@@ -12,15 +12,16 @@ ENABLE_CORRECTION="true"
 # Display red dots whilst waiting for completion.
 COMPLETION_WAITING_DOTS="true"
 
-# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
+ZSH_TMUX_AUTOSTART="true"
+ZSH_TMUX_AUTOCONNECT="false"
+
 # Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(zsh-autosuggestions zsh-completions git github sudo cp ubuntu alias-tips command-not-found pip python common-aliases zsh-syntax-highlighting alias-history)
+plugins=(tmux dircycle gitfast git-extras web-search wd alias-history zsh-autosuggestions zsh-completions git github sudo cp alias-tips command-not-found pip python common-aliases zsh-syntax-highlighting)
 
 source "$ZSH"/oh-my-zsh.sh
 
 export LANG=en_US.UTF-8
+export TERM="xterm-256color"
 
 export VISUAL=vim
 export EDITOR="$VISUAL"
