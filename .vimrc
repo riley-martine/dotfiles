@@ -235,3 +235,10 @@ let python_highlight_all=1
 syntax on
 set background=dark
 colorscheme solarized
+let g:tmuxline_preset = {
+    \'a'  : '#S',
+    \'b'  : '#W',
+    \'x'  : '#(ddate +"%%{%%A, %%e %%B%%}, %%Y YOLD%%N: %%H")',
+    \'y'  : ['%Y-%m-%d', '%H:%M'],
+    \'z'  : '#(whoami)',
+    \'win': ['#I', '#W']}
