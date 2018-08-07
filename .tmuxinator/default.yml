@@ -1,0 +1,9 @@
+name: default
+root: ~/dev
+windows:
+  - default:
+      layout: b5b9,255x70,0,0{127x70,0,0[127x35,0,0,0,127x34,0,36,2],127x70,128,0,1}
+      panes:
+        - ls
+        - clear
+        - clear
