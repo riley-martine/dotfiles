@@ -12,7 +12,8 @@ ENABLE_CORRECTION="true"
 # Display red dots whilst waiting for completion.
 COMPLETION_WAITING_DOTS="true"
 
-ZSH_TMUX_AUTOSTART="true"
+
+ZSH_TMUX_AUTOSTART="false"
 ZSH_TMUX_AUTOCONNECT="false"
 
 # Example format: plugins=(rails git textmate ruby lighthouse)
@@ -38,6 +39,8 @@ alias cl='clear'
 alias ..='cd ..'
 alias ,,='cd ..'
 alias xt='xfce4-terminal'
+alias please='fuck'
+alias :partyparrot:='curl parrot.live'
 
 alias male='make'
 alias :q='exit'
@@ -153,11 +156,6 @@ export PATH
 
 export LD_LIBRARY_PATH="/lib:/usr/local/lib:$LD_LIBRARY_PATH"
 
-PERL5LIB="$HOME/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
-PERL_LOCAL_LIB_ROOT="$HOME/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
-PERL_MB_OPT="--install_base \"$HOME/perl5\""; export PERL_MB_OPT;
-PERL_MM_OPT="INSTALL_BASE=$HOME/perl5"; export PERL_MM_OPT;
-
 export NVM_DIR="/home/$USER/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
@@ -185,6 +183,11 @@ else
     start_agent;
 fi
 
+source ~/.bin/tmuxinator.zsh
 eval "$(pipenv --completion)"
 eval "$(thefuck --alias)"
 python "$HOME/Projects/pyfortune/pyfortune.py"
+
+if [ -z "$TMUX" ]; then
+  mux start default -n "$(random-words 2)"
+fi
