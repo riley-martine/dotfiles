@@ -7,4 +7,4 @@ if [ ! -e '~/.wordlist' ]; then
 fi
 
 # The arg should be the number of words needed
-gshuf -n "$1" ~/.wordlist | sed ':a;N;$!ba;s/\n/-/g'
+shuf -n "$1" ~/.wordlist | sed ':a;N;$!ba;s/\n/-/g'
