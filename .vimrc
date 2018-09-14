@@ -1,3 +1,5 @@
+let g:black_virtualenv = '/home/riley/.pyenv/versions/3.7.0/envs/black'
+let g:python3_host_prog = '/home/riley/.pyenv/versions/3.7.0/bin/python3.7'
 " Silence message from python 3.7 about StopIteration
 if has('python3')
   silent! python3 1
@@ -5,7 +7,7 @@ endif
 
 " Set 'nocompatible' to ward off unexpected things that your distro might
 "  have made, as well as sanely reset options when re-sourcing .vimrc
-set nocompatible
+"set nocompatible
 
 " Attempt to determine the type of a file based on its name and possibly its
 " " contents. Use this to allow intelligent auto-indenting for each filetype,
@@ -14,7 +16,7 @@ filetype off
 
 syntax on
 
-set rtp+=~/.vim/bundle/Vundle.vim
+set runtimepath+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
@@ -36,8 +38,10 @@ Plugin 'jreybert/vimagit'
 
 Plugin 'fatih/vim-go'
 Plugin 'jelera/vim-javascript-syntax'
+Plugin 'alvan/vim-closetag'
 Plugin 'ambv/black'
 
+Plugin 'file:///home/riley/.fzf/', {'name': 'fzf'}
 call vundle#end()
 filetype plugin on
 
@@ -207,9 +211,16 @@ autocmd BufWritePre *.py execute ':Black'
 let g:ale_fixers = {
 \   'sh': ['shfmt'],
 \   'python': ['isort'],
+\   'javascript': ['eslint', 'importjs', 'prettier', 'prettier_eslint', 'prettier_standard', 'remove_trailing_lines', 'standard', 'trim_whitespace', 'xo'],
+\   'css': ['prettier', 'remove_trailing_lines', 'stylelint', 'trim_whitespace'],
+\   'html': ['trim_whitespace'],
 \}
+
+let g:ale_html_tidy_options = '-i -q -language en'
+
 let g:ale_fix_on_save = 1
-let g:ale_python_flake8_executable = 'pipenv'
+let g:ale_lint_on_save = 1
+let g:ale_lint_on_text_changed = 'never'
 let g:ale_python_flake8_options = '--ignore=E501'
 let g:ale_python_pylint_options = '--disable=C0412'
 let g:ale_python_mypy_options = '--ignore-missing-imports'
@@ -224,10 +235,7 @@ let g:SimpylFold_docstring_preview=1
 
 autocmd BufRead *.py set smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
 
-au BufNewFile,BufRead *.js, *.html, *.css
-    \ set tabstop=2
-    \ set softtabstop=2
-    \ set shiftwidth=2
+au FileType js,html,css set tabstop=2 softtabstop=2 shiftwidth=2
 
 set encoding=utf-8
 

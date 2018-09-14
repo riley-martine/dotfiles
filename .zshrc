@@ -12,12 +12,11 @@ ENABLE_CORRECTION="true"
 # Display red dots whilst waiting for completion.
 COMPLETION_WAITING_DOTS="true"
 
-
 ZSH_TMUX_AUTOSTART="false"
 ZSH_TMUX_AUTOCONNECT="false"
 
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(tmux dircycle gitfast git-extras web-search wd alias-history zsh-autosuggestions zsh-completions git github sudo cp alias-tips command-not-found pip python common-aliases zsh-syntax-highlighting)
+plugins=(tmux dircycle gitfast git-extras ubuntu web-search wd alias-history zsh-autosuggestions zsh-completions git github sudo cp alias-tips command-not-found pip python common-aliases zsh-syntax-highlighting)
 
 source "$ZSH"/oh-my-zsh.sh
 
@@ -38,9 +37,10 @@ alias less='less -R'
 alias cl='clear'
 alias ..='cd ..'
 alias ,,='cd ..'
-alias xt='xfce4-terminal'
-alias please='fuck'
 alias :partyparrot:='curl parrot.live'
+alias pping='prettyping'
+alias cat='bat'
+alias fd='command fd'
 
 alias male='make'
 alias :q='exit'
@@ -62,12 +62,31 @@ alias netflix='google-chrome --app=https://www.netflix.com/browse --kiosk'
 alias spotify='google-chrome --app=https://open.spotify.com/browse --kiosk'
 alias work='encfs "$HOME/.encrypted" "$HOME/work_files"; cd "$HOME/work_files" && unset HISTFILE'
 alias unwork='cd && fusermount -u "$HOME/work_files" && HISTFILE="$HOME/.zsh_history"'
+alias preview="fzf --preview 'bat --color \"always\" {}'"
+export FZF_DEFAULT_OPTS="--bind='ctrl-o:execute(vim {})+abort'"
+
+function mdless() {
+      pandoc -s -f markdown -t man $1 | groff -T utf8 -man | less -c
+}
+
+function umedit() {
+    mkdir -p ~/.notes
+    if [ ! -f ~/.notes/$1.md ]; then
+        echo "% $(echo $1 | tr '[:lower:]' '[:upper:]')(shell) Um Pages | Um Page" >> ~/.notes/$1.md
+        echo "\n# NAME\n$1 - $(whatis $1 2> /dev/null | cut -d '-' -f 2 | awk '{$1=$1};1')\n\n# COMMANDS" >> ~/.notes/$1.md
+    fi
+    vim ~/.notes/$1.md
+}
+
+function um() { mdless ~/.notes/"$1.md"; }
+function umls() { ls ~/.notes }
+
 
 # Pystiler aliases
 alias l='pyst move left'
 alias r='pyst move right' # override r builtin
 alias tl='pyst move top_left'
-alias tr='pyst move top_right' # override tr builtin
+#alias tr='pyst move top_right' # override tr builtin
 alias bl='pyst move bottom_left'
 alias br='pyst move bottom_right'
 alias m='pyst move maximize'
@@ -80,7 +99,7 @@ function wso {
 }
 
 # Pyfortune functions
-FORTUNES_DIR="$HOME/Projects/pyfortune"
+FORTUNES_DIR="$HOME/dev/pyfortune"
 FORTUNES="$FORTUNES_DIR/myfortunes.txt"
 function addfortune { echo "%\\n$1" >> "$FORTUNES"; }
 function grepfortunes { grep "$1" "$FORTUNES"; }
@@ -147,14 +166,16 @@ function mdr { pandoc "$1" | lynx -stdin; }
 function pprint_json { sed "s/'/\"/g" | python -m json.tool | pygmentize -l javascript; }
 
 export GOPATH="$HOME/gopath:$HOME/gocode/"
+export PYENV_ROOT="$HOME/.pyenv"
 
-PATH="$PATH:/usr/local/go/bin"
-PATH="$GOPATH:$GOPATH/bin:$PATH:/home/riley/Projects/tools/biotext"
-PATH="/home/$USER/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH:$HOME/Projects/tools"
-PATH="/home/$USER/perl5/bin${PATH:+:${PATH}}"
+PATH="$PYENV_ROOT/bin:$PATH:/usr/local/go/bin:$HOME/gopath/bin"
+PATH="/opt/firefox:$PATH"
+PATH="$GOPATH:$GOPATH/bin:$PATH:/home/riley/dev/tools/biotext"
+PATH="$HOME/.local/bin:/home/$USER/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH:$HOME/dev/tools"
 export PATH
 
 export LD_LIBRARY_PATH="/lib:/usr/local/lib:$LD_LIBRARY_PATH"
+
 
 export NVM_DIR="/home/$USER/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
@@ -183,11 +204,22 @@ else
     start_agent;
 fi
 
+export PATH="/home/riley/.pyenv/bin:$PATH"
+eval "$(pyenv init -)"
+eval "$(pyenv virtualenv-init -)"
+
+
 source ~/.bin/tmuxinator.zsh
 eval "$(pipenv --completion)"
 eval "$(thefuck --alias)"
-python "$HOME/Projects/pyfortune/pyfortune.py"
+eval "$(thefuck --alias please)"
 
 if [ -z "$TMUX" ]; then
   mux start default -n "$(random-words 2)"
 fi
+
+if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
+    source /etc/profile.d/vte.sh
+fi
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
