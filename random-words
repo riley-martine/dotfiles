@@ -1,10 +1,11 @@
 #!/bin/bash
 
 RANDOM=$(date '+%s')
+WORDFILE="$HOME/.wordlist"
+NUMWORDS=${1:-2} # The arg should be the number of words needed
 
-if [ ! -e '~/.wordlist' ]; then
-	aspell dump master | tr -d '[:punct:]' | sort | uniq > ~/.wordlist
+if [ ! -e "$WORDFILE" ]; then
+	aspell dump master | tr -d '[:punct:]' | sort | uniq >"$WORDFILE"
 fi
 
-# The arg should be the number of words needed
-shuf -n "$1" ~/.wordlist | sed ':a;N;$!ba;s/\n/-/g'
+shuf -n "$NUMWORDS" "$WORDFILE" | sed ':a;N;$!ba;s/\n/-/g'
