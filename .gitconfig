@@ -1,0 +1,44 @@
+[user]
+	email = riley.martine@protonmail.com
+	signingkey = riley.martine@protonmail.com
+	name = Riley Martine
+[credential]
+	helper = cache --timeout=3600
+[push]
+	default = simple
+[alias]
+  branches = branch -a
+  tags = tag
+	stashes = stash list
+	unstage = reset -q HEAD --
+	discard = checkout --
+	uncommit = reset --mixed HEAD~
+	amend = commit --amend
+	nevermind = !git reset --hard HEAD && git clean -d -f
+	graph = log --graph -10 --branches --remotes --tags  --format=format:'%Cgreen%h %Creset• %<(75,trunc)%s (%cN, %cr) %Cred%d' --date-order
+	precommit = diff --cached --diff-algorithm=minimal -w
+	unmerged = diff --name-only --diff-filter=U
+	remotes = remote -v
+[commit]
+	gpgsign = true
+    template = ~/.gitmessage
+[gpg]
+	program = gpg2
+[core]
+	pager = diff-so-fancy | less --tabs=4 -RFX
+[color]
+	ui = true
+[color "diff-highlight"]
+	oldNormal = red bold
+	oldHighlight = red bold 52
+	newNormal = green bold
+	newHighlight = green bold 22
+[color "diff"]
+	meta = yellow
+	frag = magenta bold
+	commit = yellow bold
+	old = red bold
+	new = green bold
+	whitespace = red reverse
+[status]
+    showUntrackedFiles = all
