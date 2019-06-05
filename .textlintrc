@@ -1,0 +1,24 @@
+{
+    "plugins": ["latex2e", "html"],
+    "rules": {
+        "en-capitalization": true,
+        "write-good": {
+            "passive": false
+        },
+        "rousseau": {
+            "showLevels": ["suggestion", "warning", "error"],
+            "ignoreTypes": ["sentence:start", "readibility", "passive", "sentence:uppercase"]
+        },
+        "common-misspellings": {
+             "ignore": []
+        },
+        "terminology":{
+            "defaultTerms": true
+        },
+    },
+    "filters": { 
+        "node-types": {
+            "nodeTypes": ["CodeBlock", "BlockQuote"]
+        }
+    }
+}
