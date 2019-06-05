@@ -1,0 +1,14 @@
+modifyLineBreaks:
+    removeParagraphLineBreaks:
+        all: 1
+        beforeTextWrap: 1
+    oneSentencePerLine:
+        manipulateSentences: 0
+        removeSentenceLineBreaks: 1
+        textWrapSentences: 1
+        sentenceIndent: "  "
+    preserveBlankLines: 1
+    textWrapOptions:
+        columns: 80
+        perCodeBlockBasis: 1
+        all: 1

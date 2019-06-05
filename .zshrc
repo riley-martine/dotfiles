@@ -2,6 +2,7 @@
 export ZSH=$HOME/.oh-my-zsh
 
 ZSH_THEME="agnoster"
+(cat ~/.cache/wal/sequences &)
 
 # _ and - will be interchangeable.
 HYPHEN_INSENSITIVE="true"
@@ -16,7 +17,7 @@ ZSH_TMUX_AUTOSTART="false"
 ZSH_TMUX_AUTOCONNECT="false"
 
 # Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(tmux dircycle gitfast git-extras ubuntu web-search wd alias-history zsh-autosuggestions zsh-completions git github sudo cp alias-tips command-not-found pip python common-aliases zsh-syntax-highlighting)
+plugins=(tmux dircycle gitfast git-extras ubuntu web-search wd alias-history zsh-autosuggestions zsh-completions git github sudo cp alias-tips command-not-found pip python common-aliases zsh-syntax-highlighting autojump)
 
 source "$ZSH"/oh-my-zsh.sh
 
@@ -27,17 +28,19 @@ export VISUAL=vim
 export EDITOR="$VISUAL"
 
 # Aliases to specify version/flags
-alias python='python3'
-alias pip='pip3'
-alias virtualenv='virtualenv --python=/usr/bin/python3'
+#alias python='python3'
+#alias pip='pip3'
+#alias virtualenv='virtualenv --python=/usr/bin/python3'
 alias grep='grep --color=always'
 alias less='less -R'
+alias vim='vim --servername vim'
 
 # Aliases to rename commands
 alias cl='clear'
 alias ..='cd ..'
 alias ,,='cd ..'
 alias :partyparrot:='curl parrot.live'
+alias whatthecommit='curl whatthecommit.com/index.txt'
 alias pping='prettyping'
 alias cat='bat'
 alias fd='command fd'
@@ -55,15 +58,26 @@ alias deexif='exiftool -all= *.jpg *.jpeg *.png'
 alias con='windscribe connect'
 alias dis='windscribe disconnect'
 
+alias wgup='sudo wg-quick up safe-episode'
+alias wgdown='sudo wg-quick down safe-episode'
+
+alias quitkeybase='systemctl --user stop keybase kbfs keybase.gui'
+
+alias vimrc='vim ~/.vim/vimrc'
+
 # Aliases that do something complicated
 alias nicechromium='ps -C chromium-browser -o "pid=" | while read in; do renice -n 10 -p "$in"; done'
-alias coinflip='python -c "import random; print([\"Heads\",\"Tails\"][random.randint(0,1)]);"'
+#alias coinflip='python -c "import random; print([\"Heads\",\"Tails\"][random.randint(0,1)]);"'
+alias coinflip=~/dev/tools/coinflip/coinflip
 alias netflix='google-chrome --app=https://www.netflix.com/browse --kiosk'
 alias spotify='google-chrome --app=https://open.spotify.com/browse --kiosk'
 alias work='encfs "$HOME/.encrypted" "$HOME/work_files"; cd "$HOME/work_files" && unset HISTFILE'
-alias unwork='cd && fusermount -u "$HOME/work_files" && HISTFILE="$HOME/.zsh_history"'
+alias unwork='cd && fusermount -u "$HOME/work_files" && HISTFILE="$HOME/.zsh_history" && clear'
 alias preview="fzf --preview 'bat --color \"always\" {}'"
 export FZF_DEFAULT_OPTS="--bind='ctrl-o:execute(vim {})+abort'"
+
+alias incrypt='encfs "$HOME/.crypt" "$HOME/crypt"; cd "$HOME/crypt" && unset HISTFILE'
+alias uncrypt='cd && fusermount -u "$HOME/crypt" && HISTFILE="$HOME/.zsh_history" && clear'
 
 function mdless() {
       pandoc -s -f markdown -t man $1 | groff -T utf8 -man | less -c
@@ -103,6 +117,7 @@ FORTUNES_DIR="$HOME/dev/pyfortune"
 FORTUNES="$FORTUNES_DIR/myfortunes.txt"
 function addfortune { echo "%\\n$1" >> "$FORTUNES"; }
 function grepfortunes { grep "$1" "$FORTUNES"; }
+function vimfortunes { vim "$FORTUNES"; }
 function catfortunes { cat "$FORTUNES"; }
 function pushfortunes {
     cd "$FORTUNES_DIR" || exit
@@ -165,22 +180,25 @@ function gorep { find . -type f -name "*.go" -print0 | xargs -0 grep "$1"; }
 function mdr { pandoc "$1" | lynx -stdin; }
 function pprint_json { sed "s/'/\"/g" | python -m json.tool | pygmentize -l javascript; }
 
+export GEM_HOME="$HOME/gems"
+
 export GOPATH="$HOME/gopath:$HOME/gocode/"
 export PYENV_ROOT="$HOME/.pyenv"
 
-PATH="$PYENV_ROOT/bin:$PATH:/usr/local/go/bin:$HOME/gopath/bin"
+PATH="$HOME/gems/bin:$PATH"
+PATH="$PYENV_ROOT/bin:/usr/bin:$PATH:/usr/local/go/bin:$HOME/gopath/bin"
+PATH="$HOME/.cargo/bin:$PATH"
 PATH="/opt/firefox:$PATH"
 PATH="$GOPATH:$GOPATH/bin:$PATH:/home/riley/dev/tools/biotext"
 PATH="$HOME/.local/bin:/home/$USER/bin:/usr/bin:/bin:/usr/sbin:/sbin:$PATH:$HOME/dev/tools"
 export PATH
 
-export LD_LIBRARY_PATH="/lib:/usr/local/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH="/usr/local/lib:/lib:$LD_LIBRARY_PATH"
 
 
 export NVM_DIR="/home/$USER/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm
 
-source /etc/zsh_command_not_found  
 
 SSH_ENV="$HOME/.ssh/environment"
 
@@ -223,3 +241,9 @@ if [ $TILIX_ID ] || [ $VTE_VERSION ]; then
 fi
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+PATH="/home/riley/perl5/bin${PATH:+:${PATH}}"; export PATH;
+PERL5LIB="/home/riley/perl5/lib/perl5${PERL5LIB:+:${PERL5LIB}}"; export PERL5LIB;
+PERL_LOCAL_LIB_ROOT="/home/riley/perl5${PERL_LOCAL_LIB_ROOT:+:${PERL_LOCAL_LIB_ROOT}}"; export PERL_LOCAL_LIB_ROOT;
+PERL_MB_OPT="--install_base \"/home/riley/perl5\""; export PERL_MB_OPT;
+PERL_MM_OPT="INSTALL_BASE=/home/riley/perl5"; export PERL_MM_OPT;

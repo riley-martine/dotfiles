@@ -1,5 +1,5 @@
-let g:black_virtualenv = '/home/riley/.pyenv/versions/3.7.0/envs/black'
-let g:python3_host_prog = '/home/riley/.pyenv/versions/3.7.0/bin/python3.7'
+let g:black_virtualenv = '/home/riley/.pyenv/versions/3.7.3/envs/black'
+let g:python3_host_prog = '/home/riley/.pyenv/versions/3.7.3/bin/python'
 " Silence message from python 3.7 about StopIteration
 if has('python3')
   silent! python3 1
@@ -21,27 +21,37 @@ call vundle#begin()
 
 Plugin 'VundleVim/Vundle.vim'
 
+" Tmux integration
 Plugin 'tmux-plugins/vim-tmux-focus-events'
 Plugin 'christoomey/vim-tmux-navigator'
 Bundle 'edkolev/tmuxline.vim'
+
+" Theming
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
-Plugin 'altercation/vim-colors-solarized'
+Plugin 'dylanaraps/wal.vim'
+
+" Behavior 
+Plugin 'tmhedberg/SimpylFold'
+Plugin 'ciaranm/securemodelines'
+Plugin 'SirVer/ultisnips'
+
 " Make sure you have auxilary linters/fixers installed for ale
 Plugin 'w0rp/ale'
-Plugin 'tmhedberg/SimpylFold'
-Plugin 'The-NERD-Commenter'
 Plugin 'ctrlpvim/ctrlp.vim'
 Bundle 'scrooloose/nerdtree'
-Plugin 'jiangmiao/auto-pairs'
-Plugin 'jreybert/vimagit'
+Plugin 'scrooloose/nerdcommenter'
+"Plugin 'jiangmiao/auto-pairs'
+"Plugin 'jreybert/vimagit'
+"Plugin 'ludovicchabant/vim-gutentags'
+Plugin 'janko-m/vim-test'
 
-Plugin 'fatih/vim-go'
+" Language Support
+Plugin 'lervag/vimtex'
+"Plugin 'fatih/vim-go'
 Plugin 'jelera/vim-javascript-syntax'
-Plugin 'alvan/vim-closetag'
 Plugin 'ambv/black'
 
-Plugin 'file:///home/riley/.fzf/', {'name': 'fzf'}
 call vundle#end()
 filetype plugin on
 
@@ -69,8 +79,23 @@ set hidden
 set confirm
 set autowriteall
 
+" Sets how many lines of history VIM has to remember
+set history=500
+
+set encoding=utf-8
+set fileencoding=utf-8
+
+" Use Unix as the standard file type
+set fileformats=unix,dos,mac
+
 " Better command-line completion
 set wildmenu
+set wildmode=longest,full
+set wildignorecase
+set wildignore+=*.a,*.o
+set wildignore+=*.bmp,*.gif,*.ico,*.jpg,*.png
+set wildignore+=.DS_Store,.git,.hg,.svn
+set wildignore+=*~,*.swp,*.tmp,*.pyc
 
 " Show partial commands in the last line of the screen
 set showcmd
@@ -97,6 +122,7 @@ set smartcase
 
 " Allow backspacing over autoindent, line breaks and start of insert action
 set backspace=indent,eol,start
+set whichwrap+=<,>,h,l
 
 " When opening a new line and no filetype-specific indenting is enabled, keep
 " the same indent as the line you're currently on. Useful for READMEs, etc.
@@ -119,11 +145,11 @@ set laststatus=2
 " dialogue asking if you wish to save changed files.
 set confirm
 
-" Use visual bell instead of beeping when doing something wrong
-set visualbell
-
-" Do not flash on visual bell
+" No annoying sound on errors
+set noerrorbells
+set novisualbell
 set t_vb=
+set timeoutlen=500
 
 " Enable use of the mouse for all modes
 set mouse=a
@@ -132,8 +158,20 @@ set mouse=a
 " press <Enter> to continue
 set cmdheight=2
 
-" Display line numbers on the left
-set number
+" All lines will show their relative number, except for current line, which
+" will show its absolute line number, when buffer not focused or in insert.
+
+" Show relative line number
+set number relativenumber
+
+augroup numbertoggle
+  autocmd!
+  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
+  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
+augroup END
+
+" Set 7 lines above/below cursor - when moving vertically using j/k
+set scrolloff=7
 
 " Quickly time out on keycodes, but never time out on mappings
 set notimeout ttimeout ttimeoutlen=200
@@ -142,10 +180,20 @@ set notimeout ttimeout ttimeoutlen=200
 set pastetoggle=<F11>
 
 " highlight current line
-set cursorline
+" set cursorline
+
+augroup opening
+    autocmd!
+    " Return to last edit position when opening files
+    au BufReadPost * if line("'\"") > 1 && line("'\"") <= line("$") | exe "normal! g'\"" | endif
+augroup END
 
 "search as characters are entered
 set incsearch
+
+" For regular expressions turn magic on
+set magic
+
 
 "------------------------------------------------------------
 " Indentation options {{{1
@@ -156,10 +204,13 @@ set shiftwidth=4
 set softtabstop=4
 set tabstop=4
 set expandtab
+set smarttab
 
 "------------------------------------------------------------
 " Mappings {{{1
-"
+
+" Remap VIM 0 to first non-blank character
+map 0 ^
 
 " Map Y to act like D and C, i.e. to yank until EOL, rather than act as yy,
 " which is the default
@@ -169,9 +220,39 @@ map Y y$
 " next search
 nnoremap <C-L> :nohl<CR><C-L>
 
+" With a map leader it's possible to do extra key combinations
+" like <leader>w saves the current file
+let mapleader = ','
+
+" Fast saving
+nmap <leader>w :w!<cr>
+
+" :W sudo saves the file
+" (useful for handling the permission-denied error)
+command W w !sudo tee % > /dev/null
+
+" Visual mode pressing * or # searches for the current selection
+vnoremap <silent> * :<C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
+vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
+
+" Disable highlight when <leader><cr> is pressed
+map <silent> <leader><cr> :noh<cr>
+
+" Close buffer with qq
+nnoremap qq :bd<cr>
+
 " Easier buffer switching
 nnoremap <Tab> :bnext<CR>
 nnoremap <S-Tab> :bprevious<CR>
+
+" Ultisnips mappings
+let g:UltiSnipsExpandTrigger='<tab>'
+let g:UltiSnipsListSnippets='<c-tab>'
+let g:UltiSnipsJumpForwardTrigger='<tab>' "<c-j>
+let g:UltiSnipsJumpBackwardTrigger='<s-tab>'
+let g:UltiSnipsUsePythonVersion = 3
+let g:UltiSnipsSnippetDirectories=[$HOME.'/.vim/UltiSnips']
+let g:snips_author='Riley Martine'
 
 " Teach me to use hjkl
 noremap <Up> <NOP>
@@ -181,7 +262,22 @@ noremap <Right> <NOP>
 
 " Enable folding with the spacebar
 nnoremap <space> za
+
+" Make j k move by row, not line
+nnoremap j gj
+nnoremap k gk
+nnoremap gj j
+nnoremap gk k
+
+" Wrap on words, not chars
+set linebreak
+
+" Substitute all by default
+set gdefault
+
 "------------------------------------------------------------
+" Add spaces after comment delimiters by default
+let g:NERDSpaceDelims = 1
 
 " Put plugins and dictionaries in this dir (also on Windows)
 let vimDir = '$HOME/.vim'
@@ -196,24 +292,61 @@ if has('persistent_undo')
     let &undodir = myUndoDir
     set undofile
 endif
+augroup ignore
+    autocmd!
+    autocmd BufNewFile,BufRead /home/riley/work_files/* set noundofile
+augroup END
 
-" I keep typing :Wq
-command! Wq wq
+" Put swap files away
+if isdirectory($HOME . '/.vim/swap') == 0
+  :silent !mkdir -p ~/.vim/swap >/dev/null 2>&1
+endif
+set directory=./.vim-swap//
+set directory+=~/.vim/swap//
+set directory+=~/tmp//
+set directory+=.
 
-" Save on focus lost
-:au FocusLost * silent! wa
+augroup NERDTree
+    autocmd!
+    " open NERDTree if no files specified
+    autocmd StdinReadPre * let s:std_in=1
+    autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+    " close vim if only window left open is NERDTree
+    autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+augroup END
 
+" Toggle NERDTree with <C-n>
+map <C-n> :NERDTreeToggle<CR>
+let NERDTreeIgnore = ['\.pyc$', '__pycache__']
+
+augroup switching
+    autocmd!
+    " Save on focus lost
+    autocmd FocusLost * silent! wa
+    autocmd FocusGained,BufEnter * :checktime
+augroup END
+
+" Set to auto read when a file is changed from the outside
 set autoread
-au FocusGained,BufEnter * :checktime
-set clipboard=unnamed
+" set clipboard=unnamed
+set clipboard=unnamedplus
 
-autocmd BufWritePre *.py execute ':Black'
 let g:ale_fixers = {
 \   'sh': ['shfmt'],
 \   'python': ['isort'],
-\   'javascript': ['eslint', 'importjs', 'prettier', 'prettier_eslint', 'prettier_standard', 'remove_trailing_lines', 'standard', 'trim_whitespace', 'xo'],
+\   'javascript': ['remove_trailing_lines', 'trim_whitespace'],
+\   'tex': ['remove_trailing_lines', 'trim_whitespace', 'latexindent'],
+\   'text': ['remove_trailing_lines', 'trim_whitespace'],
 \   'css': ['prettier', 'remove_trailing_lines', 'stylelint', 'trim_whitespace'],
-\   'html': ['trim_whitespace'],
+\   'html': ['remove_trailing_lines', 'trim_whitespace'],
+\   'markdown': ['prettier', 'trim_whitespace', 'remove_trailing_lines'],
+\}
+
+let g:ale_linters = {
+\   'javascript': ['eslint'],
+\   'tex':['chktex', 'lacheck', 'proselint', 'redpen', 'textlint', 'vale', 'alex'],
+\   'text':['proselint', 'redpen', 'textlint', 'vale', 'alex', 'languagetool'],
+\   'html':['alex', 'fecs', 'htmlhint', 'stylelint', 'tidy', 'writegood'],
 \}
 
 let g:ale_html_tidy_options = '-i -q -language en'
@@ -221,28 +354,23 @@ let g:ale_html_tidy_options = '-i -q -language en'
 let g:ale_fix_on_save = 1
 let g:ale_lint_on_save = 1
 let g:ale_lint_on_text_changed = 'never'
+let g:ale_set_highlights = 1
+let g:ale_sign_column_always = 1
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_python_flake8_options = '--ignore=E501'
 let g:ale_python_pylint_options = '--disable=C0412'
 let g:ale_python_mypy_options = '--ignore-missing-imports'
+let g:ale_tex_latexindent_options = '-m -l ~/.indentconfig.yaml'
 let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
-let g:airline_theme='solarized'
+let g:airline_theme='wal'
 
 set foldmethod=indent
 set foldlevel=99
 let g:SimpylFold_docstring_preview=1
 
-autocmd BufRead *.py set smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
-
-au FileType js,html,css set tabstop=2 softtabstop=2 shiftwidth=2
-
-set encoding=utf-8
-
-let python_highlight_all=1
-syntax on
-set background=dark
-colorscheme solarized
+colorscheme wal
 let g:tmuxline_preset = {
     \'a'  : '#S',
     \'b'  : '#W',
@@ -250,3 +378,49 @@ let g:tmuxline_preset = {
     \'y'  : ['%Y-%m-%d', '%H:%M'],
     \'z'  : '#(whoami)',
     \'win': ['#I', '#W']}
+
+" https://castel.dev/post/lecture-notes-1/
+let g:tex_flavor='latex'
+let g:vimtex_view_method='zathura'
+let g:vimtex_quickfix_mode=0
+set conceallevel=1
+let g:tex_conceal='abdmg'
+
+" Python Filetype
+let python_highlight_all=1
+
+augroup filetype_py
+    autocmd!
+    au FileType python syn keyword pythonDecorator True None False self
+    au BufNewFile,BufRead *.jinja set syntax=htmljinja
+    autocmd BufWritePre *.py execute ':Black'
+    autocmd BufRead *.py set smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
+augroup END
+
+augroup filetype_web
+    autocmd!
+    au FileType js,html,css set tabstop=2 softtabstop=2 shiftwidth=2
+augroup END
+
+augroup filetype_gitcommit
+    autocmd!
+    " In Git commit messages, wrap at 72 characters
+    autocmd FileType gitcommit set textwidth=72
+
+    " In Git commit messages, also color the 51st column (for titles)
+    autocmd FileType gitcommit set colorcolumn+=51
+augroup END
+
+
+map <leader>ss :setlocal spell!<cr>
+" Shortcuts using <leader>
+map <leader>sn ]s
+map <leader>sp [s
+map <leader>sa zg
+map <leader>s? z=
+augroup spellchecking
+    autocmd!
+    autocmd FileType tex,markdown,text :setlocal spell
+    autocmd FileType tex,markdown,text inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
+augroup END
+
