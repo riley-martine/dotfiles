@@ -8,7 +8,7 @@ ZSH_THEME="agnoster"
 HYPHEN_INSENSITIVE="true"
 
 # Enable command auto-correction.
-ENABLE_CORRECTION="true"
+ENABLE_CORRECTION="false"
 
 # Display red dots whilst waiting for completion.
 COMPLETION_WAITING_DOTS="true"
@@ -16,8 +16,7 @@ COMPLETION_WAITING_DOTS="true"
 ZSH_TMUX_AUTOSTART="false"
 ZSH_TMUX_AUTOCONNECT="false"
 
-# Example format: plugins=(rails git textmate ruby lighthouse)
-plugins=(tmux dircycle gitfast git-extras ubuntu web-search wd alias-history zsh-autosuggestions zsh-completions git github sudo cp alias-tips command-not-found pip python common-aliases zsh-syntax-highlighting autojump)
+plugins=(tmux ubuntu wd alias-history zsh-autosuggestions zsh-completions git github sudo cp alias-tips command-not-found pip python common-aliases autojump)
 
 source "$ZSH"/oh-my-zsh.sh
 
@@ -34,6 +33,8 @@ export EDITOR="$VISUAL"
 alias grep='grep --color=always'
 alias less='less -R'
 alias vim='vim --servername vim'
+export LSCOLORS=gxfxbEaEBxxEhEhBaDaCaD
+export LSCOLORS=exfxfeaeBxxehehbadacea
 
 # Aliases to rename commands
 alias cl='clear'
@@ -48,6 +49,7 @@ alias fd='command fd'
 alias male='make'
 alias :q='exit'
 alias list='ls'
+alias ks='ls'
 
 alias caps='xdotool key Caps_Lock'
 alias CAPS='xdotool key Caps_Lock' # for when caps lock is on
@@ -73,7 +75,7 @@ alias netflix='google-chrome --app=https://www.netflix.com/browse --kiosk'
 alias spotify='google-chrome --app=https://open.spotify.com/browse --kiosk'
 alias work='encfs "$HOME/.encrypted" "$HOME/work_files"; cd "$HOME/work_files" && unset HISTFILE'
 alias unwork='cd && fusermount -u "$HOME/work_files" && HISTFILE="$HOME/.zsh_history" && clear'
-alias preview="fzf --preview 'bat --color \"always\" {}'"
+alias preview="fzf --bind \"enter:execute(vim {})+abort\" --preview 'bat --color \"always\" {}'"
 export FZF_DEFAULT_OPTS="--bind='ctrl-o:execute(vim {})+abort'"
 
 alias incrypt='encfs "$HOME/.crypt" "$HOME/crypt"; cd "$HOME/crypt" && unset HISTFILE'
@@ -176,7 +178,9 @@ function extract {
 function mp3 { youtube-dl --audio-format mp3 -x "$1"; }
 function loss { echo "l  |  ll\\n--------\\n11 |  l_"; }
 function mkcd { mkdir "$1" && cd "$1" || exit; }
-function gorep { find . -type f -name "*.go" -print0 | xargs -0 grep "$1"; }
+function gorep { rg "$1" -tgo -g '!*_test.go' --smart-case --sort path }
+function goreptest { rg "$1" -g '*_test.go' --smart-case --sort path }
+function gorepall { rg "$1" -tgo --smart-case --sort path }
 function mdr { pandoc "$1" | lynx -stdin; }
 function pprint_json { sed "s/'/\"/g" | python -m json.tool | pygmentize -l javascript; }
 
@@ -224,7 +228,7 @@ fi
 
 export PATH="/home/riley/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
-eval "$(pyenv virtualenv-init -)"
+#eval "$(pyenv virtualenv-init -)"
 
 
 source ~/.bin/tmuxinator.zsh

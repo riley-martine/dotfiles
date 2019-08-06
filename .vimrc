@@ -15,6 +15,7 @@ endif
 filetype off
 
 syntax on
+syntax enable
 
 set runtimepath+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
@@ -29,12 +30,16 @@ Bundle 'edkolev/tmuxline.vim'
 " Theming
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
+Plugin 'airblade/vim-gitgutter'
 Plugin 'dylanaraps/wal.vim'
 
 " Behavior 
 Plugin 'tmhedberg/SimpylFold'
 Plugin 'ciaranm/securemodelines'
 Plugin 'SirVer/ultisnips'
+Plugin 'ludovicchabant/vim-gutentags'
+Plugin 'skywind3000/gutentags_plus'
+Plugin 'majutsushi/tagbar'
 
 " Make sure you have auxilary linters/fixers installed for ale
 Plugin 'w0rp/ale'
@@ -42,14 +47,14 @@ Plugin 'ctrlpvim/ctrlp.vim'
 Bundle 'scrooloose/nerdtree'
 Plugin 'scrooloose/nerdcommenter'
 "Plugin 'jiangmiao/auto-pairs'
-"Plugin 'jreybert/vimagit'
-"Plugin 'ludovicchabant/vim-gutentags'
+Plugin 'jreybert/vimagit'
 Plugin 'janko-m/vim-test'
 
 " Language Support
 Plugin 'lervag/vimtex'
-"Plugin 'fatih/vim-go'
+Plugin 'fatih/vim-go'
 Plugin 'jelera/vim-javascript-syntax'
+Plugin 'sheerun/vim-polyglot'
 Plugin 'ambv/black'
 
 call vundle#end()
@@ -127,7 +132,13 @@ set whichwrap+=<,>,h,l
 " When opening a new line and no filetype-specific indenting is enabled, keep
 " the same indent as the line you're currently on. Useful for READMEs, etc.
 set autoindent
-" set smartindent
+set smartindent
+"folding settings
+set foldmethod=indent   "fold based on indent
+set foldnestmax=10      "deepest fold is 10 levels
+set nofoldenable        "dont fold by default
+set foldlevel=1         "this is just what i use
+
 
 " Stop certain movements from always going to the first character of a line.
 " While this behaviour deviates from that of Vi, it does what most users
@@ -162,6 +173,7 @@ set cmdheight=2
 " will show its absolute line number, when buffer not focused or in insert.
 
 " Show relative line number
+set number
 set number relativenumber
 
 augroup numbertoggle
@@ -180,7 +192,7 @@ set notimeout ttimeout ttimeoutlen=200
 set pastetoggle=<F11>
 
 " highlight current line
-" set cursorline
+set cursorline
 
 augroup opening
     autocmd!
@@ -212,6 +224,8 @@ set smarttab
 " Remap VIM 0 to first non-blank character
 map 0 ^
 
+nmap <F8> :TagbarToggle<CR>
+
 " Map Y to act like D and C, i.e. to yank until EOL, rather than act as yy,
 " which is the default
 map Y y$
@@ -229,7 +243,7 @@ nmap <leader>w :w!<cr>
 
 " :W sudo saves the file
 " (useful for handling the permission-denied error)
-command W w !sudo tee % > /dev/null
+command! W w !sudo tee % > /dev/null
 
 " Visual mode pressing * or # searches for the current selection
 vnoremap <silent> * :<C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
@@ -326,10 +340,29 @@ augroup switching
     autocmd FocusGained,BufEnter * :checktime
 augroup END
 
+" run :GoBuild or :GoTestCompile based on the go file
+function! s:build_go_files()
+  let l:file = expand('%')
+  if l:file =~# '^\f\+_test\.go$'
+    call go#test#Test(0, 1)
+  elseif l:file =~# '^\f\+\.go$'
+    call go#cmd#Build(0)
+  endif
+endfunction
+
+augroup filetype_golang
+    autocmd!
+    autocmd FileType go nmap <leader>t  <Plug>(go-test)
+	autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
+    autocmd FileType go nmap <Leader>c <Plug>(go-coverage-toggle)
+    autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+augroup END
+    
+
 " Set to auto read when a file is changed from the outside
 set autoread
-" set clipboard=unnamed
-set clipboard=unnamedplus
+set clipboard=unnamed
+"set clipboard=unnamedplus
 
 let g:ale_fixers = {
 \   'sh': ['shfmt'],
@@ -340,6 +373,7 @@ let g:ale_fixers = {
 \   'css': ['prettier', 'remove_trailing_lines', 'stylelint', 'trim_whitespace'],
 \   'html': ['remove_trailing_lines', 'trim_whitespace'],
 \   'markdown': ['prettier', 'trim_whitespace', 'remove_trailing_lines'],
+\   'go': ['trim_whitespace', 'remove_trailing_lines', 'goimports'],
 \}
 
 let g:ale_linters = {
@@ -359,12 +393,14 @@ let g:ale_sign_column_always = 1
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_python_flake8_options = '--ignore=E501'
 let g:ale_python_pylint_options = '--disable=C0412'
-let g:ale_python_mypy_options = '--ignore-missing-imports'
+let g:ale_python_mypy_options = '--ignore-missing-imports --strict'
 let g:ale_tex_latexindent_options = '-m -l ~/.indentconfig.yaml'
 let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
 let g:airline_theme='wal'
+" suggested by vim-gitgutter
+set updatetime=100
 
 set foldmethod=indent
 set foldlevel=99
@@ -375,7 +411,7 @@ let g:tmuxline_preset = {
     \'a'  : '#S',
     \'b'  : '#W',
     \'x'  : '#(ddate +"%%{%%A, %%e %%B%%}, %%Y YOLD%%N: %%H")',
-    \'y'  : ['%Y-%m-%d', '%H:%M'],
+    \'y'  : ['%a %b %d', '%H:%M'],
     \'z'  : '#(whoami)',
     \'win': ['#I', '#W']}
 
@@ -424,3 +460,19 @@ augroup spellchecking
     autocmd FileType tex,markdown,text inoremap <C-l> <c-g>u<Esc>[s1z=`]a<c-g>u
 augroup END
 
+" Go Stuff
+let g:go_disable_autoinstall = 0
+ 
+" Highlight
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+let g:go_highlight_structs = 1
+let g:go_highlight_operators = 1
+let g:go_highlight_build_constraints = 1
+ 
+" Scope and tags for guru in vim-go
+let g:go_null_module_warning = 0
+let g:go_code_completion_enabled = 0
+let g:ale_set_highlights = 0
+let g:go_def_mode='gopls'
+let g:go_info_mode='gopls'
