@@ -1,8 +1,6 @@
-# Path to your oh-my-zsh installation.
 export ZSH=$HOME/.oh-my-zsh
 
-ZSH_THEME="agnoster"
-(cat ~/.cache/wal/sequences &)
+ZSH_THEME="sunrise"
 
 # _ and - will be interchangeable.
 HYPHEN_INSENSITIVE="true"
@@ -16,7 +14,7 @@ COMPLETION_WAITING_DOTS="true"
 ZSH_TMUX_AUTOSTART="false"
 ZSH_TMUX_AUTOCONNECT="false"
 
-plugins=(tmux ubuntu wd alias-history zsh-autosuggestions zsh-completions git github sudo cp alias-tips command-not-found pip python common-aliases autojump)
+plugins=(tmux wd alias-history zsh-completions git github sudo cp alias-tips command-not-found pip python common-aliases autojump colored-man-pages ubuntu)
 
 source "$ZSH"/oh-my-zsh.sh
 
@@ -36,14 +34,31 @@ alias vim='vim --servername vim'
 export LSCOLORS=gxfxbEaEBxxEhEhBaDaCaD
 export LSCOLORS=exfxfeaeBxxehehbadacea
 
+
 # Aliases to rename commands
 alias cl='clear'
+alias ala='clear'
 alias ..='cd ..'
 alias ,,='cd ..'
 alias :partyparrot:='curl parrot.live'
 alias whatthecommit='curl whatthecommit.com/index.txt'
 alias pping='prettyping'
+alias ls='exa'
 alias cat='bat'
+alias pana='bat'
+alias tawa='cd'
+alias lon='wd'
+alias moli='kill'
+alias weka='rm -i'
+alias seme='which'
+alias jo='exa'
+alias ante='vim'
+alias sinpin='head' # could have been lawa/(anpa/pini)
+alias monsi='tail'
+alias sona='man'
+alias toki='echo'
+alias sewi='..'
+alias sama='cp'
 alias fd='command fd'
 
 alias male='make'
@@ -56,30 +71,31 @@ alias CAPS='xdotool key Caps_Lock' # for when caps lock is on
 
 alias weather='curl wttr.in/durham'
 alias deexif='exiftool -all= *.jpg *.jpeg *.png'
-
-alias con='windscribe connect'
-alias dis='windscribe disconnect'
-
-alias wgup='sudo wg-quick up safe-episode'
-alias wgdown='sudo wg-quick down safe-episode'
+alias tpquiz='python3 ~/dev/learn/tokiponaquiz/quiz.py'
+#alias tpwords='cat ~/dev/learn/tokiponaquiz/tokpono-valste.json | jq -r ".[].word"'
 
 alias quitkeybase='systemctl --user stop keybase kbfs keybase.gui'
 
 alias vimrc='vim ~/.vim/vimrc'
 
 # Aliases that do something complicated
-alias nicechromium='ps -C chromium-browser -o "pid=" | while read in; do renice -n 10 -p "$in"; done'
+alias thesaurus='~/dev/macdict/macdict2 -d "Oxford Thesaurus of English"'
+alias define='~/dev/macdict/macdict2 -d "Oxford Dictionary of English"'
 #alias coinflip='python -c "import random; print([\"Heads\",\"Tails\"][random.randint(0,1)]);"'
 alias coinflip=~/dev/tools/coinflip/coinflip
-alias netflix='google-chrome --app=https://www.netflix.com/browse --kiosk'
-alias spotify='google-chrome --app=https://open.spotify.com/browse --kiosk'
 alias work='encfs "$HOME/.encrypted" "$HOME/work_files"; cd "$HOME/work_files" && unset HISTFILE'
 alias unwork='cd && fusermount -u "$HOME/work_files" && HISTFILE="$HOME/.zsh_history" && clear'
 alias preview="fzf --bind \"enter:execute(vim {})+abort\" --preview 'bat --color \"always\" {}'"
 export FZF_DEFAULT_OPTS="--bind='ctrl-o:execute(vim {})+abort'"
 
+#function cwe { open "https://cwe.mitre.org/data/definitions/$1.html" }
+
 alias incrypt='encfs "$HOME/.crypt" "$HOME/crypt"; cd "$HOME/crypt" && unset HISTFILE'
 alias uncrypt='cd && fusermount -u "$HOME/crypt" && HISTFILE="$HOME/.zsh_history" && clear'
+
+function http {
+    lynx "https://httpstatuses.com/$1" -dump | awk "/$1/,/Code References/"
+}
 
 function mdless() {
       pandoc -s -f markdown -t man $1 | groff -T utf8 -man | less -c
@@ -184,6 +200,17 @@ function gorepall { rg "$1" -tgo --smart-case --sort path }
 function mdr { pandoc "$1" | lynx -stdin; }
 function pprint_json { sed "s/'/\"/g" | python -m json.tool | pygmentize -l javascript; }
 
+function go {
+    if [ "$1" = "off" ]; then 
+        shift;
+        command t update "$@"; 
+    #elif [ "$1" = "team" ]; then
+    else
+        command go "$@"; 
+    fi 
+}
+
+
 export GEM_HOME="$HOME/gems"
 
 export GOPATH="$HOME/gopath:$HOME/gocode/"
@@ -226,7 +253,7 @@ else
     start_agent;
 fi
 
-export PATH="/home/riley/.pyenv/bin:$PATH"
+export PATH="$HOME/.pyenv/bin:$PATH"
 eval "$(pyenv init -)"
 #eval "$(pyenv virtualenv-init -)"
 
@@ -235,6 +262,7 @@ source ~/.bin/tmuxinator.zsh
 eval "$(pipenv --completion)"
 eval "$(thefuck --alias)"
 eval "$(thefuck --alias please)"
+eval "$(thefuck --alias pakala)"
 
 if [ -z "$TMUX" ]; then
   mux start default -n "$(random-words 2)"
