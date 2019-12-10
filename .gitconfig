@@ -1,7 +1,7 @@
 [user]
+	name = Riley Martine
 	email = riley.martine@protonmail.com
 	signingkey = riley.martine@protonmail.com
-	name = Riley Martine
 [credential]
 	helper = cache --timeout=3600
 [push]
@@ -25,6 +25,7 @@
 	precommit = diff --cached --diff-algorithm=minimal -w
 	unmerged = diff --name-only --diff-filter=U
 	remotes = remote -v
+	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
 [gpg]
 	program = gpg2
 [commit]
@@ -46,3 +47,7 @@
 	whitespace = red reverse
 [status]
     showUntrackedFiles = all
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+[feature]
+	manyFiles = true

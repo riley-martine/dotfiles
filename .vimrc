@@ -31,7 +31,7 @@ Bundle 'edkolev/tmuxline.vim'
 Plugin 'vim-airline/vim-airline'
 Plugin 'vim-airline/vim-airline-themes'
 Plugin 'airblade/vim-gitgutter'
-Plugin 'dylanaraps/wal.vim'
+Plugin 'altercation/vim-colors-solarized'
 
 " Behavior 
 Plugin 'tmhedberg/SimpylFold'
@@ -116,6 +116,7 @@ set nomodeline
 
 " redraw only when needed, speeds up macros
 set lazyredraw
+set redrawtime=10000
 
 "------------------------------------------------------------
 " Usability options {{{1
@@ -172,15 +173,8 @@ set cmdheight=2
 " All lines will show their relative number, except for current line, which
 " will show its absolute line number, when buffer not focused or in insert.
 
-" Show relative line number
+" Show line number
 set number
-set number relativenumber
-
-augroup numbertoggle
-  autocmd!
-  autocmd BufEnter,FocusGained,InsertLeave * set relativenumber
-  autocmd BufLeave,FocusLost,InsertEnter   * set norelativenumber
-augroup END
 
 " Set 7 lines above/below cursor - when moving vertically using j/k
 set scrolloff=7
@@ -306,6 +300,7 @@ if has('persistent_undo')
     let &undodir = myUndoDir
     set undofile
 endif
+
 augroup ignore
     autocmd!
     autocmd BufNewFile,BufRead /home/riley/work_files/* set noundofile
@@ -398,7 +393,7 @@ let g:ale_tex_latexindent_options = '-m -l ~/.indentconfig.yaml'
 let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
-let g:airline_theme='wal'
+let g:airline_theme='base16_mocha'
 " suggested by vim-gitgutter
 set updatetime=100
 
@@ -406,7 +401,8 @@ set foldmethod=indent
 set foldlevel=99
 let g:SimpylFold_docstring_preview=1
 
-colorscheme wal
+set background=dark
+colorscheme peachpuff
 let g:tmuxline_preset = {
     \'a'  : '#S',
     \'b'  : '#W',
@@ -476,3 +472,8 @@ let g:go_code_completion_enabled = 0
 let g:ale_set_highlights = 0
 let g:go_def_mode='gopls'
 let g:go_info_mode='gopls'
+
+" let g:gutentags_ctags_executable = '/usr/local/bin/ctags'
+
+" generate datebases in my cache directory, prevent gtags files polluting my project
+let g:gutentags_cache_dir = expand('~/.cache/tags')
