@@ -1,14 +1,20 @@
 [user]
+	name = Riley Martine
 	email = riley.martine@protonmail.com
 	signingkey = riley.martine@protonmail.com
-	name = Riley Martine
 [credential]
 	helper = cache --timeout=3600
 [push]
 	default = simple
+[pull]
+	rebase = true
+[core]
+	excludesfile = ~/.gitignore_global
+	pager = diff-so-fancy | less --tabs=4 -RFX
 [alias]
-  branches = branch -a
-  tags = tag
+    lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    branches = branch -a
+    tags = tag
 	stashes = stash list
 	unstage = reset -q HEAD --
 	discard = checkout --
@@ -19,13 +25,12 @@
 	precommit = diff --cached --diff-algorithm=minimal -w
 	unmerged = diff --name-only --diff-filter=U
 	remotes = remote -v
+	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+[gpg]
+	program = gpg2
 [commit]
 	gpgsign = true
     template = ~/.gitmessage
-[gpg]
-	program = gpg2
-[core]
-	pager = diff-so-fancy | less --tabs=4 -RFX
 [color]
 	ui = true
 [color "diff-highlight"]
@@ -42,3 +47,7 @@
 	whitespace = red reverse
 [status]
     showUntrackedFiles = all
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+[feature]
+	manyFiles = true
