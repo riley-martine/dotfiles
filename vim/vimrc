@@ -1,0 +1,607 @@
+" Set 'nocompatible' to ward off unexpected things that your distro might
+"  have made, as well as sanely reset options when re-sourcing .vimrc
+set nocompatible
+
+" Attempt to determine the type of a file based on its name and possibly its
+" " contents. Use this to allow intelligent auto-indenting for each filetype,
+" " and for plugins that are filetype specific.
+filetype off
+
+if has('syntax') && !exists('g:syntax_on')
+    syntax enable
+endif
+
+let g:ale_disable_lsp = 1 " has to go before plugins loaded.
+let g:ale_close_preview_on_insert = 1
+let g:ale_fix_on_save = 1
+let g:ale_sign_column_always = 1
+
+if &shell =~# 'fish$'
+    set shell=/usr/bin/env\ bash
+endif
+
+let g:polyglot_disabled = ['sensible']
+
+set runtimepath+=~/.vim/bundle/Vundle.vim
+call vundle#begin()
+
+Plugin 'VundleVim/Vundle.vim'
+
+" Tmux integration
+Plugin 'tpope/vim-obsession'
+Bundle 'edkolev/tmuxline.vim'
+
+" Theming
+Plugin 'vim-airline/vim-airline'
+Plugin 'vim-airline/vim-airline-themes'
+
+" Behavior
+Plugin 'tmhedberg/SimpylFold'
+Plugin 'SirVer/ultisnips'
+Plugin 'honza/vim-snippets'
+Plugin 'ycm-core/YouCompleteMe'
+Plugin 'ludovicchabant/vim-gutentags'
+Plugin 'junegunn/fzf'
+Plugin 'junegunn/fzf.vim'
+Bundle 'scrooloose/nerdtree'
+Plugin 'ryanoasis/vim-devicons'
+" Plugin 'jiangmiao/auto-pairs'
+Plugin 'tpope/vim-surround'
+Plugin 'tpope/vim-commentary'
+" Make sure you have auxilary linters/fixers installed for ale
+" https://github.com/dense-analysis/ale/blob/master/supported-tools.md
+Plugin 'w0rp/ale'
+
+" Language
+Plugin 'vim-test/vim-test'
+Plugin 'fatih/vim-go'
+" \/ Also does sleuth (indent detection) for some reason...
+Plugin 'sheerun/vim-polyglot'
+"Plugin 'lervag/vimtex'
+"Plugin 'rust-lang/rust.vim'
+"Plugin 'arzg/vim-rust-syntax-ext'
+"Plugin 'rhysd/rust-doc.vim'
+
+call vundle#end()
+if has('autocmd')
+    filetype plugin indent on
+endif
+
+set shortmess-=A  " https://github.com/sheerun/vim-polyglot/issues/765"
+
+" :PluginList       - lists configured plugins
+" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
+" :PluginSearch foo - searches for foo; append `!` to refresh local cache
+" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+
+"------------------------------------------------------------
+"" Must have options {{{1
+"
+"" These are highly recommended options.
+
+" 'hidden' allows you to re-use the same window and switch from an unsaved buffer
+" without saving it first. Also allows you to keep an undo history for multiple
+" files when re-using the same window. Note that using persistent undo also lets
+" you undo in multiple files even in the same window, but is less efficient and
+" is actually designed for keeping undo history after closing Vim entirely. Vim
+" will complain if you try to quit without saving, and swap files will keep you
+" safe if your computer crashes.
+set hidden
+
+set confirm
+set autowriteall
+
+" Better command-line completion
+set wildmenu
+set wildmode=longest,full
+set wildignorecase
+set wildignore+=*.a,*.o
+set wildignore+=*.bmp,*.gif,*.ico,*.jpg,*.png
+set wildignore+=.DS_Store,.git,.hg,.svn
+set wildignore+=*~,*.swp,*.tmp
+set wildignore+=*/__pycache__/*,*/.mypy_cache/*,*/venv/*,*.pyc
+set wildignore+=*/_site/*,*/gems/*,*/gem/*,*/bundle/*
+" set wildignore+=go/pkg/**
+set wildignore+=*/node_modules/*,*/target/*,*/.log,*/.aux,*/.cls,*/.aux,*/.bbl,*/.blg,*/.fls,*/.fdb*/,*/.toc,*/.out,*/.glo,*/.log,*/.ist,*/.fdb_latexmk
+set wildignore+=*/.oh_my_zsh/*
+
+
+" Show partial commands in the last line of the screen
+set showcmd
+
+" Highlight searches (use <C-L> to temporarily turn off highlighting;
+" see the mapping of <C-L> below)
+set hlsearch
+
+" Modelines have historically been a source of security
+" vulnerabilities. As such, it may be a good idea to disable them and use the
+" securemodelines script, <http://www.vim.org/scripts/script.php?script_id=1876>.
+set nomodeline
+
+" redraw only when needed, speeds up macros
+set lazyredraw
+set redrawtime=10000
+
+"------------------------------------------------------------
+" Usability options {{{1
+"
+
+" Use case insensitive search, even when using capital letters
+set ignorecase
+
+" Allow backspacing over autoindent, line breaks and start of insert action
+set backspace=indent,eol,start
+set whichwrap+=<,>,[,]
+
+" When opening a new line and no filetype-specific indenting is enabled, keep
+" the same indent as the line you're currently on. Useful for READMEs, etc.
+set autoindent
+set complete-=i
+set nrformats-=octal
+" set smartindent
+
+
+" Use dash as word separator.
+set iskeyword+=-
+
+" Stop certain movements from always going to the first character of a line.
+" While this behaviour deviates from that of Vi, it does what most users
+" coming from other editors would expect.
+set nostartofline
+
+" Display the cursor position on the last line of the screen or in the status
+" line of a window
+set ruler
+
+" Always display the status line, even if only one window is displayed
+set laststatus=2
+
+" Instead of failing a command because of unsaved changes, instead raise a
+" dialogue asking if you wish to save changed files.
+set confirm
+
+" Use visual bell instead of beeping when doing something wrong
+set noerrorbells
+set visualbell
+
+" Do not flash on visual bell
+set t_vb=
+
+" Enable use of the mouse for all modes
+set mouse=a
+
+" Set the command window height to 2 lines, to avoid many cases of having to
+" press <Enter> to continue
+set cmdheight=2
+
+" Display line numbers on the left
+set number
+
+" Quickly time out on keycodes, but never time out on mappings
+if !has('nvim') && &ttimeoutlen == -1
+  set notimeout
+  set ttimeout
+  set ttimeoutlen=100
+endif
+
+if !&scrolloff
+  set scrolloff=7
+endif
+if !&sidescrolloff
+  set sidescrolloff=5
+endif
+set display+=lastline
+
+
+if &listchars ==# 'eol:$'
+  set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
+endif
+
+
+if v:version > 703 || v:version == 703 && has('patch541')
+  set formatoptions+=j " Delete comment character when joining commented lines
+endif
+
+
+if has('path_extra')
+  setglobal tags-=./tags tags-=./tags; tags^=./tags;
+  set tags+='~/.tags'
+endif
+
+" Use <F11> to toggle between 'paste' and 'nopaste'
+set pastetoggle=<F11>
+
+" highlight current line
+set cursorline
+
+"search as characters are entered
+set incsearch
+
+" For regular expressions turn magic on
+set magic
+
+" Wrap on words, not chars
+set linebreak
+"------------------------------------------------------------
+" Indentation options {{{1
+"
+
+" Indentation settings for representing tabs as 4 spacces.
+set shiftwidth=4
+set softtabstop=4
+set tabstop=4
+set expandtab
+set smarttab
+
+"------------------------------------------------------------
+" Mappings {{{1
+"
+" Remap VIM 0 to first non-blank character
+map 0 ^
+
+" Map Y to act like D and C, i.e. to yank until EOL, rather than act as yy,
+" which is the default
+map Y y$
+
+" Fast saving
+nmap <leader>w :w!<cr>
+
+" :W sudo saves the file
+" (useful for handling the permission-denied error)
+command W w !sudo tee % > /dev/null
+
+" Map <C-L> (redraw screen) to also turn off search highlighting until the
+" next search
+if maparg('<C-L>', 'n') ==# ''
+  nnoremap <silent> <C-L> :nohlsearch<C-R>=has('diff')?'<Bar>diffupdate':''<CR><CR><C-L>
+endif
+
+" Visual mode pressing * or # searches for the current selection
+vnoremap <silent> * :<C-u>call VisualSelection('', '')<CR>/<C-R>=@/<CR><CR>
+vnoremap <silent> # :<C-u>call VisualSelection('', '')<CR>?<C-R>=@/<CR><CR>
+
+" Easier buffer switching
+nnoremap <Tab> :bnext<CR>
+nnoremap <S-Tab> :bprevious<CR>
+"nnoremap <leader>q :bd<CR>
+nnoremap <leader>bq :bp <BAR> bd #<CR>
+
+" Teach me to use hjkl
+noremap <Up> <NOP>
+noremap <Down> <NOP>
+noremap <Left> <NOP>
+noremap <Right> <NOP>
+
+" Enable folding with the spacebar!
+nnoremap <space> za
+
+" Make j k move by row, not line
+nnoremap j gj
+nnoremap k gk
+nnoremap gj j
+nnoremap gk k
+"------------------------------------------------------------
+
+" Put plugins and dictionaries in this dir (also on Windows)
+let vimDir = '$HOME/.vim'
+let &runtimepath.=','.vimDir
+
+" Keep undo history across sessions by storing it in a file
+if has('persistent_undo')
+    let myUndoDir = expand(vimDir . '/undodir')
+    " Create dirs
+    call system('mkdir ' . vimDir)
+    call system('mkdir ' . myUndoDir)
+    let &undodir = myUndoDir
+    set undofile
+endif
+
+" Put swap files away
+if isdirectory($HOME . '/.vim/swap') == 0
+  :silent !mkdir -p ~/.vim/swap >/dev/null 2>&1
+endif
+set directory=./.vim-swap//
+set directory+=~/.vim/swap//
+set directory+=~/tmp//
+set directory+=.
+
+set history=1000
+set tabpagemax=50
+if !empty(&viminfo)
+  set viminfo^=!
+endif
+set sessionoptions-=options
+set viewoptions-=options
+
+" Allow color schemes to do bright colors without forcing bold.
+if &t_Co == 8 && $TERM !~# '^Eterm'
+  set t_Co=16
+endif
+
+
+if empty(mapcheck('<C-U>', 'i'))
+  inoremap <C-U> <C-G>u<C-U>
+endif
+if empty(mapcheck('<C-W>', 'i'))
+  inoremap <C-W> <C-G>u<C-W>
+endif
+
+
+" Load matchit.vim, but only if the user hasn't installed a newer version.
+if !exists('g:loaded_matchit') && findfile('plugin/matchit.vim', &runtimepath) ==# ''
+  runtime! macros/matchit.vim
+endif
+
+
+" No ftplugins for me, prefer ease of transferring one file.
+
+" Put these in an autocmd group, so that you can revert them with:
+" ":augroup vimStartup | exe 'au!' | augroup END"
+augroup vimStartup
+  au!
+
+  " When editing a file, always jump to the last known cursor position.
+  " Don't do it when the position is invalid, when inside an event handler
+  " (happens when dropping a file on gvim) and for a commit message (it's
+  " likely a different one than last time).
+  autocmd BufReadPost *
+    \ if line("'\"") >= 1 && line("'\"") <= line("$") && &ft !~# 'commit'
+    \ |   exe "normal! g`\""
+    \ | endif
+
+augroup END
+
+" WSL yank support
+let s:clip = '/mnt/c/Windows/System32/clip.exe'  " change this path according to your mount point
+if executable(s:clip)
+    augroup WSLYank
+        autocmd!
+        autocmd TextYankPost * if v:event.operator ==# 'y' | call system(s:clip, @0) | endif
+        "autocmd TextYankPost * if v:event.operator ==# 'y' | call system('cat |' . s:clip, @0) | endif
+    augroup END
+endif
+
+" https://coderwall.com/p/if9mda/automatically-set-paste-mode-in-vim-when-pasting-in-insert-mode
+let &t_SI .= "\<Esc>[?2004h"
+let &t_EI .= "\<Esc>[?2004l"
+
+inoremap <special> <expr> <Esc>[200~ XTermPasteBegin()
+
+function! XTermPasteBegin()
+  set pastetoggle=<Esc>[201~
+  set paste
+  return ''
+endfunction
+
+augroup ft_fish
+  au!
+
+  autocmd FileType fish
+    \ compiler fish
+    \ | setlocal textwidth=79
+    \ | setlocal foldmethod=expr
+
+augroup END
+
+augroup ft_vim
+  au!
+
+  autocmd FileType vim
+  \ setlocal tabstop=2
+  \ | setlocal softtabstop=2
+  \ | setlocal shiftwidth=2
+
+augroup END
+
+augroup ft_python
+  au!
+
+  au FileType python syn keyword pythonDecorator True None False self
+  au BufNewFile,BufRead *.jinja set syntax=htmljinja
+  autocmd BufRead *.py set smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
+augroup END
+
+augroup ft_web
+  au!
+  au BufNewFile,BufRead *.js, *.html, *.css
+      \ set tabstop=2
+      \ set softtabstop=2
+      \ set shiftwidth=2
+augroup END
+
+augroup ft_gitcommit
+    autocmd!
+    " In Git commit messages, wrap at 72 characters
+    autocmd FileType gitcommit set textwidth=72
+
+    " In Git commit messages, also color the 51st column (for titles)
+    autocmd FileType gitcommit set colorcolumn+=51
+augroup END
+
+
+augroup switching
+  au!
+
+  " Save on focus lost
+  au FocusGained,BufEnter * :silent! checktime
+  autocmd FocusLost * silent! wa
+augroup END
+
+" run :GoBuild or :GoTestCompile based on the go file
+function! s:build_go_files()
+  let l:file = expand('%')
+  if l:file =~# '^\f\+_test\.go$'
+    call go#test#Test(0, 1)
+  elseif l:file =~# '^\f\+\.go$'
+    call go#cmd#Build(0)
+  endif
+endfunction
+
+augroup filetype_golang
+    autocmd!
+
+  autocmd FileType go nmap <leader>t  <Plug>(go-test)
+	autocmd FileType go nmap <leader>b :<C-u>call <SID>build_go_files()<CR>
+  autocmd FileType go nmap <Leader>c <Plug>(go-coverage-toggle)
+  autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+augroup END
+
+
+" Convenient command to see the difference between the current buffer and the
+" file it was loaded from, thus the changes you made.
+" Only define it when not defined already.
+" Revert with: ":delcommand DiffOrig".
+if !exists(':DiffOrig')
+  command DiffOrig vert new | set bt=nofile | r ++edit # | 0d_ | diffthis
+		  \ | wincmd p | diffthis
+endif
+
+" I keep typing :Wq
+command! Wq wq
+
+augroup NERDTree
+    autocmd!
+    " open NERDTree if no files specified
+    autocmd StdinReadPre * let s:std_in=1
+    autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+    " close vim if only window left open is NERDTree
+    autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
+augroup END
+
+" Toggle NERDTree with <C-n>
+map <C-n> :NERDTreeToggle<CR>
+let NERDTreeIgnore = ['\.pyc$', '__pycache__']
+
+
+let g:UltiSnipsExpandTrigger='<c-j>'
+let g:UltiSnipsListSnippets='<c-tab>'
+let g:UltiSnipsJumpForwardTrigger='<c-j>' "<c-j>
+let g:UltiSnipsJumpBackwardTrigger='<c-k>'
+let g:UltiSnipsEditSplit='tabdo'
+let g:UltiSnipsSnippetDirectories=['bundle/vim-snippets/UltiSnips', 'customsnippets']
+
+let g:ycm_language_server =
+  \ [
+  \   {
+  \     'name': 'vimls',
+  \     'cmdline': [ '/usr/local/bin/vim-language-server', '--stdio' ],
+  \     'filetypes': [ 'vim' ]
+  \   },
+  \ ]
+imap <silent> <C-l> <Plug>(YCMToggleSignatureHelp)
+nnoremap <leader>fw <Plug>(YCMFindSymbolInWorkspace)
+nnoremap <leader>fd <Plug>(YCMFindSymbolInDocument)
+nnoremap <leader>jd :YcmCompleter GoTo<CR>
+let g:ycm_auto_hover = ''
+let g:ycm_autoclose_preview_window_after_insertion = 1
+let g:ycm_complete_in_strings = 0
+
+"Just disable al YCM diagnostic options
+let g:ycm_enable_diagnostic_signs = 0
+let g:ycm_enable_diagnostic_highlighting = 0
+let g:ycm_echo_current_diagnostic = 0
+let g:ycm_show_diagnostics_ui = 0
+let g:ycm_update_diagnostics_in_insert_mode = 0
+
+let g:ycm_goto_buffer_command = 'split-or-existing-window'
+" Disable preview window
+set completeopt-=preview
+set completeopt+=popup
+
+nmap <C-P> :FZF<CR>
+
+" let g:ctrlp_working_path_mode = 'rwa'
+" let g:ctrlp_clear_cache_on_exit = 0
+" let g:ctrlp_show_hidden = 1
+" let g:ctrlp_tilde_homedir = 1
+" let g:ctrlp_extensions = ['buffertag', 'tag', 'mixed']
+
+set autoread
+set clipboard^=unnamed,unnamedplus
+
+
+" Go Stuff
+let g:go_disable_autoinstall = 0
+
+" Highlight
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+let g:go_highlight_structs = 1
+let g:go_highlight_operators = 1
+let g:go_highlight_build_constraints = 1
+
+" Scope and tags for guru in vim-go
+let g:go_null_module_warning = 0
+let g:go_code_completion_enabled = 0
+let g:ale_set_highlights = 0
+let g:go_def_mode='gopls'
+let g:go_info_mode='gopls'
+
+
+" Let vim-go handle linting.
+" Note: if not finishing, bump g:go_metalinter_deadline
+let g:go_metalinter_autosave = 1
+let g:ale_linters = {
+\   'go': [],
+\   'python': ['bandit', 'mypy', 'pylint', 'vulture', 'flake8'],
+\}
+
+let g:ale_fixers = {
+\   'sh': ['shfmt', 'remove_trailing_lines', 'trim_whitespace'],
+\   'tex': ['remove_trailing_lines', 'trim_whitespace', 'latexindent'],
+\   'text': ['remove_trailing_lines', 'trim_whitespace'],
+\   'markdown': ['prettier', 'trim_whitespace', 'remove_trailing_lines'],
+\   'css': ['prettier', 'remove_trailing_lines', 'trim_whitespace'],
+\   'html': ['remove_trailing_lines', 'trim_whitespace'],
+\   'javascript': ['remove_trailing_lines', 'trim_whitespace', 'prettier', 'eslint'],
+\   'python': ['isort', 'black', 'autoflake'],
+\   '*': ['remove_trailing_lines', 'trim_whitespace'],
+\}
+let g:ale_html_tidy_options = '-i -q -language en' " --doctype omit
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+let g:ale_python_flake8_options = '--ignore=E501'
+let g:ale_python_pylint_options = '--disable=C0412'
+let g:ale_python_mypy_options = '--ignore-missing-imports --strict'
+nmap <silent> <C-k> <Plug>(ale_previous_wrap)
+nmap <silent> <C-j> <Plug>(ale_next_wrap)
+
+let g:airline#extensions#ale#enabled = 1
+let g:airline#extensions#tabline#enabled = 1
+let g:airline_powerline_fonts = 1
+let g:airline_theme='onedark'
+
+" Keyword (so as to not conflict with <leader>t)
+nmap <leader>k :Tags<CR>
+" Keyword (so as to not conflict with <leader>t)
+nmap <leader>bk :BTags<CR>
+nmap <leader>r :Rg<CR>
+let g:fzf_tags_command='' " don't generate your own tags fzf >:(
+let g:gutentags_cache_dir = expand('~/.cache/tags')
+let g:gutentags_file_list_command = 'rg --files'
+
+let g:rustfmt_autosave = 1
+let g:tex_flavor='latex'
+
+set foldmethod=indent
+set foldlevel=99
+set foldnestmax=10      "deepest fold is 10 levels
+let g:SimpylFold_docstring_preview=1
+
+set encoding=utf-8
+set fileencoding=utf-8
+
+" Use Unix as the standard file type
+set fileformats=unix,dos,mac
+
+let g:python_highlight_all=1
+set background=dark
+"colorscheme solarized
+let g:tmux_navigator_save_on_switch = 2
+let g:tmuxline_preset = {
+    \'a'  : '#S',
+    \'b'  : '#W',
+    \'y'  : ['#{prefix_highlight} #(ddate +"%%{%%d %%b, %%Y%%}%%N: %%H")', '%Y-%m-%d', '%-I:%M %p'],
+    \'z'  : '#(whoami)',
+    \'win': ['#I', '#W']}
+
+" vim:set ft=vim et sw=2:
