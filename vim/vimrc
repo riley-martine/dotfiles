@@ -367,6 +367,12 @@ let &t_EI .= "\<Esc>[?2004l"
 
 inoremap <special> <expr> <Esc>[200~ XTermPasteBegin()
 
+" press space in visual-block mode to prepend a space to the block (and re-select it)
+xnoremap <Space> I<Space><Esc>gvlolo
+" or tab (only sort of works - doesn't highlight correctly when not moving
+" by softtabstop. Do a space then a tab to see.)
+xnoremap <Tab> I<Tab><Esc>:<C-u>execute "normal gv" . &l:softtabstop . "lo" . &l:softtabstop . "lo"<CR>
+
 function! XTermPasteBegin()
   set pastetoggle=<Esc>[201~
   set paste
