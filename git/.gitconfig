@@ -1,0 +1,62 @@
+[user]
+    name = Riley Martine
+    email = riley.martine@protonmail.com
+    signingkey = riley.martine@protonmail.com
+[credential]
+	helper = /mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager-core.exe
+	; helper = cache --timeout=3600
+[push]
+    default = simple
+[pull]
+	rebase = true
+[core]
+	excludesfile = ~/.gitignore_global
+    autocrlf = input
+    editor = vim
+    pager = delta
+[interactive]
+    diffFilter = delta --color-only
+[github]
+    user = "riley-martine"
+[web]
+    browser = wsl-open
+[browser "wsl-open"]
+    cmd = ~/bin/wsl-open
+[alias]
+    lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+    branches = branch -a
+    tags = tag
+    stashes = stash list
+    unstage = reset -q HEAD --
+    discard = checkout --
+    uncommit = reset --mixed HEAD~
+    amend = commit --amend
+    nevermind = !git reset --hard HEAD && git clean -d -f
+    graph = log --graph -10 --branches --remotes --tags  --format=format:'%Cgreen%h %Creset• %<(75,trunc)%s (%cN, %cr) %Cred%d' --date-order
+    precommit = diff --cached --diff-algorithm=minimal -w
+    unmerged = diff --name-only --diff-filter=U
+    remotes = remote -v
+	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+[commit]
+    gpgsign = true
+    template = ~/.gitmessage
+[gpg]
+    program = gpg
+[merge]
+    conflictstyle = diff3
+[diff]
+    colorMoved = default
+[delta]
+    navigate = true  # use n and N to move between diff sections
+    light = false    # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
+    hyperlinks = true # Tmux doesn't have support for hyperlink escape character. :(
+    line-numbers = true
+    # side-by-side = true
+[init]
+  defaultBranch = main
+[status]
+    showUntrackedFiles = all
+[url "git@github.com:"]
+	insteadOf = https://github.com/
+[feature]
+	manyFiles = true
