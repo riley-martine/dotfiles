@@ -33,7 +33,7 @@ Bundle 'edkolev/tmuxline.vim'
 
 " Theming
 Plugin 'vim-airline/vim-airline'
-Plugin 'vim-airline/vim-airline-themes'
+Plugin 'arcticicestudio/nord-vim'
 
 " Behavior
 Plugin 'tmhedberg/SimpylFold'
@@ -313,10 +313,6 @@ endif
 set sessionoptions-=options
 set viewoptions-=options
 
-" Allow color schemes to do bright colors without forcing bold.
-if &t_Co == 8 && $TERM !~# '^Eterm'
-  set t_Co=16
-endif
 
 
 if empty(mapcheck('<C-U>', 'i'))
@@ -574,7 +570,6 @@ nmap <silent> <C-j> <Plug>(ale_next_wrap)
 let g:airline#extensions#ale#enabled = 1
 let g:airline#extensions#tabline#enabled = 1
 let g:airline_powerline_fonts = 1
-let g:airline_theme='onedark'
 
 " Keyword (so as to not conflict with <leader>t)
 nmap <leader>k :Tags<CR>
@@ -599,9 +594,27 @@ set fileencoding=utf-8
 " Use Unix as the standard file type
 set fileformats=unix,dos,mac
 
+" Colorscheme and highlighting
 let g:python_highlight_all=1
+if exists('$TMUX')
+  let &t_8f = "\<Esc>[38;2;%lu;%lu;%lum"
+  let &t_8b = "\<Esc>[48;2;%lu;%lu;%lum"
+  set termguicolors
+else
+  set termguicolors
+endif
+set t_Co=256
 set background=dark
-"colorscheme solarized
+colorscheme nord
+
+" Tells you what group is below cursor for highlighting purposes
+function! SynStack()
+  if !exists("*synstack")
+    return
+  endif
+  echo map(synstack(line('.'), col('.')), 'synIDattr(v:val, "name")')
+endfunc
+
 let g:tmux_navigator_save_on_switch = 2
 let g:tmuxline_preset = {
     \'a'  : '#S',
