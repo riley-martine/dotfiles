@@ -1,0 +1,63 @@
+# An incomplete list of "install these programs to be set up." Targeted at debian-like.
+# Each line should be the name of a binary that should exist. Run `installed.fish` to check they exist.
+# fish command to get binaries on $PATH:
+# complete -C | string match -r -g '^(\w+)\s+command' | uniq | less
+
+# Rewrite it in rust
+fd
+fzf
+bat
+delta
+rg
+starship
+exa
+
+# Utilities
+tmux
+gpg
+watch
+ssh
+vim
+awk
+sed
+pdftotext
+tac
+fish
+aspell
+dict
+dictd
+jq
+git
+curl
+shfmt
+shellcheck
+tree
+wget
+htop
+units
+## universal-ctags
+ctags
+
+# Fun fellows
+cowsay
+ddate
+sl
+
+# Python
+python3.10
+## pip
+black
+autoflake
+bandit
+bashate
+flake8
+isort
+mypy
+vulture
+pylint
+
+## npm
+alex
+bash-language-server
+vim-language-server
+writegood

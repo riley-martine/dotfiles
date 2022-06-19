@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail
 
 declare -A dotfiles=(
     ["$HOME/.tmux.conf"]="tmux/.tmux.conf"
@@ -8,9 +8,12 @@ declare -A dotfiles=(
     ["$HOME/.config/starship.toml"]="starship/starship.toml"
     ["$HOME/.gitconfig"]="git/.gitconfig"
     ["$HOME/.gitmessage"]="git/.gitmessage"
+    ["$__fish_config_dir/fish_plugins"]="fish/fish_plugins"
+    ["$__fish_config_dir/config.fish"]="fish/config.fish"
 )
 
 for i in "${!dotfiles[@]}"; do
-    echo "$i: ${dotfiles[$i]}"
     diff "$i" "${dotfiles[$i]}"
 done
+
+fish installed.fish
