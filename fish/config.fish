@@ -82,6 +82,7 @@ alias gpf 'git push --force-with-lease'
 alias gco 'git checkout'
 alias gst 'git status'
 alias gl 'git pull'
+alias gd 'git diff'
 alias gc 'git commit'
 
 alias vimrc 'vim ~/.vim/vimrc'
