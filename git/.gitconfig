@@ -1,27 +1,21 @@
 [user]
     name = Riley Martine
-    email = riley.martine@protonmail.com
-    signingkey = riley.martine@protonmail.com
+[include]
+    path = ~/.config/git/identity.gitconfig
 [credential]
-	helper = /mnt/c/Program\\ Files/Git/mingw64/bin/git-credential-manager-core.exe
-	; helper = cache --timeout=3600
+	helper = osxkeychain
 [push]
     default = simple
+    autoSetupRemote = true
 [pull]
 	rebase = true
 [core]
-	excludesfile = ~/.gitignore_global
+	excludesfile = ~/.config/git/gitignore
     autocrlf = input
     editor = vim
     pager = delta
 [interactive]
     diffFilter = delta --color-only
-[github]
-    user = "riley-martine"
-[web]
-    browser = wsl-open
-[browser "wsl-open"]
-    cmd = ~/bin/wsl-open
 [alias]
     lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
     branches = branch -a
@@ -37,23 +31,61 @@
     unmerged = diff --name-only --diff-filter=U
     remotes = remote -v
 	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
+    push-pull-request = "!f() { \
+        openUrl=\"$(type -P xdg-open)\"; \
+        openUrl=\"${openUrl:-open}\"; \
+        branch=\"$(git rev-parse --abbrev-ref HEAD)\"; \
+        git push -u \"${1:-origin}\" $branch 2>&1 \
+        | grep -o 'https://github.com/.*/pull/new/.*' \
+        | xargs \"$openUrl\"; \
+    }; f"
+    ppr = "!git push-pull-request"
+    tree = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold white). %an%C(reset)%C(bold yellow)%d%C(reset)' --abbrev-commit --date=relative
+    squash = "!s() { if [ ! -z \"$1\" ];then if [ ! \"$(git rev-parse --abbrev-ref HEAD)\" = \"$1\" ];then git rebase --interactive $(git merge-base HEAD $1) ;else echo \"HEAD can't rebase against itself.  You can't rebase against the branch you have checked out.\"; return 1; fi; else echo \"No argument supplied.  Pass in a branch that you want to interactively rebase against compared to your current HEAD.\"; return 1; fi } ; s"
+    checkpoint = "!cp() { git add -A && git commit -m checkpoint; } ; cp"
+    reuse = "!r() { git commit -C \"${1:-HEAD}\"; git commit --amend --reset-author; }; r"
+    rebase-master = "!git fetch origin master:master && git rebase master"
+    # https://softwaredoug.com/blog/2022/11/09/idiot-proof-git-aliases.html
+    pr = "!f() { \
+       open \"$(git ls-remote --get-url $(git config --get branch.$(git rev-parse --abbrev-ref HEAD).remote) \
+       | sed 's|git@github.com:\\(.*\\)$|https://github.com/\\1|' \
+       | sed 's|\\.git$||'; \
+       )/compare/$(\
+       git config --get branch.$(git rev-parse --abbrev-ref HEAD).merge | cut -d '/' -f 3- \
+       )?expand=1\"; \
+        }; f"
+    # TODO impl remote tracking branch https://github.com/paulirish/git-open/blob/f772364eb8538411e6dbcf1f7cc23b958e190c8c/git-open#L60
+    # TODO test detached HEAD
+    hub = "!f() { \
+        baseURL=\"$(git ls-remote --get-url \
+            | sed 's|git@github.com:\\(.*\\)$|https://github.com/\\1|' \
+            | sed 's|\\.git$||'; \
+        )\"; \
+        branch=\"$(git branch --show-current)\"; \
+        remoteMainBranch=\"$(git branch -r | grep -o 'HEAD -> .*$' | cut -d'/' -f2)\"; \
+        git branch -r | grep -q \"$branch\" || branch=\"$remoteMainBranch\"; \
+        gitRoot=\"$(git rev-parse --show-toplevel)\"; \
+        cd -- ${GIT_PREFIX:-.}; \
+        path=\"$(realpath --relative-to=\"$gitRoot\" \"${1:-$PWD}\")\"; \
+        open \"${baseURL}/tree/${branch}/${path}${2:+#L$2}\"; \
+    }; f"
 [commit]
     gpgsign = true
-    template = ~/.gitmessage
+    template = ~/.config/git/gitmessage
 [gpg]
-    program = gpg
+	program = gpg
 [merge]
     conflictstyle = diff3
 [diff]
     colorMoved = default
 [delta]
     navigate = true  # use n and N to move between diff sections
-    light = false    # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
-    hyperlinks = true # Tmux doesn't have support for hyperlink escape character. :(
+    light = true    # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
+    hyperlinks = true
     line-numbers = true
-    # side-by-side = true
+    side-by-side = true
 [init]
-  defaultBranch = main
+    defaultBranch = main
 [status]
     showUntrackedFiles = all
 [url "git@github.com:"]
