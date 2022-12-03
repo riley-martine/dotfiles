@@ -4,7 +4,7 @@ set -uo pipefail
 declare -A dotfiles
 dotfiles=(
     ["$HOME/.tmux.conf"]="tmux/.tmux.conf"
-    ["$HOME/.tmuxline"]="tmux/.tmuxline"
+    ["$HOME/.config/tmux/tokyonight_day.tmux"]="tmux/tokyonight_day.tmux"
 
     ["$HOME/.vim/vimrc"]="vim/vimrc"
 
