@@ -84,6 +84,8 @@
     hyperlinks = true
     line-numbers = true
     side-by-side = true
+[include]
+    path = ~/.config/git/tokyonight_day.gitconfig
 [init]
     defaultBranch = main
 [status]

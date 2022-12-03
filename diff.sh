@@ -12,6 +12,7 @@ dotfiles=(
 
     ["$HOME/.gitconfig"]="git/.gitconfig"
     ["$HOME/.config/git/identity.gitconfig"]="git/identity.gitconfig"
+    ["$HOME/.config/git/tokyonight_day.gitconfig"]="git/tokyonight_day.gitconfig"
     ["$HOME/.config/git/gitmessage"]="git/gitmessage"
     ["$HOME/.config/git/gitignore"]="git/gitignore"
 
