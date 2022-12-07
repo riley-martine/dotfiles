@@ -16,10 +16,12 @@ dotfiles=(
     ["$HOME/.config/git/gitmessage"]="git/gitmessage"
     ["$HOME/.config/git/gitignore"]="git/gitignore"
 
-    ["$HOME/.config/bat/tokyonight_day.tmTheme"]="bat/tokyonight_day.tmTheme"
+    ["$HOME/.config/bat/themes/tokyonight_day.tmTheme"]="bat/tokyonight_day.tmTheme"
 
     ["$__fish_config_dir/fish_plugins"]="fish/fish_plugins"
     ["$__fish_config_dir/config.fish"]="fish/config.fish"
+
+    ["$HOME/bin/random-words"]="bin/random-words"
 )
 
 for i in "${!dotfiles[@]}"; do
