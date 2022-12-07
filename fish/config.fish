@@ -62,6 +62,7 @@ end
 
 # Alii and functions that are basically alii
 
+alias k 'kubectl'
 alias kl 'kubectl logs'
 
 alias kg 'kubectl get'
