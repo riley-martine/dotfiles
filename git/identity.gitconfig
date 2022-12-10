@@ -1,7 +1,3 @@
-[url "github-riley-martine:"]
-    insteadOf = git@github.com:
-[url "github-riley-martine:"]
-    insteadOf = https://github.com/
 [user]
     email = riley.martine@protonmail.com
     signingkey = riley.martine@protonmail.com
