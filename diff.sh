@@ -20,6 +20,7 @@ dotfiles=(
 
     ["$__fish_config_dir/fish_plugins"]="fish/fish_plugins"
     ["$__fish_config_dir/config.fish"]="fish/config.fish"
+    ["$__fish_config_dir/themes/tokyonight_day.fish"]="fish/themes/tokyonight_day.fish"
 
     ["$HOME/bin/random-words"]="bin/random-words"
 )
