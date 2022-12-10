@@ -25,58 +25,57 @@ endif
 
 let g:polyglot_disabled = ['sensible', 'markdown']
 
-set runtimepath+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-
-Plugin 'VundleVim/Vundle.vim'
+call plug#begin()
 
 " Tmux integration
-Plugin 'tpope/vim-obsession'
-" Bundle 'edkolev/tmuxline.vim'
+Plug 'tpope/vim-obsession'
+" Plug 'edkolev/tmuxline.vim'
 
 " Theming
-Plugin 'vim-airline/vim-airline'
-" Plugin 'file:///Users/riley-martine/dev/tokyonight-vim'
+Plug 'vim-airline/vim-airline'
+" Plug 'file:///Users/riley-martine/dev/tokyonight-vim'
 
 " Behavior
-Plugin 'tmhedberg/SimpylFold'
-Plugin 'SirVer/ultisnips'
-Plugin 'honza/vim-snippets'
-Plugin 'ycm-core/YouCompleteMe'
-Plugin 'ludovicchabant/vim-gutentags'
-Plugin 'junegunn/fzf'
-Plugin 'junegunn/fzf.vim'
-Bundle 'scrooloose/nerdtree'
-Plugin 'ryanoasis/vim-devicons'
-" Plugin 'jiangmiao/auto-pairs'
-Plugin 'tpope/vim-surround'
-Plugin 'tpope/vim-eunuch'
-Plugin 'tpope/vim-commentary'
+Plug 'tmhedberg/SimpylFold'
+Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
+Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
+Plug 'ludovicchabant/vim-gutentags'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+Plug 'scrooloose/nerdtree'
+Plug 'ryanoasis/vim-devicons'
+" Plug 'jiangmiao/auto-pairs'
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-eunuch'
+Plug 'tpope/vim-commentary'
 " Make sure you have auxilary linters/fixers installed for ale
 " https://github.com/dense-analysis/ale/blob/master/supported-tools.md
-Plugin 'dense-analysis/ale'
+Plug 'dense-analysis/ale'
 
 " Language
-Plugin 'vim-test/vim-test'
-Plugin 'fatih/vim-go'
+Plug 'vim-test/vim-test'
+Plug 'fatih/vim-go', { 'for': 'go' }
 " \/ Also does sleuth (indent detection) for some reason...
-Plugin 'sheerun/vim-polyglot'
-"Plugin 'lervag/vimtex'
-"Plugin 'rust-lang/rust.vim'
-"Plugin 'arzg/vim-rust-syntax-ext'
-"Plugin 'rhysd/rust-doc.vim'
+Plug 'sheerun/vim-polyglot'
+"Plug 'lervag/vimtex'
+"Plug 'rust-lang/rust.vim'
+"Plug 'arzg/vim-rust-syntax-ext'
+"Plug 'rhysd/rust-doc.vim'
 
-call vundle#end()
+call plug#end()
 if has('autocmd')
     filetype plugin indent on
 endif
 
 set shortmess-=A  " https://github.com/sheerun/vim-polyglot/issues/765"
 
-" :PluginList       - lists configured plugins
-" :PluginInstall    - installs plugins; append `!` to update or just :PluginUpdate
-" :PluginSearch foo - searches for foo; append `!` to refresh local cache
-" :PluginClean      - confirms removal of unused plugins; append `!` to auto-approve removal
+" PlugInstall [name ...] [#threads] 	Install plugins
+" PlugUpdate [name ...] [#threads] 	Install or update plugins
+" PlugClean[!] 	Remove unlisted plugins (bang version will clean without prompt)
+" PlugUpgrade 	Upgrade vim-plug itself
+" PlugStatus 	Check the status of plugins
+" PlugDiff 	Examine changes from the previous update and the pending changes
+" PlugSnapshot[!] [output path] 	Generate script for restoring the current snapshot of the plugins
 
 "------------------------------------------------------------
 "" Must have options {{{1
