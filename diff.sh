@@ -18,9 +18,11 @@ dotfiles=(
 
     ["$HOME/.config/bat/themes/tokyonight_day.tmTheme"]="bat/tokyonight_day.tmTheme"
 
-    ["$__fish_config_dir/fish_plugins"]="fish/fish_plugins"
-    ["$__fish_config_dir/config.fish"]="fish/config.fish"
-    ["$__fish_config_dir/themes/tokyonight_day.fish"]="fish/themes/tokyonight_day.fish"
+    ["$HOME/.config/fish/fish_plugins"]="fish/fish_plugins"
+    ["$HOME/.config/fish/config.fish"]="fish/config.fish"
+    ["$HOME/.config/fish/themes/tokyonight_day.fish"]="fish/themes/tokyonight_day.fish"
+
+    ["$HOME/Documents/Tokyonight\ Day.terminal"]="terminal.app/Tokyonight\ Day.terminal"
 
     ["$HOME/bin/random-words"]="bin/random-words"
 )
