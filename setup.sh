@@ -24,7 +24,6 @@
 #    You can delete either section and the other will work fine.
 #  - Passes shellcheck with no warnings or errors
 
-
 # NON-GOALS:
 #  - All things to all people. This is highly opionated; it is how I want MY workstation set up.
 #    It WILL mess with preferences you want one way. It WILL have opinions about how you should
@@ -66,13 +65,13 @@
 set -euo pipefail
 
 if [[ $EUID -eq 0 ]]; then
-  echo "This script should not be run as root."
-  exit 1
+    echo "This script should not be run as root."
+    exit 1
 fi
 
 echo "Caching password..."
 sudo -K
-sudo true;
+sudo true
 
 ###################
 #    Functions    #
@@ -100,40 +99,48 @@ sudo true;
 
 # TODO finish section
 
-# TODO doc
+# Append a line to a config file, if not already present.
+# Creates file if it does not exist.
+# Prefixes text with a newline if file already exists.
+# Arguments:
+#   $1: the file to append to
+#   $2: the text to append. can be multi-line.
+#   $3: (optional) a pattern to search for, and return if found.
+#       used for skipping if non-exact string match already exists.
+#
 # Taken in part from:
 # https://github.com/junegunn/fzf/blob/master/install
 # I'm hot for this script 🥵
 append() {
-  local conf_file="$1"
-  local text="$2"
-  local pat="${3:-}"
-  local lno=""
+    local conf_file="$1"
+    local text="$2"
+    local pat="${3:-}"
+    local lno=""
 
-  echo "Update ${conf_file}:"
-  echo "  - $(echo "$text" | head -n1)"
-  if [[ $text == *$'\n'* ]]; then
-    echo "$text" | tail -n +2 | sed 's/^/    /'
-  fi
-
-  if [ -f "$conf_file" ]; then
-    if [ $# -lt 3 ]; then
-      lno=$(\grep -nF "$text" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
-    else
-      lno=$(\grep -nF "$pat" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
+    echo "Update ${conf_file}:"
+    echo "  - $(echo "$text" | head -n1)"
+    if [[ $text == *$'\n'* ]]; then
+        echo "$text" | tail -n +2 | sed 's/^/    /'
     fi
-  fi
 
-  if [ -n "$lno" ]; then
-    echo "    - Already exists: line #$lno"
+    if [ -f "$conf_file" ]; then
+        set +e
+        if [ $# -lt 3 ]; then
+            lno=$(\grep -nF "$text" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
+        else
+            lno=$(\grep -nF "$pat" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
+        fi
+        set -e
+    fi
+
+    if [ -n "$lno" ]; then
+        echo "    - Already exists: line #$lno"
+    else
+        [ -f "$conf_file" ] && echo >> "$conf_file"
+        echo "$text" >> "$conf_file"
+        echo "    + Added"
+    fi
     echo
-    return 0
-  fi
-
-  [ -f "$conf_file" ] && echo >> "$conf_file"
-  echo "$text" >> "$conf_file"
-  echo "    + Added"
-  echo
 }
 
 # This wraps brew install calls in a bundle command, so we don't get error messages
@@ -141,31 +148,29 @@ append() {
 # the brewfiles ourselves.
 # https://github.com/Homebrew/brew/issues/2491
 brew-get() {
-  local PREFIX="brew"
-  local ARGS=""
-  for arg in "$@"; do
-    case "$arg" in
-    --cask)
-      PREFIX="cask"
-      shift
-      ;;
-    --HEAD)
-      # https://github.com/Homebrew/homebrew-bundle/issues/1042
-      ARGS=', args: ["head"]'
-      shift
-      ;;
-    *)
-      ;;
-    esac
-  done
+    local PREFIX="brew"
+    local ARGS=""
+    for arg in "$@"; do
+        case "$arg" in
+            --cask)
+                PREFIX="cask"
+                shift
+                ;;
+            --HEAD)
+                # https://github.com/Homebrew/homebrew-bundle/issues/1042
+                ARGS=', args: ["head"]'
+                shift
+                ;;
+            *) ;;
 
-  for arg in "$@"; do echo "${PREFIX} \"${arg}\"${ARGS}"; done | brew bundle --file=-
+        esac
+    done
+
+    for arg in "$@"; do echo "${PREFIX} \"${arg}\"${ARGS}"; done | brew bundle --file=-
 }
 
-
-
 # https://www.dzombak.com/blog/2021/11/macOS-Scripting-How-to-tell-if-the-Terminal-app-has-Full-Disk-Access.html
-if ! plutil -lint /Library/Preferences/com.apple.TimeMachine.plist >/dev/null ; then
+if ! plutil -lint /Library/Preferences/com.apple.TimeMachine.plist > /dev/null; then
     echo "This script requires granting Terminal.app (or whatever terminal it is running in) Full Disk Access permissions."
     echo "Please navigate to System Preferences -> Security & Privacy -> Full Disk Access and check the box for Terminal."
     echo "Once you've done so, quit and reopen Terminal and re-run this script."
@@ -182,7 +187,6 @@ else
 fi
 echo "Done detecting system properties."
 
-
 echo "Updating MacOS..."
 softwareupdate -i -a
 echo "Done updating MacOS."
@@ -194,23 +198,29 @@ echo "Disabling boot sound..."
 sudo nvram SystemAudioVolume=" "
 
 echo "Enabling MacOS auto-update..."
-sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticCheckEnabled -bool TRUE
 defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
 defaults write com.apple.SoftwareUpdate CriticalUpdateInstall -int 1
-sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownload -bool TRUE
-sudo defaults write /Library/Preferences/com.apple.SoftwareUpdate AutomaticallyInstallMacOSUpdates -bool TRUE
+sudo defaults write \
+    /Library/Preferences/com.apple.SoftwareUpdate AutomaticCheckEnabled \
+    -bool TRUE
+sudo defaults write \
+    /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownload \
+    -bool TRUE
+sudo defaults write \
+    /Library/Preferences/com.apple.SoftwareUpdate \
+    AutomaticallyInstallMacOSUpdates \
+    -bool TRUE
 # App store auto-update
-sudo defaults write /Library/Preferences/com.apple.commerce.plist AutoUpdate -bool TRUE
-echo "Done enabling MacOS auto-update."
+sudo defaults write /Library/Preferences/com.apple.commerce.plist AutoUpdate \
+    -bool TRUE
 
 echo "Installing developer tools..."
 if ! pkgutil --pkg-info=com.apple.pkg.CLTools_Executables > /dev/null; then
     echo "Please select 'Yes' on the prompt."
     xcode-select --install
     echo "Press any key when done."
-    read
+    read -r
 fi
-echo "Done installing developer tools."
 
 if [ $arm = true ]; then
     echo "Installing rosetta..."
@@ -223,12 +233,13 @@ if [ "$(sudo fdesetup status)" = "FileVault is Off." ]; then
     # fdesetup scares me. Make user do it manually.
     echo "Please enable filevault."
     open /System/Library/PreferencePanes/Security.prefPane
-    read -p "Press any key once complete."
+    read -rp "Press any key once complete."
 fi
 
 echo "Installing homebrew..."
 if ! which brew; then
-  NONINTERACTIVE=1 HOMEBREW_NO_ANALYTICS=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+    NONINTERACTIVE=1 HOMEBREW_NO_ANALYTICS=1 /bin/bash -c \
+        "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
 echo "Disabling homebrew analytics..."
@@ -256,10 +267,9 @@ append ~/.config/fish/conf.d/00_brew.fish 'eval (/opt/homebrew/bin/brew shellenv
 eval "$(/opt/homebrew/bin/brew shellenv)"
 echo "Done installing homebrew."
 
-# TODO sometimes this doesn't work. Why?
 # Could've sworn I heard about this in this talk, but can't find it:
 # https://xeiaso.net/talks/rustconf-2022-sheer-terror-pam
- echo "Enabling touch-id for sudo..."
+echo "Enabling touch-id for sudo..."
 
 if ! grep -qe "pam_tid.so" /etc/pam.d/sudo; then
     sudo sed -i '' '2i\
@@ -267,7 +277,6 @@ auth       sufficient     pam_tid.so
 ' /etc/pam.d/sudo
 fi
 
-# # TODO Test
 # https://birkhoff.me/make-sudo-authenticate-with-touch-id-in-a-tmux/
 brew-get pam-reattach # This is so we can use it in tmux sessions
 if ! grep -qe "pam_reattach.so" /etc/pam.d/sudo; then
@@ -275,7 +284,6 @@ if ! grep -qe "pam_reattach.so" /etc/pam.d/sudo; then
 auth       optional       /opt/homebrew/lib/pam/pam_reattach.so
 ' /etc/pam.d/sudo
 fi
-
 
 echo "Setting screenshots as jpg and not png, for smaller file size..."
 defaults write com.apple.screencapture type jpg
@@ -287,7 +295,6 @@ echo "Showing ~/Library and /Volumes folders..."
 chflags nohidden ~/Library
 xattr -d com.apple.FinderInfo ~/Library || true
 sudo chflags nohidden /Volumes
-
 
 # https://apple.stackexchange.com/questions/408716/setting-safari-preferences-from-script-on-big-sur
 echo "Configuring Safari settings..."
@@ -514,29 +521,30 @@ echo "Modifying spotlight search..."
 # MENU_SPOTLIGHT_SUGGESTIONS sends search queries to Apple
 
 # TODO I don't think this is working... it isn't changing what it says in sysprefs
+#  or what comes out of spotlight.
 # Maybe it needs to be in the same order?
-defaults write com.apple.spotlight orderedItems -array \
-	'{"enabled" = 1;"name" = "APPLICATIONS";}' \
-	'{"enabled" = 1;"name" = "SYSTEM_PREFS";}' \
-	'{"enabled" = 1;"name" = "DIRECTORIES";}' \
-	'{"enabled" = 1;"name" = "PDF";}' \
-	'{"enabled" = 1;"name" = "MENU_DEFINITION";}' \
-	'{"enabled" = 1;"name" = "MENU_EXPRESSION";}' \
-	'{"enabled" = 1;"name" = "MENU_CONVERSION";}' \
-	'{"enabled" = 0;"name" = "FONTS";}' \
-	'{"enabled" = 0;"name" = "DOCUMENTS";}' \
-	'{"enabled" = 0;"name" = "MESSAGES";}' \
-	'{"enabled" = 0;"name" = "CONTACT";}' \
-	'{"enabled" = 0;"name" = "EVENT_TODO";}' \
-	'{"enabled" = 0;"name" = "IMAGES";}' \
-	'{"enabled" = 0;"name" = "BOOKMARKS";}' \
-	'{"enabled" = 0;"name" = "MUSIC";}' \
-	'{"enabled" = 0;"name" = "MOVIES";}' \
-	'{"enabled" = 0;"name" = "PRESENTATIONS";}' \
-	'{"enabled" = 0;"name" = "SPREADSHEETS";}' \
-	'{"enabled" = 0;"name" = "SOURCE";}' \
-	'{"enabled" = 0;"name" = "MENU_OTHER";}' \
-	'{"enabled" = 0;"name" = "MENU_SPOTLIGHT_SUGGESTIONS";}'
+# defaults write com.apple.spotlight orderedItems -array \
+# 	'{"enabled" = 1;"name" = "APPLICATIONS";}' \
+# 	'{"enabled" = 1;"name" = "SYSTEM_PREFS";}' \
+# 	'{"enabled" = 1;"name" = "DIRECTORIES";}' \
+# 	'{"enabled" = 1;"name" = "PDF";}' \
+# 	'{"enabled" = 1;"name" = "MENU_DEFINITION";}' \
+# 	'{"enabled" = 1;"name" = "MENU_EXPRESSION";}' \
+# 	'{"enabled" = 1;"name" = "MENU_CONVERSION";}' \
+# 	'{"enabled" = 0;"name" = "FONTS";}' \
+# 	'{"enabled" = 0;"name" = "DOCUMENTS";}' \
+# 	'{"enabled" = 0;"name" = "MESSAGES";}' \
+# 	'{"enabled" = 0;"name" = "CONTACT";}' \
+# 	'{"enabled" = 0;"name" = "EVENT_TODO";}' \
+# 	'{"enabled" = 0;"name" = "IMAGES";}' \
+# 	'{"enabled" = 0;"name" = "BOOKMARKS";}' \
+# 	'{"enabled" = 0;"name" = "MUSIC";}' \
+# 	'{"enabled" = 0;"name" = "MOVIES";}' \
+# 	'{"enabled" = 0;"name" = "PRESENTATIONS";}' \
+# 	'{"enabled" = 0;"name" = "SPREADSHEETS";}' \
+# 	'{"enabled" = 0;"name" = "SOURCE";}' \
+# 	'{"enabled" = 0;"name" = "MENU_OTHER";}' \
+# 	'{"enabled" = 0;"name" = "MENU_SPOTLIGHT_SUGGESTIONS";}'
 
 # Load new settings before rebuilding the index
 killall mds || true
@@ -556,7 +564,7 @@ echo "Enabling disk utility debug menu..."
 defaults write com.apple.DiskUtility DUDebugMenuEnabled -bool true
 defaults write com.apple.DiskUtility advanced-image-options -bool true
 
-echo "Setting TextEdit to use UTF-8 .txt format for new files instead of rtf..."
+echo "Setting TextEdit to use UTF-8 .txt for new files instead of rtf..."
 defaults write com.apple.TextEdit "RichText" -bool "false"
 defaults write com.apple.TextEdit PlainTextEncodingForWrite -int 4
 defaults write com.apple.TextEdit PlainTextEncoding -int 4
@@ -594,29 +602,34 @@ sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
 echo "Disabling asking if disks should be used for time machine backup..."
 defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
 
-
 echo "Making external monitors look a bit better..."
 # https://tonsky.me/blog/monitors/
 defaults -currentHost write -g AppleFontSmoothing -int 0
 defaults write NSGlobalDomain AppleFontSmoothing -int 0
-sudo defaults write /Library/Preferences/com.apple.windowserver DisplayResolutionEnabled -bool true
-
+sudo defaults write /Library/Preferences/com.apple.windowserver \
+    DisplayResolutionEnabled -bool true
 
 echo "Disabling some keyboard auto-fixers..."
 defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false
-defaults write "Apple Global Domain" NSAutomaticCapitalizationEnabled -bool FALSE
-defaults write "Apple Global Domain" NSAutomaticDashSubstitutionEnabled -bool FALSE
-defaults write "Apple Global Domain" NSAutomaticQuoteSubstitutionEnabled -bool FALSE
+defaults write "Apple Global Domain" NSAutomaticCapitalizationEnabled \
+    -bool FALSE
+defaults write "Apple Global Domain" NSAutomaticDashSubstitutionEnabled \
+    -bool FALSE
+defaults write "Apple Global Domain" NSAutomaticQuoteSubstitutionEnabled \
+    -bool FALSE
 defaults write "Apple Global Domain" "KB_DoubleQuoteOption" -string "\\"abc\\""
 defaults write "Apple Global Domain" "KB_SingleQuoteOption" -string "'abc'"
 # Good lady this one was painful to write
-defaults write "Apple Global Domain" NSUserQuotesArray -array '"\""' '"\""' "\'" "\'"
+defaults write "Apple Global Domain" NSUserQuotesArray \
+    -array '"\""' '"\""' "\'" "\'"
 
 echo "Setting computer name to not contain login name..."
 sudo scutil --set ComputerName "Computer"
 sudo scutil --set LocalHostName "Computer"
 sudo scutil --set HostName "Computer"
-sudo defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName -string "Computer"
+sudo defaults write \
+    /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName \
+    -string "Computer"
 
 echo "Installing quicklook plugins..."
 if ! defaults read "com.apple.preferences.extensions.QuickLook" | grep -qe QLMarkdown; then
@@ -630,7 +643,9 @@ fi
 if ! defaults read "com.apple.preferences.extensions.QuickLook" | grep -qe SyntaxHighlight; then
     brew install --cask --no-quarantine syntax-highlight
     echo "Opening Syntax Highlight to register extension..."
-    open '/Applications/Syntax Highlight.app' && sleep 5 && killall 'Syntax Highlight'
+    open '/Applications/Syntax Highlight.app' &&
+        sleep 5 &&
+        killall 'Syntax Highlight'
 fi
 defaults write com.apple.finder QLEnableTextSelection -bool TRUE
 echo "Done installing quicklook plugins."
@@ -641,58 +656,57 @@ curl -L --no-progress-bar https://iterm2.com/shell_integration/fish \
     -o ~/.config/fish/conf.d/90_iterm2_shell_integration.fish
 
 brew tap homebrew/cask-fonts
-# TODO Install correct nerd font
 brew-get --cask font-roboto
 
 echo "Installing GNU utilities..."
 brew-get \
-  bash \
-  gawk \
-  wget \
-  parallel \
-  gnu-time \
-  gettext \
-  grep \
-  less \
-  gsed \
-  gnu-tar \
-  gnupg \
-  aspell \
-  findutils \
-  grep \
-  coreutils \
-  binutils \
-  diffutils \
-  readline \
+    bash \
+    gawk \
+    wget \
+    parallel \
+    gnu-time \
+    gettext \
+    grep \
+    less \
+    gsed \
+    gnu-tar \
+    gnupg \
+    aspell \
+    findutils \
+    grep \
+    coreutils \
+    binutils \
+    diffutils \
+    readline
 
 echo "Installing various utilities..."
 brew-get \
-  git \
-  bash-completion \
-  bash-language-server \
-  zsh-completions \
-  vim \
-  dict \
-  fish \
-  tree \
-  jq \
-  yq \
-  htop \
-  watch \
-  cowsay \
-  sl \
-  ddate \
-  gifsicle \
-  ffmpeg \
-  gh \
-  pandoc \
-  tmux \
-  pinentry-mac \
-  imagemagick \
-  openssl \
-  openssh \
-  lynx \
-  html2text \
+    git \
+    bash-completion \
+    bash-language-server \
+    zsh-completions \
+    vim \
+    dict \
+    fish \
+    tree \
+    jq \
+    yq \
+    htop \
+    watch \
+    cowsay \
+    sl \
+    ddate \
+    gifsicle \
+    ffmpeg \
+    gh \
+    pandoc \
+    tmux \
+    pinentry-mac \
+    imagemagick \
+    openssl \
+    openssh \
+    lynx \
+    html2text
 
 brew unlink openssh # needed so we can UseKeychain
 
@@ -700,43 +714,30 @@ brew-get --HEAD universal-ctags/universal-ctags/universal-ctags
 
 echo "Installing zsh plugins..."
 brew-get \
-  zsh-syntax-highlighting
+    zsh-syntax-highlighting
 
 echo "Installing next-gen CLI utilities..."
 brew-get \
-  git-delta \
-  exa \
-  bat \
-  duf \
-  fzf \
-  tldr \
-  fd \
-  ripgrep \
-  ripgrep-all \
-  hyperfine \
-  tz \
+    git-delta \
+    exa \
+    bat \
+    duf \
+    fzf \
+    tldr \
+    fd \
+    ripgrep \
+    ripgrep-all \
+    hyperfine \
+    tz
 
 /opt/homebrew/opt/fzf/install --all
 
-
-# TODO go thru ale linters in use and get em all
-echo "Installing linters and fixers..."
-brew-get \
-  shellcheck \
-  shfmt \
-  vale \
-  yamllint \
-  hadolint \
-  languagetool \
-  markdownlint-cli \
-  perltidy \
-  redpen \
-
-
-
+echo "Installing texlive..."
+brew-get texlive
 
 echo "Adding bash completion..."
-append ~/.bashrc "[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion"
+append ~/.bashrc \
+    "[ -f /usr/local/etc/bash_completion ] && . /usr/local/etc/bash_completion"
 
 echo "Adding zsh completion to zshrc..."
 append ~/.zshrc 'if type brew &>/dev/null; then
@@ -747,7 +748,6 @@ append ~/.zshrc 'if type brew &>/dev/null; then
 fi'
 rm -f ~/.zcompdump
 
-
 # https://unix.stackexchange.com/questions/383365/zsh-compinit-insecure-directories-run-compaudit-for-list
 zsh -c 'autoload -Uz compinit && compinit && compaudit | xargs chmod g-w'
 
@@ -757,7 +757,8 @@ append ~/.zshrc 'export EDITOR=vim'
 append ~/.config/fish/conf.d/10_editor.fish 'set -x EDITOR vim'
 
 echo "Installing fisher..."
-fish -c 'curl -sL https://git.io/fisher | source && fisher install jorgebucaran/fisher'
+fish -c 'curl -sL https://git.io/fisher | source && \
+    fisher install jorgebucaran/fisher'
 
 echo "Configuring starship..."
 brew-get starship
@@ -769,25 +770,34 @@ append ~/.config/fish/conf.d/99_starship.fish 'starship init fish | source'
 echo "Installing python via pyenv..."
 brew-get pyenv
 
+# TODO consolidate appends
 append ~/.bashrc 'export PYENV_ROOT="$HOME/.pyenv"'
-append ~/.bashrc 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"'
+append ~/.bashrc \
+    'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"'
 append ~/.bashrc 'eval "$(pyenv init -)"'
+append ~/.bashrc 'export PYTHON_CONFIGURE_OPTS="--enable-framework"'
 
 append ~/.zshrc 'export PYENV_ROOT="$HOME/.pyenv"'
-append ~/.zshrc 'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"'
+append ~/.zshrc \
+    'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"'
 append ~/.zshrc 'eval "$(pyenv init -)"'
+append ~/.zshrc 'export PYTHON_CONFIGURE_OPTS="--enable-framework"'
 
 fish -c 'set -Ux PYENV_ROOT $HOME/.pyenv'
 fish -c 'set -U fish_user_paths $PYENV_ROOT/bin $fish_user_paths'
 
 append ~/.config/fish/conf.d/30_pyenv.fish 'pyenv init - | source'
+append ~/.config/fish/conf.d/30_pyenv.fish \
+    'set -x PYTHON_CONFIGURE_OPTS "--enable-framework"'
 
 # https://github.com/pyenv/pyenv/wiki#suggested-build-environment
 brew-get openssl readline sqlite3 xz zlib tcl-tk
 
 eval "$(pyenv init -)"
-pyenv install --skip-existing 3:latest
-pyenv global $(pyenv latest 3)
+# Install latest stable python
+pyenv install --skip-existing \
+    "$(pyenv install --list | sed 's/ //g' | ggrep -P '^[\d\.]+$' | tail -n 1)"
+pyenv global "$(pyenv latest 3)"
 
 #TODO should I use asdf, or fnm?
 # https://github.com/Schniz/fnm ooh its rust
@@ -836,13 +846,18 @@ fish -c 'set -U fish_user_paths ~/.cargo/bin $fish_user_paths'
 
 echo "Installing ruby..."
 brew-get rbenv ruby-build
-brew-get autoconf automake gdbm gmp libksba libtool libyaml openssl pkg-config readline
+brew-get autoconf automake gdbm gmp \
+    libksba libtool libyaml openssl pkg-config readline
 
 append ~/.bashrc 'eval "$(rbenv init - bash)"'
 append ~/.zshrc 'eval "$(rbenv init - zsh)"'
-append ~/.config/fish/conf.d/52_rbenv.fish "status --is-interactive; and rbenv init - fish | source"
+append ~/.config/fish/conf.d/52_rbenv.fish \
+    "status --is-interactive; and rbenv init - fish | source"
 
-rbenv install $(rbenv install -l | grep -v - | tail -1) --skip-existing
+rbenv install "$(rbenv install -l | grep -v - | tail -1)" --skip-existing
+if [ "$(rbenv global)" = system ]; then
+    rbenv global "$(rbenv versions | tail -n1 | sed 's/ //g')"
+fi
 
 # Disables doc generation, speeding up gem installs
 append ~/.gemrc 'gem: --no-ri --no-rdoc'
@@ -861,12 +876,150 @@ append ~/.zshrc 'export PATH="$HOME/.jenv/bin:$PATH"'
 append ~/.zshrc 'eval "$(jenv init -)"'
 
 append ~/.config/fish/conf.d/53_jenv.fish 'set PATH "$HOME"/.jenv/bin "$PATH"'
-append ~/.config/fish/conf.d/53_jenv.fish "status --is-interactive; and jenv init - | source"
+append ~/.config/fish/conf.d/53_jenv.fish \
+    "status --is-interactive; and jenv init - | source"
 
 jenv add /Library/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home
 jenv add /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
 jenv add /Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home
 # jenv enable-plugin export # Not for fish! Disable for fish!
+
+echo "Installing perl via perlbrew..."
+if ! type perlbrew; then
+    SHELL=bash curl -L https://install.perlbrew.pl | bash
+fi
+
+append ~/.bashrc 'source ~/perl5/perlbrew/etc/bashrc'
+append ~/.zshrc 'source ~/perl5/perlbrew/etc/bashrc'
+append ~/.config/fish/conf.d/13_perlbrew.fish \
+    '. ~/perl5/perlbrew/etc/perlbrew.fish'
+
+set +u
+SHELL=bash source "$HOME/perl5/perlbrew/etc/bashrc"
+set -u
+SHELL=bash perlbrew init
+
+latest="$(perlbrew available | sed -nE 's/.*(perl-.*)/\1/p' | head -n1)"
+if ! perlbrew list | grep -qF "$latest"; then
+    perlbrew install "$latest"
+fi
+perlbrew switch "$latest"
+
+if [ ! -f "$PERLBREW_ROOT/bin/cpanm" ]; then
+    perlbrew install-cpanm
+fi
+
+cpan -i CPAN::DistnameInfo
+cpan -i Text::Levenshtein
+cpan -i Log::Log4perl
+cpan -i Term::ReadLine::Perl
+
+echo "Installing linters and fixers..."
+# bash
+brew-get \
+    shellcheck \
+    shfmt
+
+pip install bashate
+npm i -g bash-language-server
+
+# cloudformation
+brew-get cfn-lint
+
+# css
+npm i -g vscode-langservers-extracted
+npm install -g csslint
+
+# docker
+npm install -g dockerfile_lint
+brew-get hadolint
+
+# git
+brew-get gitlint
+
+# go handled by vim-go
+
+# graphql
+npm install -g gqlint
+
+# HCL
+brew tap hashicorp/tap
+brew-get \
+    hashicorp/tap/packer \
+    hashicorp/tap/terraform \
+    hashicorp/tap/terraform-ls \
+    tflint \
+    tfsec \
+    checkov
+
+# Skipping java bc lazy rn
+# Same for js
+
+# json
+npm install jsonlint -g
+
+# kotlin
+brew-get \
+    kotlin-language-server \
+    kotlin \
+    ktlint
+
+# latex
+brew-get texlab
+
+#lua
+brew-get stylua
+
+#md
+brew-get markdownlint-cli
+
+# perl
+cpanm Perl::Critic
+
+# protobuf
+brew tap bufbuild/buf
+brew-get bufbuild/buf/buf
+
+# python
+pip install \
+    black \
+    isort \
+    autoflake \
+    bandit[toml] \
+    vulture \
+    mypy \
+    pylint \
+    mccabe \
+    pylsp-rope \
+    python-lsp-server[rope]
+
+# puppet
+gem install puppet-lint
+
+# rust
+rustup component add rust-src
+rustup component add rust-analyzer
+ln -sf "$(rustup which --toolchain stable rust-analyzer)" ~/.cargo/bin/
+
+# TODO text valerc
+brew-get \
+    vale \
+    languagetool \
+    redpen
+
+npm install alex --global
+
+# vim
+npm install -g vim-language-server
+pip install vim-vint
+
+# xml
+brew-get libxml2
+ln -sf /opt/homebrew/opt/libxml2/bin/xmllint /opt/homebrew/bin/
+
+# yaml
+npm install -g yaml-language-server
+brew-get yamllint
 
 # TODO sdkman
 
@@ -876,18 +1029,23 @@ brew-get --cask Docker
 
 # Bash completion
 etc=/Applications/Docker.app/Contents/Resources/etc
-ln -sf $etc/docker.bash-completion $(brew --prefix)/etc/bash_completion.d/docker
-ln -sf $etc/docker-compose.bash-completion $(brew --prefix)/etc/bash_completion.d/docker-compose
+ln -sf "$etc"/docker.bash-completion \
+    "$(brew --prefix)"/etc/bash_completion.d/docker
+ln -sf "$etc"/docker-compose.bash-completion \
+    "$(brew --prefix)"/etc/bash_completion.d/docker-compose
 
 # zsh completion
-etc=/Applications/Docker.app/Contents/Resources/etc
-ln -sf $etc/docker.zsh-completion $(brew --prefix)/share/zsh/site-functions/_docker
-ln -sf $etc/docker-compose.zsh-completion $(brew --prefix)/share/zsh/site-functions/_docker-compose
+ln -sf "$etc"/docker.zsh-completion \
+    "$(brew --prefix)"/share/zsh/site-functions/_docker
+ln -sf "$etc"/docker-compose.zsh-completion \
+    "$(brew --prefix)"/share/zsh/site-functions/_docker-compose
 
 # fish completion
 mkdir -p ~/.config/fish/completions
-ln -shif /Applications/Docker.app/Contents/Resources/etc/docker.fish-completion ~/.config/fish/completions/docker.fish
-ln -shif /Applications/Docker.app/Contents/Resources/etc/docker-compose.fish-completion ~/.config/fish/completions/docker-compose.fish
+ln -sf "$etc"/docker.fish-completion \
+    ~/.config/fish/completions/docker.fish
+ln -sf "$etc"/docker-compose.fish-completion \
+    ~/.config/fish/completions/docker-compose.fish
 
 echo "Installing Firefox..."
 brew-get --cask firefox
@@ -926,15 +1084,17 @@ defaults write "com.knollsoft.Rectangle" SUHasLaunchedBefore -bool TRUE
 open '/Applications/Rectangle.app'
 # Needed because we can't write to Accessibility without SIP disabled
 # https://github.com/jacobsalmela/tccutil#sip-notice
-echo "Follow prompts in app, then press any key to continue."
-read
+echo "Follow prompts in app, then press enter to continue."
+read -r
 echo "Done installing rectangle."
 
 # https://github.com/kcrawford/dockutil/issues/127
 # https://github.com/pivotal/workstation-setup/blob/main/scripts/common/configuration-osx.sh
 echo "Cleaning up Dock..."
 brew-get --cask hpedrorodrigues/tools/dockutil
-dockutil --list | awk -F'\t' '{print "dockutil --remove \""$1"\" --no-restart"}' | sh
+dockutil --list |
+    awk -F'\t' '{print "dockutil --remove \""$1"\" --no-restart"}' |
+    sh
 dockutil --add /Applications/Firefox.app --no-restart
 dockutil --add /Applications/iTerm.app --no-restart
 # dockutil --add /System/Applications/Utilities/Terminal.app --no-restart
@@ -947,14 +1107,16 @@ echo "Setting default browser..."
 # that future updates won't break things
 
 if [ ! -d ~/dev/defaultbrowser ]; then
-    git clone https://github.com/riley-martine/defaultbrowser ~/dev/defaultbrowser
+    git clone \
+        https://github.com/riley-martine/defaultbrowser \
+        ~/dev/defaultbrowser
 fi
 cd ~/dev/defaultbrowser
 git pull
 make
 
 # https://www.felixparadis.com/posts/how-to-set-the-default-browser-from-the-command-line-on-a-mac/
-./defaultbrowser firefox && osascript <<EOF
+./defaultbrowser firefox && osascript << EOF
 try
 	tell application "System Events"
 		tell application process "CoreServicesUIAgent"
@@ -973,7 +1135,7 @@ cd -
 login_bitwarden() {
     echo "Logging in to bitwarden CLI..."
     echo "This is necessary for generating and storing passwords."
-    if ! bw login --check >/dev/null; then
+    if ! bw login --check > /dev/null; then
         export BW_SESSION="$(bw login riley.martine@protonmail.com | sed -E -n 's/\$ export BW_SESSION="(.*)"/\1/p')"
     else
         if [ -z "${BW_SESSION-}" ] || [ "$(bw status | jq -r '.status')" != unlocked ]; then
@@ -993,7 +1155,6 @@ login_github() {
     fi
 }
 
-
 # https://serverfault.com/questions/818289/add-second-sub-key-to-unattended-gpg-key#962553
 echo "Generating GPG key for github..."
 if ! gpg --list-secret-keys | grep -q github; then
@@ -1005,12 +1166,14 @@ if ! gpg --list-secret-keys | grep -q github; then
     bw sync
     GPG_PASS="$(bw get notes "$GPG_PASS_ID")"
 
-    KEYID="$(gpg \
+    KEYID="$(
+             gpg \
             --with-colons --batch --status-fd=1 \
             --passphrase "$GPG_PASS" \
             --quick-generate-key \
-                "Riley Martine (github) <riley.martine@protonmail.com>" default cert 1y \
-        | sed -E -n 's/\[GNUPG:\] KEY_CREATED P (.*)/\1/p'
+                "Riley Martine (github) <riley.martine@protonmail.com>" \
+                default cert 1y |
+            sed -E -n 's/\[GNUPG:\] KEY_CREATED P (.*)/\1/p'
     )"
     gpg --batch --passphrase "$GPG_PASS" --pinentry-mode loopback \
         --quick-add-key "$KEYID" default sign 1y
@@ -1021,13 +1184,14 @@ if ! gpg --list-secret-keys | grep -q github; then
 
     # https://gist.github.com/bmhatfield/cc21ec0a3a2df963bffa3c1f884b676b
     brew-get pinentry-mac
-    append ~/.gnupg/gpg-agent.conf "pinentry-program $(brew --prefix)/bin/pinentry-mac"
+    append ~/.gnupg/gpg-agent.conf \
+        "pinentry-program $(brew --prefix)/bin/pinentry-mac"
     append ~/.gnupg/gpg.conf "use-agent"
     gpgconf --kill gpg-agent
 
     # Fragile! This signs something w/ the pw and in doing so, adds to the MacOS keychain.
     echo test | gpg --clearsign &
-    osascript <<EOF
+    osascript << EOF
 delay 2
 try
     tell application "System Events"
@@ -1043,7 +1207,6 @@ EOF
 
 fi
 
-
 echo "Generating ssh key for github..."
 mkdir -p ~/.ssh
 
@@ -1057,17 +1220,30 @@ if [ ! -f ~/.ssh/id_github ]; then
     login_bitwarden
     login_github
 
-    SSH_PASS_ID="$(bw get template item | jq ".type = 2 | .secureNote.type = 0 | .notes = \"$(bw generate --length 32)\" | .name = \"Github SSH key MacOS $(date)\"" | bw encode | bw create item | jq -r '.id')"
+    # TODO test jq indented
+    SSH_PASS_ID="$(bw get template item |
+        jq ".type = 2 | \
+            .secureNote.type = 0 | \
+            .notes = \"$(bw generate --length 32)\" | \
+            .name = \"Github SSH key MacOS $(date)\"" |
+        bw encode |
+        bw create item |
+        jq -r '.id')"
+
     bw sync
     SSH_PASS="$(bw get notes "$SSH_PASS_ID")"
 
-    ssh-keygen -t ed25519 -C "riley.martine@protonmail.com" -f ~/.ssh/id_github -N "$SSH_PASS"
+    ssh-keygen \
+        -t ed25519 \
+        -C "riley.martine@protonmail.com" \
+        -f ~/.ssh/id_github \
+        -N "$SSH_PASS"
 
     # https://stackoverflow.com/questions/13033799/how-to-make-ssh-add-read-passphrase-from-a-file
     mask="$(umask)"
     umask 077
     ap=$(mktemp)
-    [ -f "${ap}" ] && cat <<EOF >"$ap"
+    [ -f "${ap}" ] && cat << EOF > "$ap"
 #!/bin/bash
 # Parameter $1 passed to the script is the prompt text
 # READ Secret from STDIN and echo it
@@ -1092,7 +1268,7 @@ if ! grep -qe "/opt/homebrew/bin/fish" /etc/shells; then
     echo "/opt/homebrew/bin/fish" | sudo tee -a /etc/shells
 fi
 
-if ! grep -q fish < "$SHELL"; then
+if ! grep -q fish < "$(perl -e '@pw = getpwuid $< ; print $pw[8], "\n"')"; then
     chsh -s "$(which fish)"
 fi
 
@@ -1107,6 +1283,7 @@ if [ ! -d ~/dev/dotfiles ]; then
     git clone https://github.com/riley-martine/dotfiles ~/dev/dotfiles
 fi
 cd ~/dev/dotfiles
+# TODO fix no lcoal uncom
 git pull # Assumes no local uncommitted mods...
 
 # Copy dotfile from a repo to local machine.
@@ -1115,28 +1292,29 @@ git pull # Assumes no local uncommitted mods...
 #   If same file by sha256sum, skip
 #   Else prompt with delta
 copy_dotfile() {
-  local from="$1"
-  local to="$2"
+    local from="$1"
+    local to="$2"
 
-  mkdir -p "$(dirname "$to")"
+    mkdir -p "$(dirname "$to")"
 
-  if [ ! -f "$to" ]; then
-    cp "$from" "$to"
-    return 0
-  fi
+    if [ ! -f "$to" ]; then
+        cp "$from" "$to"
+        return 0
+    fi
 
-  if [ "$(sha256sum "$from" | cut -d' ' -f1)" = "$(sha256sum "$to" | cut -d' ' -f1)" ]; then
-    echo "Existing file is the same as remote file."
-    return 0
-  fi
+    if [ "$(sha256sum "$from" | cut -d' ' -f1)" = "$(sha256sum "$to" | cut -d' ' -f1)" ]; then
+        echo "Existing file is the same as remote file."
+        return 0
+    fi
 
-  delta "$from" "$to" || true
-  cp -i "$from" "$to" || true
+    delta "$from" "$to" || true
+    cp -i "$from" "$to" || true
 }
 
 echo "Installing tmux conf..."
 copy_dotfile "tmux/.tmux.conf" "$HOME/.tmux.conf"
-copy_dotfile "tmux/tokyonight_day.tmux" "$HOME/.config/tmux/tokyonight_day.tmux"
+copy_dotfile "tmux/tokyonight_day.tmux" \
+    "$HOME/.config/tmux/tokyonight_day.tmux"
 if [ ! -d ~/.tmux/plugins/tpm ]; then
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
 fi
@@ -1157,29 +1335,32 @@ copy_dotfile "starship/starship.toml" "$HOME/.config/starship.toml"
 
 copy_dotfile "git/.gitconfig" "$HOME/.gitconfig"
 copy_dotfile "git/identity.gitconfig" "$HOME/.config/git/identity.gitconfig"
-copy_dotfile "git/tokyonight_day.gitconfig" "$HOME/.config/git/tokyonight_day.gitconfig"
+copy_dotfile "git/tokyonight_day.gitconfig" \
+    "$HOME/.config/git/tokyonight_day.gitconfig"
 copy_dotfile "git/gitmessage" "$HOME/.config/git/gitmessage"
 copy_dotfile "git/gitignore" "$HOME/.config/git/gitignore"
 
-copy_dotfile "bat/tokyonight_day.tmTheme" "$HOME/.config/bat/themes/tokyonight_day.tmTheme"
+copy_dotfile "bat/tokyonight_day.tmTheme" \
+    "$HOME/.config/bat/themes/tokyonight_day.tmTheme"
 bat cache --build
 
 copy_dotfile "fish/fish_plugins" "$HOME/.config/fish/fish_plugins"
 copy_dotfile "fish/config.fish" "$HOME/.config/fish/config.fish"
-copy_dotfile "fish/themes/tokyonight_day.fish" "$HOME/.config/fish/themes/tokyonight_day.fish"
+copy_dotfile "fish/themes/tokyonight_day.fish" \
+    "$HOME/.config/fish/themes/tokyonight_day.fish"
 fish -c 'fisher update'
 
 copy_dotfile "bin/random-words" "$HOME/bin/random-words"
 
 # https://apple.stackexchange.com/questions/344401/how-to-programatically-set-terminal-theme-profile
-theme=$(<terminal.app/Tokyonight\ Day.xml)
+theme=$(< terminal.app/Tokyonight\ Day.xml)
 plutil -replace Window\ Settings.Tokyonight\ Day -xml \
     "$theme" \
     ~/Library/Preferences/com.apple.Terminal.plist
-defaults write com.apple.Terminal "Default Window Settings" -string "Tokyonight Day"
-defaults write com.apple.Terminal "Startup Window Settings" -string "Tokyonight Day"
-
-
+defaults write com.apple.Terminal \
+    "Default Window Settings" -string "Tokyonight Day"
+defaults write com.apple.Terminal \
+    "Startup Window Settings" -string "Tokyonight Day"
 
 cd -
 
@@ -1190,17 +1371,13 @@ cd -
 # superuser.com##.js-consent-banner
 # https://meta.stackoverflow.com/questions/406344/cookie-settings-on-every-page
 
-# TODO install terminal.app theme
 # TODO terminal.app settings
 # TODO switch known tn themes to real repo
 # TODO iTerm2 settings
 # TODO lunar prefs disable pro check
 # TODO make look pretty w brew install script bits
 # TODO install non-brew list (gem, npm, go, etc)
-# TODO dotfiles
-# TODO git setup w/ keys
 # TODO remove safari favorites
-# TODO fish
 # TODO sudo delay increase
 # TODO terminal disable visualbell
 # TODO casks don't launch if already configured
@@ -1217,7 +1394,6 @@ cd -
 # TODO disable location services for "analytics"
 # TODO set require password immediately from CLI
 # TODO Select System Preferences > Spotlight > Search Results, and ensure that Siri Suggestions is not enabled.
-# TODO gen ssh + GPG keys and add to github w gh https://www.robinwieruch.de/mac-setup-web-development/
 # TODO night shift
 # TODO set notification prefs defaults read "com.apple.ncprefs" apps to disable tips
 # TODO set caps to control
@@ -1226,16 +1402,14 @@ cd -
 # TODO bitwarden setup (enable touchid)
 # TODO ohmyzsh
 # TODO update script incl nvm install node --reinstall-packages-from=node
-# TODO install perl maybe perlbrew
 # TODO check out git duet https://github.com/pivotal/workstation-setup/blob/25e73693f5f2e991f7c08c039fd6ae42abc2a390/scripts/common/git.sh#L14
 # TODO remove sidebar widgets
 # TODO install dictionaries
 # TODO hide spotlight tray icon
-# TODO gitignore global
 # TODO gum
-# TODO pyenv not beta latest
 # TODO uhh nextcloud plubming calendar notes sync etc
 # # TODO system prefs close windows when quitting an app
 
 echo "The following must be done manually:"
-echo '  - Finder -> Preferences -> Sidebar -> Locations -> Uncheck iCloud Drive'
+echo '  - Finder -> Preferences -> Sidebar
+        -> Locations -> Uncheck iCloud Drive'
