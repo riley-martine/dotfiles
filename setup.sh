@@ -61,6 +61,8 @@
 # https://github.com/geerlingguy/dotfiles/blob/master/.osx
 # https://github.com/mathiasbynens/dotfiles/blob/main/.macos
 # https://github.com/thoughtbot/laptop/blob/main/mac
+#
+# TODO impl https://git.herrbischoff.com/awesome-macos-command-line/about/
 
 set -euo pipefail
 
