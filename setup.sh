@@ -20,8 +20,6 @@
 #    so that I can pull other dotfiles without overwriting, and don't clutter my own with
 #    tool-specific config. (e.g. pyenv path)
 #    - Eventually, the script will regenerate my preferred dotfiles from scratch.
-#  - Modular: if two installs need autoconf, it will be specified both places.
-#    You can delete either section and the other will work fine.
 #  - Passes shellcheck with no warnings or errors
 
 # NON-GOALS:
@@ -36,6 +34,8 @@
 #  - Being pretty (this will come later)
 #  - An update script. There are sections that run updates; this script should not be run in order
 #    to update the things it installs. (that will come later)
+#  - Modular; while linear, dependency relations are not encoded as a proper DAG.
+#    Delete sections at your own risk.
 
 # You may have to run this script several times, e.g. to work through all the updates.
 
@@ -113,6 +113,7 @@ sudo true
 # Taken in part from:
 # https://github.com/junegunn/fzf/blob/master/install
 # I'm hot for this script 🥵
+
 append() {
     local conf_file="$1"
     local text="$2"
@@ -143,6 +144,29 @@ append() {
         echo "    + Added"
     fi
     echo
+}
+
+# TODO should it be /usr/local/bin?
+# Writes an update script to $HOME/.local/share/update.d
+# The directory should contain executable files that each are responsible for
+# updating a particular program, e.g. brew, global npm packages.
+# Script that runs all of these is installed to ~/bin.
+# Args:
+#   $1: filename, minus suffix, e.g. "macos"
+#   $2: what to run to update the thing, e.g. "softwareupdate -i -a"
+add-update() {
+    echo "Adding update script:"
+    local update_dir="$HOME/.local/share/update.d"
+    local file="${update_dir}/${1}.sh"
+
+    mkdir -p "$update_dir"
+
+    if [ ! -f "$file" ]; then
+        echo '#!/usr/bin/env bash' >> "$file"
+    fi
+
+    append "$file" "$2"
+    chmod +x "$file"
 }
 
 # This wraps brew install calls in a bundle command, so we don't get error messages
@@ -191,7 +215,7 @@ echo "Done detecting system properties."
 
 echo "Updating MacOS..."
 softwareupdate -i -a
-echo "Done updating MacOS."
+add-update macos 'softwareupdate -i -a'
 
 echo "Closing system preferences..."
 osascript -e 'tell application "System Preferences" to quit'
@@ -267,7 +291,10 @@ mkdir -p ~/.config/fish/conf.d/
 append ~/.config/fish/conf.d/00_brew.fish 'eval (/opt/homebrew/bin/brew shellenv)'
 
 eval "$(/opt/homebrew/bin/brew shellenv)"
-echo "Done installing homebrew."
+
+add-update homebrew 'brew update
+brew upgrade
+brew upgrade --cask --greedy'
 
 # Could've sworn I heard about this in this talk, but can't find it:
 # https://xeiaso.net/talks/rustconf-2022-sheer-terror-pam
@@ -288,7 +315,8 @@ auth       optional       /opt/homebrew/lib/pam/pam_reattach.so
 fi
 
 echo "Setting screenshots as jpg and not png, for smaller file size..."
-defaults write com.apple.screencapture type jpg
+# TODO nvm?
+defaults write com.apple.screencapture type png
 
 echo 'Disabling opening previous previewed files (e.g. PDFs) when opening a new one'
 defaults write com.apple.Preview ApplePersistenceIgnoreState YES
@@ -415,7 +443,6 @@ else
     sudo dscacheutil -flushcache
     sudo killall -HUP mDNSResponder
 fi
-echo "Done setting up AdGuard DNS servers."
 
 echo "Always showing scroll bars, instead of just when scrolling..."
 defaults write NSGlobalDomain AppleShowScrollBars -string "Always"
@@ -490,10 +517,6 @@ echo "Hiding tags..."
 defaults write com.apple.finder ShowRecentTags -bool FALSE
 
 echo "Modifying Favorites..."
-mysides_installed=false
-if brew list | grep -qe mysides; then
-    mysides_installed=true
-fi
 brew-get --cask mysides
 echo "Removing airdrop..."
 mysides remove / || true
@@ -506,11 +529,6 @@ mkdir -p ~/dev
 mysides add "Dev" "file://$HOME/dev/"
 echo "Adding screenshots..."
 mysides add "Screenshots" "file://$HOME/Screenshots/"
-
-if [ $mysides_installed = false ]; then
-    brew uninstall mysides
-fi
-echo "Done modifying favorites."
 
 echo "Showing path and status bar..."
 defaults write com.apple.finder "ShowPathbar" -bool "true"
@@ -549,11 +567,11 @@ echo "Modifying spotlight search..."
 # 	'{"enabled" = 0;"name" = "MENU_SPOTLIGHT_SUGGESTIONS";}'
 
 # Load new settings before rebuilding the index
-killall mds || true
+# killall mds || true
 # Make sure indexing is enabled for the main volume
-sudo mdutil -i on /
+# sudo mdutil -i on /
 # Rebuild the index from scratch
-sudo mdutil -E /
+# sudo mdutil -E /
 
 echo "Setting terminal to only use utf-8..."
 defaults write com.apple.terminal StringEncodings -array 4
@@ -583,7 +601,7 @@ defaults write "Apple Global Domain" InitialKeyRepeat -int 15
 echo "Disabling auto-correct..."
 defaults write NSGlobalDomain NSAutomaticSpellingCorrectionEnabled -bool false
 
-echo "Disabling targeted advertising..."
+echo "Disabling Apple's targeted advertising..."
 defaults write "com.apple.AdLib" allowApplePersonalizedAdvertising -bool FALSE
 defaults write "com.apple.AdLib" allowIdentifierForAdvertising -bool FALSE
 
@@ -652,10 +670,14 @@ fi
 defaults write com.apple.finder QLEnableTextSelection -bool TRUE
 echo "Done installing quicklook plugins."
 
+# TODO other shell integration
 echo "Installing iTerm2..."
 brew-get --cask iterm2
 curl -L --no-progress-bar https://iterm2.com/shell_integration/fish \
     -o ~/.config/fish/conf.d/90_iterm2_shell_integration.fish
+add-update iterm2 \
+    'curl -L --no-progress-bar https://iterm2.com/shell_integration/fish \
+    -o ~/.config/fish/conf.d/90_iterm2_shell_integration.fish'
 
 brew tap homebrew/cask-fonts
 brew-get --cask font-roboto
@@ -733,6 +755,7 @@ brew-get \
     tz
 
 /opt/homebrew/opt/fzf/install --all
+add-update fzf '/opt/homebrew/opt/fzf/install --all'
 
 echo "Installing texlive..."
 brew-get texlive
@@ -761,6 +784,7 @@ append ~/.config/fish/conf.d/10_editor.fish 'set -x EDITOR vim'
 echo "Installing fisher..."
 fish -c 'curl -sL https://git.io/fisher | source && \
     fisher install jorgebucaran/fisher'
+add-update fisher 'fish -c "fisher update"'
 
 echo "Configuring starship..."
 brew-get starship
@@ -801,6 +825,16 @@ pyenv install --skip-existing \
     "$(pyenv install --list | sed 's/ //g' | ggrep -P '^[\d\.]+$' | tail -n 1)"
 pyenv global "$(pyenv latest 3)"
 
+# https://stackoverflow.com/questions/4664229/here-document-as-an-argument-to-bash-function
+# This is really cool; it lets us not have to escape anything.
+add-update pyenv "$(
+    cat << "EOF"
+pyenv install --skip-existing \
+    "$(pyenv install --list | sed 's/ //g' | ggrep -P '^[\d\.]+$' | tail -n 1)"
+pyenv global "$(pyenv latest 3)"
+EOF
+)"
+
 #TODO should I use asdf, or fnm?
 # https://github.com/Schniz/fnm ooh its rust
 echo "Installing node via nvm..."
@@ -819,8 +853,8 @@ fish -c 'fisher install jorgebucaran/nvm.fish'
 
 set +u
 source /opt/homebrew/opt/nvm/nvm.sh
-nvm install node
-nvm use node
+nvm install latest
+nvm use latest
 npm install -g npm@latest
 set -u
 
@@ -1062,6 +1096,16 @@ brew-get bitwarden-cli
 echo "Installing lunar..."
 brew-get --cask lunar
 # TODO configure lunar
+# TODO night and day configs
+# TODO test
+defaults write fyi.lunar.Lunar SUAutomaticallyUpdate -bool false
+defaults write fyi.lunar.Lunar SUHasLaunchedBefore -bool true
+defaults write fyi.lunar.Lunar adaptiveBrightnessMode -string '"Manual"'
+defaults write fyi.lunar.Lunar completedOnboarding -bool true
+defaults write fyi.lunar.Lunar launchCount -int 42424242 # just to mess with analytics
+defaults write com.lunar.Lunar lunarProActive -bool false
+defaults write com.lunar.Lunar lunarProOnTrial -bool false
+defaults write com.lunar.Lunar lunarProAccessDialogShown -bool true
 
 echo "Installing Signal..."
 brew-get --cask signal
@@ -1169,12 +1213,12 @@ if ! gpg --list-secret-keys | grep -q github; then
     GPG_PASS="$(bw get notes "$GPG_PASS_ID")"
 
     KEYID="$(
-             gpg \
-            --with-colons --batch --status-fd=1 \
-            --passphrase "$GPG_PASS" \
-            --quick-generate-key \
-                "Riley Martine (github) <riley.martine@protonmail.com>" \
-                default cert 1y |
+           gpg \
+              --with-colons --batch --status-fd=1 \
+              --passphrase "$GPG_PASS" \
+              --quick-generate-key \
+                  "Riley Martine (github) <riley.martine@protonmail.com>" \
+                  default cert 1y |
             sed -E -n 's/\[GNUPG:\] KEY_CREATED P (.*)/\1/p'
     )"
     gpg --batch --passphrase "$GPG_PASS" --pinentry-mode loopback \
@@ -1222,7 +1266,6 @@ if [ ! -f ~/.ssh/id_github ]; then
     login_bitwarden
     login_github
 
-    # TODO test jq indented
     SSH_PASS_ID="$(bw get template item |
         jq ".type = 2 | \
             .secureNote.type = 0 | \
@@ -1285,8 +1328,11 @@ if [ ! -d ~/dev/dotfiles ]; then
     git clone https://github.com/riley-martine/dotfiles ~/dev/dotfiles
 fi
 cd ~/dev/dotfiles
-# TODO fix no lcoal uncom
-git pull # Assumes no local uncommitted mods...
+
+git fetch --all
+if [ "$(git rev-parse @)" != "$(git rev-parse '@{u}')" ]; then
+    git pull # Not always correct, but good enough. Fails on error st8.
+fi
 
 # Copy dotfile from a repo to local machine.
 # If not exists, copy it in.
@@ -1333,6 +1379,8 @@ curl -fLo --no-progress-bar ~/.vim/autoload/plug.vim --create-dirs \
 brew install cmake
 vim +PlugUpgrade +PlugInstall +PlugUpdate +qall
 
+#TODO review and make sure we got em all
+#better, unify w/ diff.sh
 copy_dotfile "starship/starship.toml" "$HOME/.config/starship.toml"
 
 copy_dotfile "git/.gitconfig" "$HOME/.gitconfig"
@@ -1356,9 +1404,8 @@ copy_dotfile "bin/random-words" "$HOME/bin/random-words"
 
 # https://apple.stackexchange.com/questions/344401/how-to-programatically-set-terminal-theme-profile
 theme=$(< terminal.app/Tokyonight\ Day.xml)
-plutil -replace Window\ Settings.Tokyonight\ Day -xml \
-    "$theme" \
-    ~/Library/Preferences/com.apple.Terminal.plist
+plutil -replace Window\ Settings.Tokyonight\ Day \
+    -xml "$theme" ~/Library/Preferences/com.apple.Terminal.plist
 defaults write com.apple.Terminal \
     "Default Window Settings" -string "Tokyonight Day"
 defaults write com.apple.Terminal \
@@ -1371,9 +1418,9 @@ cd -
 # stackexchange.com##.js-consent-banner
 # stackoverflow.com##.js-consent-banner
 # superuser.com##.js-consent-banner
+# askubuntu.com##.js-consent-banner
 # https://meta.stackoverflow.com/questions/406344/cookie-settings-on-every-page
 
-# TODO terminal.app settings
 # TODO switch known tn themes to real repo
 # TODO iTerm2 settings
 # TODO lunar prefs disable pro check
@@ -1381,7 +1428,6 @@ cd -
 # TODO install non-brew list (gem, npm, go, etc)
 # TODO remove safari favorites
 # TODO sudo delay increase
-# TODO terminal disable visualbell
 # TODO casks don't launch if already configured
 # TODO auto-update disable in syntax-highlight
 # TODO change control keys
@@ -1411,6 +1457,10 @@ cd -
 # TODO gum
 # TODO uhh nextcloud plubming calendar notes sync etc
 # # TODO system prefs close windows when quitting an app
+# TODO update.d
+# TODO tn vim theme
+# TODO vlc english default subs
+# TODO prefixed vs not coreutils
 
 echo "The following must be done manually:"
 echo '  - Finder -> Preferences -> Sidebar
