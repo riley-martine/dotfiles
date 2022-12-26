@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Updates the system. Runs every executable file in:
+update_dir="$HOME/.local/share/update.d"
+# This is non-standard; the user is responsible for populating the directory.
+
+if [ ! -d "$update_dir" ]; then
+    echo "$update_dir does not exist. Not running any updates."
+fi
+
+find "$update_dir" -maxdepth 1 -type f -exec {} \;
