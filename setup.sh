@@ -1,20 +1,37 @@
 #!/bin/bash
 # not usr/bin/env so that this stays compatible
 
+# MacOS Setup Script
+# Copyright © 2023 Riley Martine
+
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 # Script to set up a new MacOS computer for development.
 
-# DO NOT RUN THIS without reading through it, and tweaking to your liking.
+# DO NOT RUN THIS without reading through it and tweaking to your liking.
 
 # GOALS:
 #  - Sets up a decent development workstation.
 #  - Works on a fresh MacOS Ventura install, with nothing set up
-#  - As much as possible, do things without user intervention.
-#    - I am not going to write automator scripts to click on things, PROBABLY.
+#  - As much as possible, does things without user intervention.
+#    - I am not going to write too many applescripts to click on things, PROBABLY.
 #  - When things need user intervention, do them as late as possible.
 #  - Idempotent.
 #    - Running twice is safe.
 #    - Running, then uninstalling half of the things, then running again, is safe.
-#    - Running, then deleting your dotfiles, then running again, restores the dotfiles.
+#    - Running, then deleting your dotfiles, then running again restores the dotfiles.
 #    - Running twice does not change your dotfiles more than running once.
 #  - For now, compatible with external dotfiles. That means everything goes in a '.d' directory
 #    so that I can pull other dotfiles without overwriting, and don't clutter my own with
@@ -37,7 +54,7 @@
 #  - Modular; while linear, dependency relations are not encoded as a proper DAG.
 #    Delete sections at your own risk.
 
-# You may have to run this script several times, e.g. to work through all the updates.
+# You may have to run this script several times to work through all the updates.
 
 # For developing, a pretty good method of figuring out preferences is:
 # 1) Find the "domain" you're operating in (com.apple.Dock)
@@ -146,6 +163,7 @@ append() {
     echo
 }
 
+# TODO maybe add this as a script in bin
 # TODO should it be /usr/local/bin?
 # Writes an update script to $HOME/.local/share/update.d
 # The directory should contain executable files that each are responsible for
@@ -703,6 +721,8 @@ brew-get \
     diffutils \
     readline
 
+echo "will cite" | parallel --citation
+
 echo "Installing various utilities..."
 brew-get \
     git \
@@ -743,6 +763,7 @@ brew-get \
 echo "Installing next-gen CLI utilities..."
 brew-get \
     git-delta \
+    git-absorb \
     exa \
     bat \
     duf \
@@ -837,8 +858,8 @@ EOF
 
 #TODO should I use asdf, or fnm?
 # https://github.com/Schniz/fnm ooh its rust
-echo "Installing node via nvm..."
-brew-get nvm
+echo "Installing node and nvm..."
+brew-get nvm node
 mkdir -p ~/.nvm
 
 append ~/.zshrc 'export NVM_DIR="$HOME/.nvm"'
@@ -851,12 +872,13 @@ append ~/.bashrc '[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \.
 
 fish -c 'fisher install jorgebucaran/nvm.fish'
 
+# So despite installing nvm, we're going to use homebrew node for everything global.
 set +u
 source /opt/homebrew/opt/nvm/nvm.sh
-nvm install latest
-nvm use latest
-npm install -g npm@latest
+nvm use system
 set -u
+
+add-update npm 'npm update -g'
 
 echo "Installing go..."
 brew-get go
@@ -871,6 +893,10 @@ mkdir -p "$HOME/go/bin"
 fish -c 'set -Ux GOPATH $HOME/go'
 fish -c 'set -U fish_user_paths $(go env GOPATH)/bin $fish_user_paths'
 
+echo 'Installing gup (go global update)'
+go install github.com/nao1215/gup@latest
+add-update go "gup update"
+
 echo "Installing rust..."
 brew-get rustup
 rustup-init -y
@@ -879,6 +905,8 @@ source "$HOME/.cargo/env"
 append ~/.bashrc 'export PATH=$PATH:~/.cargo/bin'
 append ~/.zshrc 'export PATH=$PATH:~/.cargo/bin'
 fish -c 'set -U fish_user_paths ~/.cargo/bin $fish_user_paths'
+
+add-update rust "cargo install-update -a"
 
 echo "Installing ruby..."
 brew-get rbenv ruby-build
@@ -890,6 +918,7 @@ append ~/.zshrc 'eval "$(rbenv init - zsh)"'
 append ~/.config/fish/conf.d/52_rbenv.fish \
     "status --is-interactive; and rbenv init - fish | source"
 
+# we're not using homebrew ruby because of package shennanigans
 rbenv install "$(rbenv install -l | grep -v - | tail -1)" --skip-existing
 if [ "$(rbenv global)" = system ]; then
     rbenv global "$(rbenv versions | tail -n1 | sed 's/ //g')"
@@ -897,6 +926,13 @@ fi
 
 # Disables doc generation, speeding up gem installs
 append ~/.gemrc 'gem: --no-ri --no-rdoc'
+
+latest="$(rbenv install -l | grep -v - | tail -1)"
+if [ ! "$(rbenv global)" = "$latest" ]; then
+    echo "updateme"
+fi
+
+add-update ruby 'gem update --system && gem update'
 
 echo 'Installing Java \(Temurin 8, 11, 17\) with jenv...'
 brew tap homebrew/cask-versions
@@ -954,10 +990,10 @@ echo "Installing linters and fixers..."
 # bash
 brew-get \
     shellcheck \
-    shfmt
+    shfmt \
+    bash-language-server
 
 pip install bashate
-npm i -g bash-language-server
 
 # cloudformation
 brew-get cfn-lint
@@ -1037,6 +1073,10 @@ rustup component add rust-src
 rustup component add rust-analyzer
 ln -sf "$(rustup which --toolchain stable rust-analyzer)" ~/.cargo/bin/
 
+# typescript
+npm install -g typescript \
+    ts-node
+
 # TODO text valerc
 brew-get \
     vale \
@@ -1107,6 +1147,10 @@ defaults write com.lunar.Lunar lunarProActive -bool false
 defaults write com.lunar.Lunar lunarProOnTrial -bool false
 defaults write com.lunar.Lunar lunarProAccessDialogShown -bool true
 
+echo "Installing keepingyouawake..."
+brew-get --cask keepingyouawake
+# TODO settigns
+
 echo "Installing Signal..."
 brew-get --cask signal
 
@@ -1134,6 +1178,7 @@ echo "Follow prompts in app, then press enter to continue."
 read -r
 echo "Done installing rectangle."
 
+# TODO add bitwarden
 # https://github.com/kcrawford/dockutil/issues/127
 # https://github.com/pivotal/workstation-setup/blob/main/scripts/common/configuration-osx.sh
 echo "Cleaning up Dock..."
@@ -1317,6 +1362,10 @@ if ! grep -q fish < "$(perl -e '@pw = getpwuid $< ; print $pw[8], "\n"')"; then
     chsh -s "$(which fish)"
 fi
 
+echo "Setting PATH to include ~/bin..."
+fish -c 'set -U fish_user_paths $HOME/bin $fish_user_paths'
+# TODO bash and zsh
+
 echo "Installing fonts..."
 brew tap homebrew/cask-fonts
 # TODO replace w/ the one I want
@@ -1461,6 +1510,8 @@ cd -
 # TODO tn vim theme
 # TODO vlc english default subs
 # TODO prefixed vs not coreutils
+# TODO should I have like, brewfiles?
+# TODO look into nix
 
 echo "The following must be done manually:"
 echo '  - Finder -> Preferences -> Sidebar
