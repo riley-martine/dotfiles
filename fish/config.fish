@@ -193,7 +193,6 @@ source ~/.config/fish/themes/tokyonight_day.fish
 set -x BAT_THEME 'tokyonight_day'
 
 # Final sourcing
-starship init fish | source
 
 if type -q jenv
     status --is-interactive; and jenv init - | source
