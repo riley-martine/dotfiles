@@ -38,7 +38,7 @@ Plug 'vim-airline/vim-airline'
 " Behavior
 Plug 'tmhedberg/SimpylFold'
 Plug 'SirVer/ultisnips' | Plug 'honza/vim-snippets'
-Plug 'Valloric/YouCompleteMe', { 'do': './install.py' }
+Plug 'Valloric/YouCompleteMe', { 'do': './install.py --all' }
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
@@ -51,10 +51,11 @@ Plug 'tpope/vim-commentary'
 " Make sure you have auxilary linters/fixers installed for ale
 " https://github.com/dense-analysis/ale/blob/master/supported-tools.md
 Plug 'dense-analysis/ale'
+Plug 'ciaranm/securemodelines'
 
 " Language
 Plug 'vim-test/vim-test'
-Plug 'fatih/vim-go', { 'for': 'go' }
+Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoUpdateBinaries' }
 " \/ Also does sleuth (indent detection) for some reason...
 Plug 'sheerun/vim-polyglot'
 "Plug 'lervag/vimtex'
@@ -235,6 +236,7 @@ set softtabstop=4
 set tabstop=4
 set expandtab
 set smarttab
+set nojoinspaces " Makes 'j' not have two spaces after a period
 
 "------------------------------------------------------------
 " Mappings {{{1
@@ -378,6 +380,14 @@ function! XTermPasteBegin()
   return ''
 endfunction
 
+augroup ft_ts
+  au!
+
+  autocmd FileType typescript
+    \ let g:ale_disable_lsp = 0
+
+augroup END
+
 augroup ft_fish
   au!
 
@@ -420,7 +430,7 @@ augroup END
 
 augroup ft_web
   au!
-  au BufNewFile,BufRead *.js, *.html, *.css
+  au BufNewFile, BufRead *.js, *.html, *.css
       \ set tabstop=2
       \ set softtabstop=2
       \ set shiftwidth=2
@@ -580,7 +590,8 @@ let g:ale_linters = {
 \   'java': ['javac', 'pmd'],
 \   'python': ['bandit', 'mypy', 'pylint', 'vulture', 'pylsp'],
 \   'markdown': ['alex', 'vale', 'languagetool', 'markdownlint'],
-\   'lua': ['luac'],
+\   'lua': ['luac', 'selene'],
+\   'typescript': ['tsserver', 'eslint'],
 \}
 " TODO readd flake8
 " Prefer markdownlint to mdl as it's more up to date
@@ -593,13 +604,14 @@ let g:ale_linters = {
 
 
 let g:ale_fixers = {
-\   'sh': ['remove_trailing_lines', 'trim_whitespace'],
+\   'sh': ['shfmt', 'remove_trailing_lines', 'trim_whitespace'],
 \   'tex': ['remove_trailing_lines', 'trim_whitespace', 'latexindent'],
 \   'text': ['remove_trailing_lines', 'trim_whitespace'],
 \   'markdown': ['trim_whitespace', 'remove_trailing_lines'],
 \   'css': ['prettier', 'remove_trailing_lines', 'trim_whitespace'],
 \   'html': ['remove_trailing_lines', 'trim_whitespace'],
 \   'javascript': ['remove_trailing_lines', 'trim_whitespace', 'prettier', 'eslint'],
+\   'typescript': ['remove_trailing_lines', 'trim_whitespace', 'prettier'],
 \   'python': ['isort', 'black', 'autoflake'],
 \   'puppet': ['puppetlint'],
 \   'lua': ['stylua', 'remove_trailing_lines', 'trim_whitespace'],
