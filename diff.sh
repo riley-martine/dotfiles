@@ -26,6 +26,8 @@ dotfiles=(
 
      ["$HOME/bin/random-words"]="bin/random-words"
      ["$HOME/bin/update-system"]="bin/update-system"
+
+     ["$HOME/.local/share/update.d/lulu.sh"]="bin/update.d/lulu.sh"
 )
 
 for i in "${!dotfiles[@]}"; do

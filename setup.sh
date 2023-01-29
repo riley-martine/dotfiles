@@ -1451,6 +1451,8 @@ fish -c 'fisher update'
 
 copy_dotfile "bin/random-words" "$HOME/bin/random-words"
 
+copy_dotfile "bin/update.d/lulu.sh" "$HOME/.local/share/update.d/lulu.sh"
+
 # https://apple.stackexchange.com/questions/344401/how-to-programatically-set-terminal-theme-profile
 theme=$(< terminal.app/Tokyonight\ Day.xml)
 plutil -replace Window\ Settings.Tokyonight\ Day \
@@ -1512,6 +1514,7 @@ cd -
 # TODO prefixed vs not coreutils
 # TODO should I have like, brewfiles?
 # TODO look into nix
+# TODO eval LuLu https://objective-see.org/products/lulu.html
 
 echo "The following must be done manually:"
 echo '  - Finder -> Preferences -> Sidebar
