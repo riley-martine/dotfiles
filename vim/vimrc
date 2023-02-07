@@ -27,6 +27,13 @@ endif
 
 let g:polyglot_disabled = ['sensible', 'markdown']
 
+" Auto-install vim-plug
+let data_dir = has('nvim') ? stdpath('data') . '/site' : '~/.vim'
+if empty(glob(data_dir . '/autoload/plug.vim'))
+  silent execute '!curl -fLo '.data_dir.'/autoload/plug.vim --create-dirs  https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
 call plug#begin()
 
 " Tmux integration
@@ -587,6 +594,7 @@ let g:go_info_mode='gopls'
 " checkstyle present.
 " Note: if not finishing, bump g:go_metalinter_deadline
 let g:go_metalinter_autosave = 1
+let g:ale_rust_cargo_use_clippy = 1
 let g:ale_linters = {
 \   'go': [],
 \   'java': ['javac', 'pmd'],
@@ -594,6 +602,7 @@ let g:ale_linters = {
 \   'markdown': ['alex', 'vale', 'markdownlint'],
 \   'lua': ['luac', 'selene'],
 \   'typescript': ['tsserver', 'eslint'],
+\   'rust': ['cargo', 'analyzer'],
 \}
 " TODO readd flake8
 " Prefer markdownlint to mdl as it's more up to date
@@ -620,6 +629,7 @@ let g:ale_fixers = {
 \   'puppet': ['puppetlint'],
 \   'lua': ['stylua', 'remove_trailing_lines', 'trim_whitespace'],
 \   'perl': ['perltidy'],
+\   'rust': ['remove_trailing_lines', 'trim_whitespace'],
 \   '*': ['remove_trailing_lines', 'trim_whitespace'],
 \}
 " let g:ale_java_checkstyle_options = '-p=$HOME/.checkstyle.xml'
