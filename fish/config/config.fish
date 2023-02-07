@@ -9,6 +9,9 @@ and not set -q TMUX
     tmux
 end
 
+# no indent to make this easier
+# only do any of this on login to make faster
+if status --is-login
 # Language Default
 set -x LC_ALL en_US.UTF-8
 set -x LC_CTYPE en_US.UTF-8
@@ -205,3 +208,4 @@ alias hm 'history merge'
 set fish_greeting
 source ~/.config/fish/themes/tokyonight_day.fish
 set -x BAT_THEME 'tokyonight_day'
+end
