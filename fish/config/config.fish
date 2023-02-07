@@ -31,7 +31,7 @@ set -x PAGER 'less -F'
 set -x MANPAGER 'less +Gg' # Goes to end and then start of file; this gives a percentage complete.
 
 set -x FZF_DEFAULT_COMMAND "fd --type f --hidden -E '.git/'"
-set -x FZF_DEFAULT_OPTS "--bind='ctrl-o:execute(vim {})+abort'"
+set -x FZF_DEFAULT_OPTS "--bind=ctrl-c:abort,'ctrl-o:execute(vim {})+abort'"
 set -x GPG_TTY (tty)
 
 set -x pact_do_not_track "true"
@@ -107,6 +107,7 @@ if type -q bat
 end
 
 alias rg 'rg --ignore-case'
+alias frg 'rg --fixed-strings' # fgrep
 function rge -d "Ripgrep but exclude"
     rg '^((?!'$argv[1]').)*$' --pcre2
 end
@@ -175,11 +176,24 @@ alias refish 'source ~/.config/fish/config.fish'
 
 alias lsa 'ls -lah'
 
-alias p="vim (fzf --preview 'bat --color \"always\" {}')"
-alias pa="vim (fzf --hidden --preview 'bat --color \"always\" {}')"
-alias f='vim (fzf)'
+# Function instead of alias, so we can exit on ctrl-c
+function p
+    set file (fzf --preview 'bat --color "always" {}' --bind='ctrl-o:accept')
+    if string length -q $file
+        vim $file
+    end
+end
+
+function pa
+    set file (fzf --hidden--preview 'bat --color "always" {}' --bind='ctrl-o:accept')
+    if string length -q $file
+        vim $file
+    end
+end
+
 bind \cp 'p'
 bind \cx edit_command_buffer
+bind \cz 'fg 2>/dev/null; commandline -f repaint'
 
 alias rm 'rm -i'
 alias cp 'cp -i'
@@ -191,13 +205,3 @@ alias hm 'history merge'
 set fish_greeting
 source ~/.config/fish/themes/tokyonight_day.fish
 set -x BAT_THEME 'tokyonight_day'
-
-# Final sourcing
-
-if type -q jenv
-    status --is-interactive; and jenv init - | source
-end
-
-if type -q shellclear
-    shellclear --init-shell | source
-end
