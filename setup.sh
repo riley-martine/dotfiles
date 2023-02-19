@@ -899,6 +899,14 @@ brew list |
 EOF
 )"
 
+echo "Installing python packages..."
+brew-get pkg-config poppler python
+mkdir -p ~/.config/python
+# This is where I'm keeping my binaries to bring with on new python versions
+append ~/.config/python/requirements.txt "pdftotext"
+pip install -r  ~/.config/python/requirements.txt
+add-update pyenv 'pip install -r ~/.config/python/requirements.txt'
+
 #TODO should I use asdf, or fnm?
 # https://github.com/Schniz/fnm ooh its rust
 echo "Installing node and nvm..."
@@ -1027,6 +1035,7 @@ if [ ! -f "$PERLBREW_ROOT/bin/cpanm" ]; then
     perlbrew install-cpanm
 fi
 
+cpanm Perl::Critic
 cpanm CPAN::DistnameInfo
 cpanm Text::Levenshtein
 cpanm Log::Log4perl
@@ -1111,17 +1120,18 @@ brew tap bufbuild/buf
 brew-get bufbuild/buf/buf
 
 # python
-pip install \
-    black \
-    isort \
-    autoflake \
-    bandit[toml] \
-    vulture \
-    mypy \
-    pylint \
-    mccabe \
-    pylsp-rope \
-    python-lsp-server[rope]
+# This way these come with us to new python versions
+append ~/.config/python/requirements.txt 'black'
+append ~/.config/python/requirements.txt 'isort'
+append ~/.config/python/requirements.txt 'autoflake'
+append ~/.config/python/requirements.txt 'bandit[toml]'
+append ~/.config/python/requirements.txt 'vulture'
+append ~/.config/python/requirements.txt 'mypy'
+append ~/.config/python/requirements.txt 'pylint'
+append ~/.config/python/requirements.txt 'mccabe'
+append ~/.config/python/requirements.txt 'pylsp-rope'
+append ~/.config/python/requirements.txt 'python-lsp-server[rope]'
+pip install -r  ~/.config/python/requirements.txt
 
 # puppet
 gem install puppet-lint
@@ -1431,6 +1441,11 @@ brew tap homebrew/cask-fonts
 # TODO replace w/ the one I want
 brew-get --cask font-meslo-lg-nerd-font
 
+echo "Installing sundial..."
+brew tap riley-martine/sundial https://github.com/riley-martine/sundial
+brew-get riley-martine/sundial/sundial
+sundial --city Denver
+
 echo "Configuring dotfiles..."
 mkdir -p ~/dev
 if [ ! -d ~/dev/dotfiles ]; then
@@ -1481,7 +1496,7 @@ add-update tpm '~/.tmux/plugins/tpm/bin/update_plugins all'
 
 echo "Installing vim conf..."
 copy_dotfile "vim/vimrc" "$HOME/.vim/vimrc"
-curl -fLo --no-progress-bar ~/.vim/autoload/plug.vim --create-dirs \
+curl --no-progress-bar -fLo  ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 # YCM reqs
 # Unsure if e.g. nvm node yields a completer. See:
@@ -1571,13 +1586,11 @@ cd -
 # TODO gum
 # TODO uhh nextcloud plubming calendar notes sync etc
 # # TODO system prefs close windows when quitting an app
-# TODO update.d
 # TODO tn vim theme
 # TODO vlc english default subs
 # TODO prefixed vs not coreutils
 # TODO should I have like, brewfiles?
 # TODO look into nix
-# TODO eval LuLu https://objective-see.org/products/lulu.html
 # TODO add little snitch downloading and registering and preferencing
 # TODO work and personal profile
 # TODO pre-commit
