@@ -17,7 +17,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
 # Script to set up a new MacOS computer for development.
 
 # DO NOT RUN THIS without reading through it and tweaking to your liking.
@@ -723,6 +722,8 @@ brew-get \
 
 echo "will cite" | parallel --citation
 
+add-update gpg 'gpg --refresh-keys'
+
 echo "Installing various utilities..."
 brew-get \
     git \
@@ -774,6 +775,8 @@ brew-get \
     ripgrep-all \
     hyperfine \
     tz
+
+add-update tldr 'tldr --update'
 
 /opt/homebrew/opt/fzf/install --all
 add-update fzf '/opt/homebrew/opt/fzf/install --all'
@@ -846,6 +849,10 @@ pyenv install --skip-existing \
     "$(pyenv install --list | sed 's/ //g' | ggrep -P '^[\d\.]+$' | tail -n 1)"
 pyenv global "$(pyenv latest 3)"
 
+# Update pyenv
+add-update pyenv 'pyenv update'
+
+# Update to latest python from pyenv
 # https://stackoverflow.com/questions/4664229/here-document-as-an-argument-to-bash-function
 # This is really cool; it lets us not have to escape anything.
 add-update pyenv "$(
@@ -853,6 +860,42 @@ add-update pyenv "$(
 pyenv install --skip-existing \
     "$(pyenv install --list | sed 's/ //g' | ggrep -P '^[\d\.]+$' | tail -n 1)"
 pyenv global "$(pyenv latest 3)"
+EOF
+)"
+
+# Update installed fellas from each pyenv
+add-update pyenv "$(
+    cat << "EOF"
+pyenv versions --bare |
+    gxargs -d $'\n' bash -c $'eval "$(pyenv init -)";
+    for arg do
+        pyenv shell $arg
+        python --version
+        python -m pip install --upgrade pip
+        pip list --format=freeze |
+            grep -v \'^\\-e\' |
+            cut -d = -f 1 |
+            xargs -n1 pip install -U
+    done' _
+EOF
+)"
+
+# We also have to add updates for brew python packages
+# TODO figure out expected fails like libtorrent
+add-update brew-python "$(
+    cat << "EOF"
+# Update pip itself
+brew list |
+    sed -rn 's/python@(.+)/\1/p' |
+    xargs -I{} bash -c '/opt/homebrew/bin/"python{}" -m pip install --upgrade pip'
+
+# Update packages installed by pip
+brew list |
+    sed -rn 's/python@(.+)/\1/p' |
+    xargs -I{} bash -c '/opt/homebrew/bin/"pip{}" list --format=freeze |
+        grep -v '^\-e' |
+        cut -d = -f 1 |
+        xargs -n1 pip{} install -U'
 EOF
 )"
 
@@ -906,7 +949,10 @@ append ~/.bashrc 'export PATH=$PATH:~/.cargo/bin'
 append ~/.zshrc 'export PATH=$PATH:~/.cargo/bin'
 fish -c 'set -U fish_user_paths ~/.cargo/bin $fish_user_paths'
 
+cargo install cargo-update
+
 add-update rust "cargo install-update -a"
+add-update rust "rustup update"
 
 echo "Installing ruby..."
 brew-get rbenv ruby-build
@@ -981,10 +1027,18 @@ if [ ! -f "$PERLBREW_ROOT/bin/cpanm" ]; then
     perlbrew install-cpanm
 fi
 
-cpan -i CPAN::DistnameInfo
-cpan -i Text::Levenshtein
-cpan -i Log::Log4perl
-cpan -i Term::ReadLine::Perl
+cpanm CPAN::DistnameInfo
+cpanm Text::Levenshtein
+cpanm Log::Log4perl
+cpanm Term::ReadLine::Perl
+cpanm App::cpanoutdated
+
+# add-update perl 'yes | perl -MCPAN -e "upgrade /(.\*)/"'
+add-update perl 'cpanm --self-upgrade'
+add-update perl 'cpan-outdated -p | cpanm'
+
+echo "Installing lua via brew..."
+brew-get lua luarocks
 
 echo "Installing linters and fixers..."
 # bash
@@ -1041,6 +1095,10 @@ brew-get texlab
 
 #lua
 brew-get stylua
+luarocks install luacheck
+luarocks install lanes
+add-update luarocks 'luarocks install luacheck'
+add-update luarocks 'luarocks install lanes'
 
 #md
 brew-get markdownlint-cli
@@ -1082,6 +1140,8 @@ brew-get \
     vale \
     languagetool \
     redpen
+
+add-update vale 'vale sync'
 
 npm install alex --global
 
@@ -1417,6 +1477,7 @@ if [ ! -d ~/.tmux/plugins/tpm ]; then
 fi
 ~/.tmux/plugins/tpm/bin/install_plugins
 ~/.tmux/plugins/tpm/bin/update_plugins all
+add-update tpm '~/.tmux/plugins/tpm/bin/update_plugins all'
 
 echo "Installing vim conf..."
 copy_dotfile "vim/vimrc" "$HOME/.vim/vimrc"
@@ -1427,6 +1488,7 @@ curl -fLo --no-progress-bar ~/.vim/autoload/plug.vim --create-dirs \
 # https://github.com/ycm-core/YouCompleteMe#installation
 brew install cmake
 vim +PlugUpgrade +PlugInstall +PlugUpdate +qall
+add-update vim 'vim +PlugUpgrade +PlugInstall +PlugUpdate +qall'
 
 #TODO review and make sure we got em all
 #better, unify w/ diff.sh
@@ -1448,6 +1510,7 @@ copy_dotfile "fish/config.fish" "$HOME/.config/fish/config.fish"
 copy_dotfile "fish/themes/tokyonight_day.fish" \
     "$HOME/.config/fish/themes/tokyonight_day.fish"
 fish -c 'fisher update'
+add-update fisher 'fish -c "fisher update"'
 
 copy_dotfile "bin/random-words" "$HOME/bin/random-words"
 
@@ -1515,6 +1578,9 @@ cd -
 # TODO should I have like, brewfiles?
 # TODO look into nix
 # TODO eval LuLu https://objective-see.org/products/lulu.html
+# TODO add little snitch downloading and registering and preferencing
+# TODO work and personal profile
+# TODO pre-commit
 
 echo "The following must be done manually:"
 echo '  - Finder -> Preferences -> Sidebar
