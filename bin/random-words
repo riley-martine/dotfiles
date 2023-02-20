@@ -5,7 +5,12 @@ WORDFILE="$HOME/.wordlist"
 NUMWORDS=${1:-2} # The arg should be the number of words needed
 
 if [ ! -e "$WORDFILE" ]; then
-	aspell dump master | tr -d '[:punct:]' | sort | uniq >"$WORDFILE"
+    aspell dump master | tr -d '[:punct:]' | sort | uniq > "$WORDFILE"
 fi
 
-shuf -n "$NUMWORDS" "$WORDFILE" | sed ':a;N;$!ba;s/\n/-/g'
+SED="sed"
+if type gsed > /dev/null 2>&1; then
+    SED="gsed"
+fi
+
+shuf -n "$NUMWORDS" "$WORDFILE" | "$SED" ':a;N;$!ba;s/\n/-/g'
