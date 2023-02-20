@@ -1,37 +1,106 @@
 #!/usr/bin/env bash
-set -uo pipefail
+set -euo pipefail
 
 declare -A dotfiles
 dotfiles=(
-     ["$HOME/.tmux.conf"]="tmux/.tmux.conf"
-     ["$HOME/.config/tmux/tokyonight_day.tmux"]="tmux/tokyonight_day.tmux"
+    ["$HOME/.tmux.conf"]="tmux/.tmux.conf"
+    ["$HOME/.config/tmux/"]="tmux/config"
 
-     ["$HOME/.vim/vimrc"]="vim/vimrc"
+    ["$HOME/.vim/vimrc"]="vim/vimrc"
+    ["$HOME/.vim/syntax/"]="vim/syntax"
 
-     ["$HOME/.config/starship.toml"]="starship/starship.toml"
+    ["$HOME/.config/starship.toml"]="starship/starship.toml"
 
-     ["$HOME/.gitconfig"]="git/.gitconfig"
-     ["$HOME/.config/git/identity.gitconfig"]="git/identity.gitconfig"
-     ["$HOME/.config/git/tokyonight_day.gitconfig"]="git/tokyonight_day.gitconfig"
-     ["$HOME/.config/git/gitmessage"]="git/gitmessage"
-     ["$HOME/.config/git/gitignore"]="git/gitignore"
+    ["$HOME/.gitconfig"]="git/.gitconfig"
+    ["$HOME/.config/git/"]="git/config"
 
-     ["$HOME/.config/bat/themes/tokyonight_day.tmTheme"]="bat/tokyonight_day.tmTheme"
+    ["$HOME/.config/bat/"]="bat/config/"
 
-     ["$HOME/.config/fish/fish_plugins"]="fish/fish_plugins"
-     ["$HOME/.config/fish/config.fish"]="fish/config.fish"
-     ["$HOME/.config/fish/themes/tokyonight_day.fish"]="fish/themes/tokyonight_day.fish"
+    ["$HOME/.config/fish/fish_plugins"]="fish/config/fish_plugins"
+    ["$HOME/.config/fish/config.fish"]="fish/config/config.fish"
+    ["$HOME/.config/fish/themes/"]="fish/config/themes"
 
-     ["$HOME/Documents/Tokyonight\ Day.terminal"]="terminal.app/Tokyonight\ Day.terminal"
+    ["$HOME/Documents/Tokyonight Day.terminal"]="terminal.app/Tokyonight Day.terminal"
 
-     ["$HOME/bin/random-words"]="bin/random-words"
-     ["$HOME/bin/update-system"]="bin/update-system"
+    ["$HOME/bin/"]="bin"
 
-     ["$HOME/.local/share/update.d/lulu.sh"]="bin/update.d/lulu.sh"
+    ["$HOME/.local/share/update.d/"]="update.d"
 )
 
-for i in "${!dotfiles[@]}"; do
-    PAGER='cat' delta "$i" "${dotfiles[$i]}"
+# Compare two files to see if they match
+function compare_file {
+    local LOCAL="$1"
+    local GIT="$2"
+
+    if ! [ -f "$LOCAL" ]; then
+        echo "Local dotfile does not exist: $LOCAL" >&2
+        return 1
+    fi
+
+    if ! [ -f "$GIT" ]; then
+        echo "$GIT does not exist. Run:" >&2
+        echo " cp $LOCAL $GIT"
+        return 0
+    fi
+
+    if PAGER='cat' delta "$LOCAL" "$GIT"; then
+        # echo "EQUAL: $LOCAL $GIT"
+        return 0
+    fi
+
+    echo "vim $LOCAL $GIT +vsplit  -c ':1' -c ':wincmd l' -c ':bnext' -c ':1'"
+}
+
+# Recurse
+function compare_maybe_dir {
+    local LOCAL GIT
+    LOCAL="$(echo "$1" | tr -s /)"
+    GIT="$(echo "$2" | tr -s /)"
+
+    if ! [ -e "$LOCAL" ]; then
+        echo "Expected dotfile does not exist: $LOCAL" >&2
+        return
+    fi
+
+    if [ -f "$LOCAL" ]; then
+        compare_file "$LOCAL" "$GIT"
+        return
+    fi
+
+    if [ -d "$LOCAL" ]; then
+        for local_maybe_dir in "$LOCAL"/*; do
+            local final
+            final="$(basename "$local_maybe_dir")"
+            compare_maybe_dir "$local_maybe_dir" "${GIT}/${final}"
+        done
+        # TODO remove dupes, add copy cmd
+        for git_maybe_dir in "$GIT"/*; do
+            local final
+            final="$(basename "$git_maybe_dir")"
+            compare_maybe_dir "${LOCAL}/${final}" "$git_maybe_dir"
+        done
+        return
+    fi
+
+    echo "This should never happen" >&2
+    return 1
+}
+
+
+
+for local in "${!dotfiles[@]}"; do
+    compare_maybe_dir "$(echo "$local" | tr -s /)" "${dotfiles[$local]}"
+done
+
+# All my fish configs are in the form 30_pyenv.fish
+# So we can exclude the ones created by fish_plugins
+for config in "$HOME/.config/fish/conf.d"/*; do
+    if basename "$config" | grep -qE '^\d\d' ; then
+        gitconfig=fish/config/conf.d/"$(basename "$config")"
+        compare_file "$config" "$gitconfig"
+    fi
 done
 
 fish installed.fish
+
+# TODO add "--install" flag

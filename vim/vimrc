@@ -17,6 +17,8 @@ endif
 let g:ale_disable_lsp = 1 " has to go before plugins loaded.
 let g:ale_close_preview_on_insert = 1
 let g:ale_fix_on_save = 1
+let g:ale_lint_on_text_changed = 0
+let g:ale_lint_on_enter = 0
 let g:ale_sign_column_always = 1
 
 if &shell =~# 'fish$'
@@ -589,7 +591,7 @@ let g:ale_linters = {
 \   'go': [],
 \   'java': ['javac', 'pmd'],
 \   'python': ['bandit', 'mypy', 'pylint', 'vulture', 'pylsp'],
-\   'markdown': ['alex', 'vale', 'languagetool', 'markdownlint'],
+\   'markdown': ['alex', 'vale', 'markdownlint'],
 \   'lua': ['luac', 'selene'],
 \   'typescript': ['tsserver', 'eslint'],
 \}
@@ -601,10 +603,12 @@ let g:ale_linters = {
 " All text linters provisional basis, will configure and/or remove as time
 "     progresses.
 " At some point, consider textlint, but it seems to require a lot of config.
-
+"
+" See: https://github.com/dense-analysis/ale/issues/3379 and associated PR for
+" languagetool/markdown
 
 let g:ale_fixers = {
-\   'sh': ['shfmt', 'remove_trailing_lines', 'trim_whitespace'],
+\   'sh': ['remove_trailing_lines', 'trim_whitespace'],
 \   'tex': ['remove_trailing_lines', 'trim_whitespace', 'latexindent'],
 \   'text': ['remove_trailing_lines', 'trim_whitespace'],
 \   'markdown': ['trim_whitespace', 'remove_trailing_lines'],
@@ -628,7 +632,17 @@ let g:ale_python_pylint_options = '--disable=C0412'
 let g:ale_python_mypy_options = '--ignore-missing-imports --strict'
 " let g:ale_python_pylsp_config = ''
 let g:ale_sh_shfmt_options = '-i=4 -ci -sr -kp'
+let g:ale_sh_bashate_options = '-i E006'
 let g:ale_lua_luacheck_options = '-i 111 112'
+
+if filereadable('stylua.toml')
+  let g:ale_lua_stylua_options = '-f stylua.toml'
+endif
+
+if filereadable('selene.toml')
+  let g:ale_lua_selene_options = '--config selene.toml'
+endif
+
 nmap <silent> <C-k> <Plug>(ale_previous_wrap)
 nmap <silent> <C-j> <Plug>(ale_next_wrap)
 
