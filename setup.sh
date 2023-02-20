@@ -145,9 +145,9 @@ append() {
     if [ -f "$conf_file" ]; then
         set +e
         if [ $# -lt 3 ]; then
-            lno=$(\grep -nF "$text" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
+            lno=$(\grep -nxF "$text" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
         else
-            lno=$(\grep -nF "$pat" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
+            lno=$(\grep -nE "$pat" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
         fi
         set -e
     fi
@@ -903,14 +903,17 @@ echo "Installing python packages..."
 brew-get pkg-config poppler python
 mkdir -p ~/.config/python
 # This is where I'm keeping my binaries to bring with on new python versions
-append ~/.config/python/requirements.txt "pdftotext"
-pip install -r  ~/.config/python/requirements.txt
-add-update pyenv 'pip install -r ~/.config/python/requirements.txt'
+append ~/.config/python/global-requirements.txt "pdftotext"
+pip install -r  ~/.config/python/global-requirements.txt
+add-update pyenv 'pip install -r ~/.config/python/global-requirements.txt'
 
 #TODO should I use asdf, or fnm?
 # https://github.com/Schniz/fnm ooh its rust
 echo "Installing node and nvm..."
-brew-get nvm node
+# brew-get nvm node
+# TODO make this use latest tag
+# Review if appends are needed
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
 mkdir -p ~/.nvm
 
 append ~/.zshrc 'export NVM_DIR="$HOME/.nvm"'
@@ -1121,17 +1124,17 @@ brew-get bufbuild/buf/buf
 
 # python
 # This way these come with us to new python versions
-append ~/.config/python/requirements.txt 'black'
-append ~/.config/python/requirements.txt 'isort'
-append ~/.config/python/requirements.txt 'autoflake'
-append ~/.config/python/requirements.txt 'bandit[toml]'
-append ~/.config/python/requirements.txt 'vulture'
-append ~/.config/python/requirements.txt 'mypy'
-append ~/.config/python/requirements.txt 'pylint'
-append ~/.config/python/requirements.txt 'mccabe'
-append ~/.config/python/requirements.txt 'pylsp-rope'
-append ~/.config/python/requirements.txt 'python-lsp-server[rope]'
-pip install -r  ~/.config/python/requirements.txt
+append ~/.config/python/global-requirements.txt 'black'
+append ~/.config/python/global-requirements.txt 'isort'
+append ~/.config/python/global-requirements.txt 'autoflake'
+append ~/.config/python/global-requirements.txt 'bandit[toml]'
+append ~/.config/python/global-requirements.txt 'vulture'
+append ~/.config/python/global-requirements.txt 'mypy'
+append ~/.config/python/global-requirements.txt 'pylint'
+append ~/.config/python/global-requirements.txt 'mccabe'
+append ~/.config/python/global-requirements.txt 'pylsp-rope'
+append ~/.config/python/global-requirements.txt 'python-lsp-server[rope]'
+pip install -r  ~/.config/python/global-requirements.txt
 
 # puppet
 gem install puppet-lint
@@ -1565,7 +1568,7 @@ cd -
 # TODO .zshenv vs .zprofile vs .zshrc vs .profile etc
 # TODO Docker config
 # TODO appleID/find my mac?
-# TODO firefox config
+# TODO firefox config (incl UBO config)
 # TODO night shift
 # todo  turn off Location Services for Spotlight Suggestions and Safari Suggestions,
 # TODO disable location services for "analytics"
@@ -1594,6 +1597,10 @@ cd -
 # TODO add little snitch downloading and registering and preferencing
 # TODO work and personal profile
 # TODO pre-commit
+# TODO try pipx
+# TODO try direnv + pyenv
+# TODO version control torrent scripts + plist
+#     AND BREW THEM HOLY HELL SERVICES
 
 echo "The following must be done manually:"
 echo '  - Finder -> Preferences -> Sidebar
