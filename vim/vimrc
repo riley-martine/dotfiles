@@ -206,8 +206,9 @@ endif
 set display+=lastline
 
 
+set list
 if &listchars ==# 'eol:$'
-  set listchars=tab:>\ ,trail:-,extends:>,precedes:<,nbsp:+
+  set listchars=tab:>·,extends:>,precedes:<,nbsp:+
 endif
 
 
@@ -388,6 +389,17 @@ function! XTermPasteBegin()
   set paste
   return ''
 endfunction
+
+augroup ft_gitconfig
+  au!
+
+  autocmd FileType gitconfig
+    \ setlocal shiftwidth=4
+    \ | setlocal tabstop=4
+    \ | setlocal softtabstop=4
+    \ | setlocal noexpandtab
+
+augroup END
 
 augroup ft_ts
   au!
