@@ -1,6 +1,6 @@
 # for things not checked into git..
 if test -e "$HOME/.extra.fish";
-	source ~/.extra.fish
+    source ~/.extra.fish
 end
 
 if status --is-login
@@ -9,6 +9,9 @@ and not set -q TMUX
     tmux
 end
 
+# no indent to make this easier
+# only do any of this on login to make faster
+# if status --is-login
 # Language Default
 set -x LC_ALL en_US.UTF-8
 set -x LC_CTYPE en_US.UTF-8
@@ -21,6 +24,22 @@ function fish_right_prompt_loading_indicator -a last_prompt
     echo -n (set_color brblack)"$uncolored_last_prompt"(set_color normal)
 end
 
+function last_history_item; echo $history[1]; end
+abbr -a !! --position anywhere --function last_history_item
+
+# Paste a git URL in the prompt, hit enter, and it'll clone it and CD in.
+function git_clone_into
+    [ -d $(basename $argv[1] .git) ]
+    or git clone $argv[1]
+    cd $(basename $argv[1] .git)
+end
+abbr -a auto_clone_cd --position command --regex ".+\.git" --function git_clone_into
+abbr -a auto_clone_cd_p --position command --regex "^git@.+" --function git_clone_into
+abbr -a auto_clone_cd_h --position command --regex "^https://github\.com.+" --function git_clone_into
+
+# Read: xargs multiple
+# https://stackoverflow.com/questions/6958689/running-multiple-commands-with-xargs
+abbr -a XM --position anywhere --set-cursor '| gxargs -d \'\n\' bash -c \'for arg do % "$arg"; done\' _'
 
 # Configuration for tools
 # LESS with colors
@@ -31,7 +50,7 @@ set -x PAGER 'less -F'
 set -x MANPAGER 'less +Gg' # Goes to end and then start of file; this gives a percentage complete.
 
 set -x FZF_DEFAULT_COMMAND "fd --type f --hidden -E '.git/'"
-set -x FZF_DEFAULT_OPTS "--bind='ctrl-o:execute(vim {})+abort'"
+set -x FZF_DEFAULT_OPTS "--bind=ctrl-c:abort,'ctrl-o:execute(vim {})+abort'"
 set -x GPG_TTY (tty)
 
 set -x pact_do_not_track "true"
@@ -62,14 +81,14 @@ end
 
 # Alii and functions that are basically alii
 
-alias k 'kubectl'
-alias kl 'kubectl logs'
+abbr -a k 'kubectl'
+abbr -a kl 'kubectl logs'
 
-alias kg 'kubectl get'
-alias kgd 'kubectl get deploy'
+abbr -a kg 'kubectl get'
+abbr -a kgd 'kubectl get deploy'
 
-alias kd 'kubectl describe'
-alias kdd 'kubectl describe deploy'
+abbr -a kd 'kubectl describe'
+abbr -a kdd 'kubectl describe deploy'
 
 function knamespace -a 'ns' -d "Set kubernetes namespace context."
     kubectl config set-context --current --namespace=$ns
@@ -96,9 +115,9 @@ end
 
 # I'm not sold on exa but I'll try it
 if type -q exa
-    alias l exa
-    alias ll 'exa --long --all --group --header --git'
-    alias lt 'exa --long --all --group --header --tree --level'
+    abbr -a l exa
+    abbr -a ll 'exa --long --all --group --header --git'
+    abbr -a lt 'exa --long --all --group --header --tree --level'
 end
 
 
@@ -107,15 +126,16 @@ if type -q bat
 end
 
 alias rg 'rg --ignore-case'
+abbr -a frg 'rg --fixed-strings' # fgrep
 function rge -d "Ripgrep but exclude"
     rg '^((?!'$argv[1]').)*$' --pcre2
 end
 
-alias agar 'sudo apt autoremove'
-alias agi 'sudo apt install'
-alias agr 'sudo apt remove'
-alias agu 'sudo apt update'
-alias agud 'sudo apt update && sudo apt dist-upgrade'
+abbr -a agar 'sudo apt autoremove'
+abbr -a agi 'sudo apt install'
+abbr -a agr 'sudo apt remove'
+abbr -a agu 'sudo apt update'
+abbr -a agud 'sudo apt update && sudo apt dist-upgrade'
 
 function tzconv -a "from" -a "to" -a "time" -d "Convert a time between timezones"
     echo (TZ="$from" gdate --date $time +"%r %a %b %d") in (string split '/' -f2 $from) is:
@@ -138,20 +158,20 @@ function sco -d "shellcheck open"
     open https://www.shellcheck.net/wiki/$argv[1]
 end
 
-alias cl 'clear'
+abbr -a cl 'clear'
 
-alias g 'git'
-alias ga 'git add'
-alias gcmsg 'git commit -m'
-alias gp 'git push'
-alias gpf 'git push --force-with-lease'
-alias gco 'git checkout'
-alias gst 'git status'
-alias gl 'git pull'
-alias gd 'git diff'
-alias gc 'git commit'
-alias gppr 'git ppr'
-alias grbm 'git rebase-master && gpf'
+abbr -a g 'git'
+abbr -a ga 'git add'
+abbr -a --set-cursor gcmsg 'git commit -m "%"'
+abbr -a gp 'git push'
+abbr -a gpf 'git push --force-with-lease'
+abbr -a gco 'git checkout'
+abbr -a gst 'git status'
+abbr -a gl 'git pull'
+abbr -a gd 'git diff'
+abbr -a gc 'git commit'
+abbr -a gppr 'git ppr'
+abbr -a grbm 'git rebase-master && gpf'
 
 # Git root
 alias gr 'cd (git rev-parse --show-toplevel)'
@@ -169,35 +189,56 @@ function gap -d "Git add one file, or prompt for all"
     end
 end
 
-alias vimrc 'vim ~/.vim/vimrc'
-alias vimfish 'vim ~/.config/fish/config.fish'
-alias refish 'source ~/.config/fish/config.fish'
+abbr -a vimrc 'vim ~/.vim/vimrc'
+abbr -a vimfish 'vim ~/.config/fish/config.fish'
+abbr -a refish 'source ~/.config/fish/config.fish'
 
-alias lsa 'ls -lah'
+abbr -a lsa 'ls -lah'
 
-alias p="vim (fzf --preview 'bat --color \"always\" {}')"
-alias pa="vim (fzf --hidden --preview 'bat --color \"always\" {}')"
-alias f='vim (fzf)'
+# https://unix.stackexchange.com/questions/631733/how-to-write-a-command-to-history-in-fish-shell
+function add_history_entry
+  begin
+    flock 1
+    and echo -- '- cmd:' (
+      string replace -- \n \\n (string join ' ' $argv) | string replace \\ \\\\
+    )
+    and date +'  when: %s'
+  end >> $__fish_user_data_dir/fish_history
+  and history merge
+end
+
+# Function instead of alias, so we can exit on ctrl-c
+function p
+    set file (fzf --preview 'bat --color "always" {}' --bind='ctrl-o:accept')
+    if string length -q $file
+        # This way you can arrow up->enter to re-open
+        add_history_entry "vim $file"
+        vim $file
+    end
+end
+
+# Preview-all (includes hidden files)
+function pa
+    set file (fzf --hidden --preview 'bat --color "always" {}' --bind='ctrl-o:accept')
+    if string length -q $file
+        # This way you can arrow up->enter to re-open
+        add_history_entry "vim $file"
+        vim $file
+    end
+end
+
 bind \cp 'p'
 bind \cx edit_command_buffer
+bind \cz 'fg 2>/dev/null; commandline -f repaint'
 
 alias rm 'rm -i'
 alias cp 'cp -i'
 alias mv 'mv -i'
 
-alias hm 'history merge'
+abbr -a hm 'history merge'
 
 # Appearance
 set fish_greeting
 source ~/.config/fish/themes/tokyonight_day.fish
 set -x BAT_THEME 'tokyonight_day'
-
-# Final sourcing
-
-if type -q jenv
-    status --is-interactive; and jenv init - | source
-end
-
-if type -q shellclear
-    shellclear --init-shell | source
-end
+# end

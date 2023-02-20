@@ -1,0 +1,22 @@
+0 THE FOOL | innocence, new beginnings, free spirit | recklessness, taken advantage of, inconsideration
+I THE MAGICIAN | willpower, desire, creation, manifestation | trickery, illusions, out of touch
+II THE HIGH PRIESTESS | intuitive, unconscious, inner voice | lack of center, lost inner voice, repressed feelings
+III THE EMPRESS | motherhood, fertility, nature | dependence, smothering, emptiness, nosiness
+IV THE EMPEROR | authority, structure, control, fatherhood | tyranny, rigidity, coldness
+V THE HIEROPHANT | tradition, conformity, morality, ethics | rebellion, subversiveness, new approaches
+VI THE LOVERS | partnerships, duality, union | loss of balance, one-sidedness, disharmony
+VII THE CHARIOT | direction, control, willpower | lack of control, lack of direction, aggression
+VIII STRENGTH | inner strength, bravery, compassion, focus | self doubt, weakness, insecurity
+IX THE HERMIT | contemplation, search for truth, inner guidance | loneliness, isolation, lost your way
+X THE WHEEL OF FORTUNE | change, cycles, inevitable fate | no control, clinging to control, bad luck
+XI JUSTICE | cause and effect, clarity, truth | dishonesty, unaccountability, unfairness
+XII THE HANGED MAN | sacrifice, release, martyrdom | stalling, needless sacrifice, fear of sacrifice
+XIII DEATH | end of cycle, beginnings, change, metamorphosis | fear of change, holding on, stagnation, decay
+XIV TEMPERANCE | middle path, patience, finding meaning | extremes, excess, lack of balance
+XV THE DEVIL | addiction, materialism, playfulness | freedom, release, restoring control
+XVI THE TOWER | sudden upheaval, broken pride, disaster | disaster avoided, delayed disaster, fear of suffering
+XVII THE STAR | hope, faith, rejuvenation | faithlessness, discouragement, insecurity
+XVIII THE MOON | unconscious, illusions, intuition | confusion, fear, misinterpretation
+XIX THE SUN | joy, success, celebration, positivity | negativity, depression, sadness
+XX JUDGEMENT | reflection, reckoning, awakening | lack of self awareness, doubt, self loathing
+XXI THE WORLD | fulfillment, harmony, completion | incompletion, no closure

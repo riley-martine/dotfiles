@@ -1,96 +1,97 @@
 [user]
-    name = Riley Martine
+	name = Riley Martine
 [include]
-    path = ~/.config/git/identity.gitconfig
+	path = ~/.config/git/identity.gitconfig
 [credential]
-	helper = osxkeychain
+	 helper = osxkeychain
 [push]
-    default = simple
-    autoSetupRemote = true
+	default = simple
+	autoSetupRemote = true
 [pull]
 	rebase = true
 [core]
 	excludesfile = ~/.config/git/gitignore
-    autocrlf = input
-    editor = vim
-    pager = delta
+	autocrlf = input
+	editor = vim
+	pager = delta
 [interactive]
-    diffFilter = delta --color-only
+	diffFilter = delta --color-only
 [alias]
-    lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
-    branches = branch -a
-    tags = tag
-    stashes = stash list
-    unstage = reset -q HEAD --
-    discard = checkout --
-    uncommit = reset --mixed HEAD~
-    amend = commit --amend
-    nevermind = !git reset --hard HEAD && git clean -d -f
-    graph = log --graph -10 --branches --remotes --tags  --format=format:'%Cgreen%h %Creset• %<(75,trunc)%s (%cN, %cr) %Cred%d' --date-order
-    precommit = diff --cached --diff-algorithm=minimal -w
-    unmerged = diff --name-only --diff-filter=U
-    remotes = remote -v
+	lg = log --color --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit
+	branches = branch -a
+	tags = tag
+	stashes = stash list
+	unstage = reset -q HEAD --
+	discard = checkout --
+	uncommit = reset --mixed HEAD~
+	amend = commit --amend
+	nevermind = !git reset --hard HEAD && git clean -d -f
+	graph = log --graph -10 --branches --remotes --tags  --format=format:'%Cgreen%h %Creset• %<(75,trunc)%s (%cN, %cr) %Cred%d' --date-order
+	precommit = diff --cached --diff-algorithm=minimal -w
+	unmerged = diff --name-only --diff-filter=U
+	remotes = remote -v
 	alias = ! git config --get-regexp ^alias\\. | sed -e s/^alias\\.// -e s/\\ /\\ =\\ /
-    push-pull-request = "!f() { \
-        openUrl=\"$(type -P xdg-open)\"; \
-        openUrl=\"${openUrl:-open}\"; \
-        branch=\"$(git rev-parse --abbrev-ref HEAD)\"; \
-        git push -u \"${1:-origin}\" $branch 2>&1 \
-        | grep -o 'https://github.com/.*/pull/new/.*' \
-        | xargs \"$openUrl\"; \
-    }; f"
-    ppr = "!git push-pull-request"
-    tree = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold white). %an%C(reset)%C(bold yellow)%d%C(reset)' --abbrev-commit --date=relative
-    squash = "!s() { if [ ! -z \"$1\" ];then if [ ! \"$(git rev-parse --abbrev-ref HEAD)\" = \"$1\" ];then git rebase --interactive $(git merge-base HEAD $1) ;else echo \"HEAD can't rebase against itself.  You can't rebase against the branch you have checked out.\"; return 1; fi; else echo \"No argument supplied.  Pass in a branch that you want to interactively rebase against compared to your current HEAD.\"; return 1; fi } ; s"
-    checkpoint = "!cp() { git add -A && git commit -m checkpoint; } ; cp"
-    reuse = "!r() { git commit -C \"${1:-HEAD}\"; git commit --amend --reset-author; }; r"
-    rebase-master = "!git fetch origin master:master && git rebase master"
-    # https://softwaredoug.com/blog/2022/11/09/idiot-proof-git-aliases.html
-    pr = "!f() { \
-       open \"$(git ls-remote --get-url $(git config --get branch.$(git rev-parse --abbrev-ref HEAD).remote) \
-       | sed 's|git@github.com:\\(.*\\)$|https://github.com/\\1|' \
-       | sed 's|\\.git$||'; \
-       )/compare/$(\
-       git config --get branch.$(git rev-parse --abbrev-ref HEAD).merge | cut -d '/' -f 3- \
-       )?expand=1\"; \
-        }; f"
-    # TODO impl remote tracking branch https://github.com/paulirish/git-open/blob/f772364eb8538411e6dbcf1f7cc23b958e190c8c/git-open#L60
-    # TODO test detached HEAD
-    hub = "!f() { \
-        baseURL=\"$(git ls-remote --get-url \
-            | sed 's|git@github.com:\\(.*\\)$|https://github.com/\\1|' \
-            | sed 's|\\.git$||'; \
-        )\"; \
-        branch=\"$(git branch --show-current)\"; \
-        remoteMainBranch=\"$(git branch -r | grep -o 'HEAD -> .*$' | cut -d'/' -f2)\"; \
-        git branch -r | grep -q \"$branch\" || branch=\"$remoteMainBranch\"; \
-        gitRoot=\"$(git rev-parse --show-toplevel)\"; \
-        cd -- ${GIT_PREFIX:-.}; \
-        path=\"$(realpath --relative-to=\"$gitRoot\" \"${1:-$PWD}\")\"; \
-        open \"${baseURL}/tree/${branch}/${path}${2:+#L$2}\"; \
-    }; f"
+	push-pull-request = "!f() { \
+		openUrl=\"$(type -P xdg-open)\"; \
+		openUrl=\"${openUrl:-open}\"; \
+		branch=\"$(git rev-parse --abbrev-ref HEAD)\"; \
+		git push -u \"${1:-origin}\" $branch 2>&1 \
+		| grep -o 'https://github.com/.*/pull/new/.*' \
+		| xargs \"$openUrl\"; \
+	}; f"
+	ppr = "!git push-pull-request"
+	tree = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold white). %an%C(reset)%C(bold yellow)%d%C(reset)' --abbrev-commit --date=relative
+	squash = "!s() { if [ ! -z \"$1\" ];then if [ ! \"$(git rev-parse --abbrev-ref HEAD)\" = \"$1\" ];then git rebase --interactive $(git merge-base HEAD $1) ;else echo \"HEAD can't rebase against itself.  You can't rebase against the branch you have checked out.\"; return 1; fi; else echo \"No argument supplied.  Pass in a branch that you want to interactively rebase against compared to your current HEAD.\"; return 1; fi } ; s"
+	checkpoint = "!cp() { git add -A && git commit -m checkpoint; } ; cp"
+	reuse = "!r() { git commit -C \"${1:-HEAD}\"; git commit --amend --reset-author; }; r"
+	rebase-master = "!git fetch origin master:master && git rebase master"
+	# https://softwaredoug.com/blog/2022/11/09/idiot-proof-git-aliases.html
+	pr = "!f() { \
+		open \"$(git ls-remote --get-url $(git config --get branch.$(git rev-parse --abbrev-ref HEAD).remote) \
+			| sed 's|git@github.com:\\(.*\\)$|https://github.com/\\1|' \
+			| sed 's|\\.git$||'; \
+		)/compare/$(\
+			git config --get branch.$(git rev-parse --abbrev-ref HEAD).merge | cut -d '/' -f 3- \
+		)?expand=1\"; \
+		}; f"
+	# TODO impl remote tracking branch https://github.com/paulirish/git-open/blob/f772364eb8538411e6dbcf1f7cc23b958e190c8c/git-open#L60
+	# TODO test detached HEAD
+	hub = "!f() { \
+		baseURL=\"$(git ls-remote --get-url \
+			| sed 's|git@github.com:\\(.*\\)$|https://github.com/\\1|' \
+			| sed 's|\\.git$||'; \
+		)\"; \
+		branch=\"$(git branch --show-current)\"; \
+		remoteMainBranch=\"$(git branch -r | grep -o 'HEAD -> .*$' | cut -d'/' -f2)\"; \
+		git branch -r | grep -q \"$branch\" || branch=\"$remoteMainBranch\"; \
+		gitRoot=\"$(git rev-parse --show-toplevel)\"; \
+		cd -- ${GIT_PREFIX:-.}; \
+		path=\"$(realpath --relative-to=\"$gitRoot\" \"${1:-$PWD}\")\"; \
+		open \"${baseURL}/tree/${branch}/${path}${2:+#L$2}\"; \
+	}; f"
+	change-email = "git-filter-repo --email-callback 'return email.replace(b\"${1:-}\", b\"${2:-}\")'"
 [commit]
-    gpgsign = true
-    template = ~/.config/git/gitmessage
+	gpgsign = true
+	template = ~/.config/git/gitmessage
 [gpg]
 	program = gpg
 [merge]
-    conflictstyle = diff3
+	conflictstyle = diff3
 [diff]
-    colorMoved = default
+	colorMoved = default
 [delta]
-    navigate = true  # use n and N to move between diff sections
-    light = true    # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
-    hyperlinks = true
-    line-numbers = true
-    side-by-side = true
+	navigate = true  # use n and N to move between diff sections
+	light = true    # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
+	hyperlinks = true
+	line-numbers = true
+	side-by-side = true
 [include]
-    path = ~/.config/git/tokyonight_day.gitconfig
-[init]
-    defaultBranch = main
+	path = ~/.config/git/tokyonight_day.gitconfig
 [status]
-    showUntrackedFiles = all
+	showUntrackedFiles = all
 [url "git@github.com:"]
 	insteadOf = https://github.com/
 [feature]
 	manyFiles = true
+[protocol "file"]
+	allow = always
