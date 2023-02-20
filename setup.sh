@@ -928,8 +928,9 @@ fish -c 'fisher install jorgebucaran/nvm.fish'
 
 # So despite installing nvm, we're going to use homebrew node for everything global.
 set +u
-source /opt/homebrew/opt/nvm/nvm.sh
-nvm use system
+# TODO fix
+# source /opt/homebrew/opt/nvm/nvm.sh
+# nvm use system
 set -u
 
 add-update npm 'npm update -g'
@@ -1038,6 +1039,7 @@ if [ ! -f "$PERLBREW_ROOT/bin/cpanm" ]; then
     perlbrew install-cpanm
 fi
 
+# TODO global perl deps
 cpanm Perl::Critic
 cpanm CPAN::DistnameInfo
 cpanm Text::Levenshtein
@@ -1109,6 +1111,7 @@ brew-get texlab
 brew-get stylua
 luarocks install luacheck
 luarocks install lanes
+# TODO global lua deps
 add-update luarocks 'luarocks install luacheck'
 add-update luarocks 'luarocks install lanes'
 
