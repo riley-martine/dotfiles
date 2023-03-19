@@ -1,0 +1,25 @@
+#!/bin/bash
+set -euo pipefail
+
+
+# Writes an update script to $HOME/.local/share/update.d
+# The directory should contain executable files that each are responsible for
+# updating a particular program, e.g. brew, global npm packages.
+# Script that runs all of these is installed to ~/bin.
+# Args:
+#   $1: filename, minus suffix, e.g. "macos"
+#   $2: what to run to update the thing, e.g. "softwareupdate -i -a"
+
+echo "Adding update script:"
+update_dir="$HOME/.local/share/update.d"
+file="${update_dir}/${1}.sh"
+
+mkdir -p "$update_dir"
+
+if [ ! -f "$file" ]; then
+    echo '#!/usr/bin/env bash' >> "$file"
+    echo 'set -euo pipefail' >> "$file"
+fi
+
+append "$file" "$2"
+chmod +x "$file"

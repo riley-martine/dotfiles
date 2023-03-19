@@ -7,6 +7,23 @@ update_dir="$HOME/.local/share/update.d"
 
 if [ ! -d "$update_dir" ]; then
     echo "$update_dir does not exist. Not running any updates."
+    exit 1
 fi
 
-find "$update_dir" -maxdepth 1 -type f -exec {} \;
+bold=$(tput bold)
+normal=$(tput sgr0)
+
+if [ "$(uname)" = Darwin ]; then
+    eval "$(ssh-agent)"
+    ssh-add --apple-load-keychain
+fi
+
+failed=()
+for script in "$update_dir"/*; do
+    echo "${bold}RUNNING SCRIPT: $(basename "$script")${normal}"
+    "$script" || failed+=("$script")
+done
+
+for i in "${failed[@]}"; do
+    echo "${bold}Failed: ${i}${normal}"
+done

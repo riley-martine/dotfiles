@@ -117,74 +117,9 @@ sudo true
 
 # TODO finish section
 
-# Append a line to a config file, if not already present.
-# Creates file if it does not exist.
-# Prefixes text with a newline if file already exists.
-# Arguments:
-#   $1: the file to append to
-#   $2: the text to append. can be multi-line.
-#   $3: (optional) a pattern to search for, and return if found.
-#       used for skipping if non-exact string match already exists.
-#
-# Taken in part from:
-# https://github.com/junegunn/fzf/blob/master/install
-# I'm hot for this script 🥵
-
-append() {
-    local conf_file="$1"
-    local text="$2"
-    local pat="${3:-}"
-    local lno=""
-
-    echo "Update ${conf_file}:"
-    echo "  - $(echo "$text" | head -n1)"
-    if [[ $text == *$'\n'* ]]; then
-        echo "$text" | tail -n +2 | sed 's/^/    /'
-    fi
-
-    if [ -f "$conf_file" ]; then
-        set +e
-        if [ $# -lt 3 ]; then
-            lno=$(\grep -nxF "$text" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
-        else
-            lno=$(\grep -nE "$pat" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
-        fi
-        set -e
-    fi
-
-    if [ -n "$lno" ]; then
-        echo "    - Already exists: line #$lno"
-    else
-        [ -f "$conf_file" ] && echo >> "$conf_file"
-        echo "$text" >> "$conf_file"
-        echo "    + Added"
-    fi
-    echo
-}
-
-# TODO maybe add this as a script in bin
-# TODO should it be /usr/local/bin?
-# Writes an update script to $HOME/.local/share/update.d
-# The directory should contain executable files that each are responsible for
-# updating a particular program, e.g. brew, global npm packages.
-# Script that runs all of these is installed to ~/bin.
-# Args:
-#   $1: filename, minus suffix, e.g. "macos"
-#   $2: what to run to update the thing, e.g. "softwareupdate -i -a"
-add-update() {
-    echo "Adding update script:"
-    local update_dir="$HOME/.local/share/update.d"
-    local file="${update_dir}/${1}.sh"
-
-    mkdir -p "$update_dir"
-
-    if [ ! -f "$file" ]; then
-        echo '#!/usr/bin/env bash' >> "$file"
-    fi
-
-    append "$file" "$2"
-    chmod +x "$file"
-}
+# https://gist.github.com/tvlooy/cbfbdb111a4ebad8b93e
+SCRIPT_DIR=$( dirname "$(readlink -f "$0")" )
+export PATH="$SCRIPT_DIR/bin:$PATH"
 
 # This wraps brew install calls in a bundle command, so we don't get error messages
 # about the program already being installed, and don't have to do extra typing to write
@@ -849,7 +784,9 @@ pyenv install --skip-existing \
     "$(pyenv install --list | sed 's/ //g' | ggrep -P '^[\d\.]+$' | tail -n 1)"
 pyenv global "$(pyenv latest 3)"
 
-# Update pyenv
+git clone https://github.com/pyenv/pyenv-update.git $(pyenv root)/plugins/pyenv-update
+
+# Update pyenv and plugins
 add-update pyenv 'pyenv update'
 
 # Update to latest python from pyenv
@@ -867,13 +804,13 @@ EOF
 add-update pyenv "$(
     cat << "EOF"
 pyenv versions --bare |
-    gxargs -d $'\n' bash -c $'eval "$(pyenv init -)";
-    for arg do
+    gxargs -d \$'\n' bash -c $'eval "$(pyenv init -)";
+    for arg; do
         pyenv shell $arg
         python --version
         python -m pip install --upgrade pip
         pip list --format=freeze |
-            grep -v \'^\\-e\' |
+            grep -v "^\-e" |
             cut -d = -f 1 |
             xargs -n1 pip install -U
     done' _
@@ -893,7 +830,7 @@ brew list |
 brew list |
     sed -rn 's/python@(.+)/\1/p' |
     xargs -I{} bash -c '/opt/homebrew/bin/"pip{}" list --format=freeze |
-        grep -v '^\-e' |
+        grep -v "^\-e" |
         cut -d = -f 1 |
         xargs -n1 pip{} install -U'
 EOF
@@ -1036,7 +973,7 @@ fi
 perlbrew switch "$latest"
 
 if [ ! -f "$PERLBREW_ROOT/bin/cpanm" ]; then
-    perlbrew install-cpanm
+    perlbrew install-cpanm --yes
 fi
 
 # TODO global perl deps
@@ -1048,7 +985,7 @@ cpanm Term::ReadLine::Perl
 cpanm App::cpanoutdated
 
 # add-update perl 'yes | perl -MCPAN -e "upgrade /(.\*)/"'
-add-update perl 'cpanm --self-upgrade'
+add-update perl 'cpanm --self-upgrade || perlbrew install-cpanm --yes'
 add-update perl 'cpan-outdated -p | cpanm'
 
 echo "Installing lua via brew..."

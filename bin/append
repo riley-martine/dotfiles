@@ -1,0 +1,49 @@
+#!/bin/bash
+
+set -euo pipefail
+
+
+# Append a line to a config file, if not already present.
+# Creates file if it does not exist.
+# Prefixes text with a newline if file already exists.
+# Arguments:
+#   $1: the file to append to
+#   $2: the text to append. can be multi-line.
+#   $3: (optional) a pattern to search for, and return if found.
+#       used for skipping if non-exact string match already exists.
+#
+# Taken in part from:
+# https://github.com/junegunn/fzf/blob/master/install
+# I'm hot for this script 🥵
+# TODO help, arg parsing
+
+
+conf_file="$1"
+text="$2"
+pat="${3:-}"
+lno=""
+
+echo "Update ${conf_file}:"
+echo "  - $(echo "$text" | head -n1)"
+if [[ $text == *$'\n'* ]]; then
+    echo "$text" | tail -n +2 | sed 's/^/    /'
+fi
+
+if [ -f "$conf_file" ]; then
+    set +e
+    if [ $# -lt 3 ]; then
+        lno=$(\grep -nxF "$text" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
+    else
+        lno=$(\grep -nE "$pat" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
+    fi
+    set -e
+fi
+
+if [ -n "$lno" ]; then
+    echo "    - Already exists: line #$lno"
+else
+    [ -f "$conf_file" ] && echo >> "$conf_file"
+    echo "$text" >> "$conf_file"
+    echo "    + Added"
+fi
+echo
