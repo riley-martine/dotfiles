@@ -117,7 +117,8 @@ sudo true
 
 # TODO finish section
 
-# https://gist.github.com/tvlooy/cbfbdb111a4ebad8b93e
+# https://gist.github.com/ptc-mrucci/61772387878ed53a6c717d51a21d9371
+# some
 SCRIPT_DIR=$( dirname "$(readlink -f "$0")" )
 export PATH="$SCRIPT_DIR/bin:$PATH"
 
@@ -1541,6 +1542,7 @@ cd -
 # TODO try direnv + pyenv
 # TODO version control torrent scripts + plist
 #     AND BREW THEM HOLY HELL SERVICES
+# TODO Syncthing
 
 echo "The following must be done manually:"
 echo '  - Finder -> Preferences -> Sidebar

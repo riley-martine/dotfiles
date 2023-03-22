@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+echo "Logging in to bitwarden CLI..."
+
+if ! bw login --check > /dev/null; then
+    BW_SESSION="$(bw login riley.martine@protonmail.com | sed -E -n 's/\$ export BW_SESSION="(.*)"/\1/p')"
+    export BW_SESSION
+else
+    if [ -z "${BW_SESSION-}" ] || [ "$(bw status | jq -r '.status')" != unlocked ]; then
+        BW_SESSION="$(bw unlock | sed -E -n 's/\$ export BW_SESSION="(.*)"/\1/p')"
+        export BW_SESSION
+    fi
+fi
+bw sync

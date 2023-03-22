@@ -12,7 +12,9 @@ dotfiles=(
     ["$HOME/.config/starship.toml"]="starship/starship.toml"
 
     ["$HOME/.gitconfig"]="git/.gitconfig"
-    ["$HOME/.config/git/"]="git/config"
+    ["$HOME/.config/git/gitignore"]="git/config/gitignore"
+    ["$HOME/.config/git/tokyonight_day.gitconfig"]="git/config/tokonight_day.gitconfig"
+    ["$HOME/.config/git/gitmessage"]="git/config/gitmessage"
 
     ["$HOME/.config/bat/"]="bat/config/"
 
@@ -48,7 +50,12 @@ function compare_file {
         return 0
     fi
 
-    echo "vim $LOCAL $GIT +vsplit  -c ':1' -c ':wincmd l' -c ':bnext' -c ':1'"
+    echo "edit files:"
+    echo "  vim $LOCAL $GIT +vsplit  -c ':1' -c ':wincmd l' -c ':bnext' -c ':1'"
+    echo "clobber local:"
+    echo " command cp $GIT $LOCAL"
+    echo "clobber remote:"
+    echo " command cp $LOCAL $GIT"
 }
 
 # Recurse

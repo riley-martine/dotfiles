@@ -61,6 +61,7 @@ Plug 'tpope/vim-commentary'
 " https://github.com/dense-analysis/ale/blob/master/supported-tools.md
 Plug 'dense-analysis/ale'
 Plug 'ciaranm/securemodelines'
+Plug 'airblade/vim-gitgutter'
 
 " Language
 Plug 'vim-test/vim-test'
@@ -134,6 +135,9 @@ set nomodeline
 " redraw only when needed, speeds up macros
 set lazyredraw
 set redrawtime=10000
+
+" but update frequently (fix for gitgutter slow)
+set updatetime=100
 
 "------------------------------------------------------------
 " Usability options {{{1

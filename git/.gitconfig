@@ -45,6 +45,7 @@
 	checkpoint = "!cp() { git add -A && git commit -m checkpoint; } ; cp"
 	reuse = "!r() { git commit -C \"${1:-HEAD}\"; git commit --amend --reset-author; }; r"
 	rebase-master = "!git fetch origin master:master && git rebase master"
+	rebase-main = "!git fetch origin main:main && git rebase main"
 	# https://softwaredoug.com/blog/2022/11/09/idiot-proof-git-aliases.html
 	pr = "!f() { \
 		open \"$(git ls-remote --get-url $(git config --get branch.$(git rev-parse --abbrev-ref HEAD).remote) \

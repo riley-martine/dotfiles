@@ -104,6 +104,7 @@ style = "bold #07879d"
 # behind = '⇣${count}'
 # staged = '[++\($count\)](#587539)'
 deleted = "x"
+modified = "~"
 
 [git_commit]
 tag_symbol = ' '
