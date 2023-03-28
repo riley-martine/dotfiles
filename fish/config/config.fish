@@ -160,18 +160,31 @@ end
 
 abbr -a cl 'clear'
 
+
+# Git shortcuts
 abbr -a g 'git'
+
 abbr -a ga 'git add'
-abbr -a --set-cursor gcmsg 'git commit -m "%"'
-abbr -a gp 'git push'
-abbr -a gpf 'git push --force-with-lease'
 abbr -a gco 'git checkout'
 abbr -a gst 'git status'
 abbr -a gl 'git pull'
 abbr -a gd 'git diff'
-abbr -a gc 'git commit'
 abbr -a gppr 'git ppr'
-abbr -a grbm 'git rebase-master && gpf'
+
+abbr -a gs 'git stash' # Sorry ghostscript
+abbr -a --set-cursor gsm 'git stash push -m "%"'
+abbr -a --set-cursor gsam 'git stash apply stash^{/%}'
+
+abbr -a gp 'git push'
+abbr -a gpf 'git push --force-with-lease'
+
+abbr -a gc 'git commit'
+abbr -a --set-cursor gcmsg 'git commit -m "%"'
+abbr -a gca 'git commit --amend -C HEAD'
+
+abbr -a grb 'git rebase'
+abbr -a grbc 'git rebase --continue'
+abbr -a grbm 'git rebase-master && git push --force-with-lease'
 
 # Git root
 alias gr 'cd (git rev-parse --show-toplevel)'
@@ -192,6 +205,7 @@ end
 abbr -a vimrc 'vim ~/.vim/vimrc'
 abbr -a vimfish 'vim ~/.config/fish/config.fish'
 abbr -a refish 'source ~/.config/fish/config.fish'
+abbr -a newfish 'exec fish -l'
 
 abbr -a lsa 'ls -lah'
 

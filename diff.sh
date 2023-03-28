@@ -1,6 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# This script detects differences between git-versioned config and the local system.
+# It offers options for what to do about them.
+# It is called without arguments.
+
+# TODO allowed patch for e.g. work starship.toml
+# TODO something about WIZARD and other symlinks
+
 declare -A dotfiles
 dotfiles=(
     ["$HOME/.tmux.conf"]="tmux/.tmux.conf"
@@ -8,6 +15,8 @@ dotfiles=(
 
     ["$HOME/.vim/vimrc"]="vim/vimrc"
     ["$HOME/.vim/syntax/"]="vim/syntax"
+
+    ["$HOME/.vale.ini"]="vale/.vale.ini"
 
     ["$HOME/.config/starship.toml"]="starship/starship.toml"
 
@@ -35,21 +44,24 @@ function compare_file {
     local GIT="$2"
 
     if ! [ -f "$LOCAL" ]; then
+        echo "=================================================================================="
         echo "Local dotfile does not exist: $LOCAL" >&2
         return 1
     fi
 
     if ! [ -f "$GIT" ]; then
+        echo "=================================================================================="
         echo "$GIT does not exist. Run:" >&2
         echo " cp $LOCAL $GIT"
         return 0
     fi
 
-    if PAGER='cat' delta "$LOCAL" "$GIT"; then
+    if PAGER='cat' delta --width "$(tput cols)" "$(realpath "$LOCAL")" "$GIT"; then
         # echo "EQUAL: $LOCAL $GIT"
         return 0
     fi
 
+    echo "=================================================================================="
     echo "edit files:"
     echo "  vim $LOCAL $GIT +vsplit  -c ':1' -c ':wincmd l' -c ':bnext' -c ':1'"
     echo "clobber local:"
@@ -65,7 +77,10 @@ function compare_maybe_dir {
     GIT="$(echo "$2" | tr -s /)"
 
     if ! [ -e "$LOCAL" ]; then
+        echo "=================================================================================="
         echo "Expected dotfile does not exist: $LOCAL" >&2
+        echo "add to local:"
+        echo " command cp $GIT $LOCAL"
         return
     fi
 

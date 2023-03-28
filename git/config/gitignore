@@ -64,6 +64,7 @@ Sessionx.vim
 *~
 tags
 [._]*.un~
+.lvimrc
 
 ## VSCode
 .vscode/*
@@ -167,6 +168,10 @@ fabric.properties
 .idea/caches/build_file_checksums.ser
 
 # Tools
+
+## Direnv
+# .envrc
+# .env
 
 ## Virtualenv python
 ## This is included because I may use a virtualenv on projects not

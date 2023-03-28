@@ -2,6 +2,7 @@
 # Each line should be the name of a binary that should exist. Run `installed.fish` to check they exist.
 # fish command to get binaries on $PATH:
 # complete -C | string match -r -g '^(\w+)\s+command' | uniq | less
+# TODO generate or pull from setup.sh
 
 # Rewrite it in rust
 fd
@@ -49,7 +50,6 @@ python3.10
 black
 autoflake
 bandit
-bashate
 flake8
 isort
 mypy
@@ -59,4 +59,3 @@ pylint
 ## npm
 alex
 bash-language-server
-vim-language-server

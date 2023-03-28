@@ -57,11 +57,18 @@ Plug 'ryanoasis/vim-devicons'
 Plug 'tpope/vim-surround'
 Plug 'tpope/vim-eunuch'
 Plug 'tpope/vim-commentary'
+Plug 'ciaranm/securemodelines'
+Plug 'embear/vim-localvimrc'
+Plug 'editorconfig/editorconfig-vim'
+Plug 'airblade/vim-gitgutter'
+
+" LSP/ALE
 " Make sure you have auxilary linters/fixers installed for ale
 " https://github.com/dense-analysis/ale/blob/master/supported-tools.md
 Plug 'dense-analysis/ale'
-Plug 'ciaranm/securemodelines'
-Plug 'airblade/vim-gitgutter'
+Plug 'prabirshrestha/vim-lsp'
+Plug 'mattn/vim-lsp-settings'
+Plug 'rhysd/vim-lsp-ale'
 
 " Language
 Plug 'vim-test/vim-test'
@@ -394,6 +401,71 @@ function! XTermPasteBegin()
   return ''
 endfunction
 
+" TODO teach how to fold subheadings
+" from: https://github.com/samrocketman/home/blob/main/dotfiles/.vimrc
+" On markdown files, header sections and code blocks are collapsed by this
+" fold-expr function.  See also :help fold-expr
+" Special behavior includes:
+"   - The fist section heading is not folded because this is typically an
+"     introduction.
+"   - Section headings get folded
+"   - Code blocks get folded nested under section headings.
+"   - Reference-style markdown links are excluded from folding.  I typically
+"     put reference-style links at the end of a markdown file.
+func FoldMarkdownHeadersAndCode()
+  " initialize buffer variables (global to the document)
+  if !exists('b:markdown_code')
+    let b:markdown_code = v:false
+  endif
+  if !exists('b:collapse_markdown_header')
+    let b:collapse_markdown_header = false
+  endif
+  " local function variables
+  let l:thisline = getline(v:lnum)
+  let l:depth = len(matchstr(thisline, '^#\+'))
+  " this logic will return a fold-expr based on conditions
+  if l:thisline =~ '^```.*$' " open or closing a code block
+    if b:markdown_code
+      let b:markdown_code = v:false
+      return "s1"
+    else
+      let b:markdown_code = v:true
+      return "a1"
+    endif
+  endif
+  if l:depth > 0
+    if !b:markdown_code && b:collapse_markdown_header
+      return ">1"
+    endif
+    let b:collapse_markdown_header = v:true
+  endif
+  let l:reference_link_expr = '^\[[^\]]\+\]: \+[^ ]\+$' " matches text like '[foo]: https://link/to/foo'
+  if l:thisline =~ l:reference_link_expr " regex match to display reference links
+      return "0"
+  endif
+  return "="
+endfunc
+
+" Custom titles for folded markdown sections and code blocks
+func FoldTextMarkdown()
+  let l:title = getline(v:foldstart)
+  if l:title !~ '^```.*$' " section title
+    let l:depth = len(matchstr(l:title, '^#\+'))
+    if depth == 1
+      return foldtext()
+    endif
+    " return a substituted title showing indented sub-section as |-
+    let l:sub = repeat(' ', depth*2 - 2) . '|-'
+    return substitute(foldtext(), '^\([^#]\+\)#\+\(.*\)$', '\1' . l:sub . '\2', '')
+  endif
+  " code block title
+  let l:replace_expr = 'CODE BLOCK: \2 (\1)'
+  if l:title == '```'
+    let l:replace_expr = 'CODE BLOCK (\1)'
+  endif
+  return substitute(foldtext(), '^[^0-9]\+\([^:]\+\): ```\(.*\)$', l:replace_expr, '')
+endfunc
+
 augroup ft_gitconfig
   au!
 
@@ -408,8 +480,18 @@ augroup END
 augroup ft_ts
   au!
 
+  " au BufNewFile,BufRead *.tsx set filetype=typescript.typescriptreact
+
   autocmd FileType typescript
-    \ let g:ale_disable_lsp = 0
+  \ setlocal tabstop=2
+  \ | setlocal softtabstop=2
+  \ | setlocal shiftwidth=2
+
+  autocmd FileType typescriptreact
+  \ let b:ale_linter_aliases = ['typescript']
+  \ | setlocal tabstop=2
+  \ | setlocal softtabstop=2
+  \ | setlocal shiftwidth=2
 
 augroup END
 
@@ -455,10 +537,10 @@ augroup END
 
 augroup ft_web
   au!
-  au BufNewFile, BufRead *.js, *.html, *.css
+  au BufNewFile, BufRead *.js, *.html, *.css, *.ts, *.tsx
       \ set tabstop=2
-      \ set softtabstop=2
-      \ set shiftwidth=2
+      \ | set softtabstop=2
+      \ | set shiftwidth=2
 augroup END
 
 augroup ft_gitcommit
@@ -475,12 +557,17 @@ augroup END
 augroup ft_markdown
   autocmd!
 
+  autocmd BufNewFile,BufRead TODO setlocal filetype=markdown
+
 "   " https://stackoverflow.com/questions/21240678/using-vim-autoformat-with-markdown-documents
   autocmd FileType markdown
     \ setlocal textwidth=80
+    \ | setlocal autoindent
+    \ | setlocal foldmethod=expr
+    \ | setlocal foldexpr=FoldMarkdownHeadersAndCode()
+    \ | setlocal foldtext=FoldTextMarkdown()
     " \ | setlocal formatoptions+=tacjqrn
     " \ | setlocal wrapmargin=0
-    \ | setlocal autoindent
 
 augroup END
 
@@ -539,6 +626,9 @@ augroup END
 map <C-n> :NERDTreeToggle<CR>
 let NERDTreeIgnore = ['\.pyc$', '__pycache__']
 
+" https://github.com/dense-analysis/ale/commit/5453e0e1a43302226da1d1d753e162af0231f9d3
+" let g:localvimrc_sandbox=0
+let g:localvimrc_persistent=2
 
 let g:UltiSnipsExpandTrigger='<c-j>'
 let g:UltiSnipsListSnippets='<c-tab>'
@@ -617,7 +707,7 @@ let g:ale_linters = {
 \   'python': ['bandit', 'mypy', 'pylint', 'vulture', 'pylsp'],
 \   'markdown': ['alex', 'vale', 'markdownlint'],
 \   'lua': ['luac', 'selene'],
-\   'typescript': ['tsserver', 'eslint'],
+\   'typescript': ['eslint'],
 \   'rust': ['cargo', 'analyzer'],
 \}
 " TODO readd flake8
@@ -636,11 +726,14 @@ let g:ale_fixers = {
 \   'sh': ['remove_trailing_lines', 'trim_whitespace'],
 \   'tex': ['remove_trailing_lines', 'trim_whitespace', 'latexindent'],
 \   'text': ['remove_trailing_lines', 'trim_whitespace'],
+\   'json': ['remove_trailing_lines', 'trim_whitespace'],
+\   'yaml': ['remove_trailing_lines', 'trim_whitespace'],
 \   'markdown': ['trim_whitespace', 'remove_trailing_lines'],
 \   'css': ['prettier', 'remove_trailing_lines', 'trim_whitespace'],
 \   'html': ['remove_trailing_lines', 'trim_whitespace'],
 \   'javascript': ['remove_trailing_lines', 'trim_whitespace', 'prettier', 'eslint'],
 \   'typescript': ['remove_trailing_lines', 'trim_whitespace', 'prettier'],
+\   'typescriptreact': ['remove_trailing_lines', 'trim_whitespace'],
 \   'python': ['isort', 'black', 'autoflake'],
 \   'puppet': ['puppetlint'],
 \   'lua': ['stylua', 'remove_trailing_lines', 'trim_whitespace'],

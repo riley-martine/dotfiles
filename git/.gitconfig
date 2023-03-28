@@ -44,6 +44,7 @@
 	squash = "!s() { if [ ! -z \"$1\" ];then if [ ! \"$(git rev-parse --abbrev-ref HEAD)\" = \"$1\" ];then git rebase --interactive $(git merge-base HEAD $1) ;else echo \"HEAD can't rebase against itself.  You can't rebase against the branch you have checked out.\"; return 1; fi; else echo \"No argument supplied.  Pass in a branch that you want to interactively rebase against compared to your current HEAD.\"; return 1; fi } ; s"
 	checkpoint = "!cp() { git add -A && git commit -m checkpoint; } ; cp"
 	reuse = "!r() { git commit -C \"${1:-HEAD}\"; git commit --amend --reset-author; }; r"
+	# TODO rewrite for fork workflow
 	rebase-master = "!git fetch origin master:master && git rebase master"
 	rebase-main = "!git fetch origin main:main && git rebase main"
 	# https://softwaredoug.com/blog/2022/11/09/idiot-proof-git-aliases.html
@@ -71,6 +72,11 @@
 		open \"${baseURL}/tree/${branch}/${path}${2:+#L$2}\"; \
 	}; f"
 	change-email = "git-filter-repo --email-callback 'return email.replace(b\"${1:-}\", b\"${2:-}\")'"
+	whoami = "!f() { \
+		echo \"email: $(git config --get-all user.email)\"; \
+		echo \"signing key: $(git config --get-all user.signingKey)\"; \
+		echo \"github: $(git config --get-all github.user)\"; \
+		}; f"
 [commit]
 	gpgsign = true
 	template = ~/.config/git/gitmessage

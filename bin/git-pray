@@ -1,0 +1,98 @@
+#!/bin/bash -e
+
+# Source: https://github.com/xiongchiamiov/git-pray
+
+case "$DEITY" in
+   'Athena')
+      cat <<'EOT'
+Athena, flint-eyed daughter
+   of excellent Zeus,
+clear-headed goddess,
+   bold-hearted patron of code.
+Bright Athena, commits guided
+   by forethought,
+kind one who draws near us,
+   who flees no merge conflict,
+your favor sought by many,
+   your presence so strong,
+so penetrating,
+   so unmistakable.
+Athena, shining engineer,
+   child of wisdom,
+I pray to you. Precision
+   and unmuddled thought
+I ask of you, crisp reason
+   and blessed clarity,
+surety and conviction,
+   quick wit and quick action.
+Give me eyes to see far,
+   over the architecture;
+give me heart to bear legacy code,
+   give me strength to hold fast.
+EOT
+      ;;
+   'Dagr')
+      cat <<'EOT'
+Hail, upstream!
+Hail, clones of upstream!
+And the fork and her clones now!
+Look on us here,
+with loving patch review,
+That waiting we merges win.
+
+Hail to the committers!
+Ye contributors, hail,
+And all the generous software ecosystem!
+Give to us wisdom,
+and goodly commits,
+And healing rebases, life-long.
+EOT
+      ;;
+   'Jehovah')
+      cat <<'EOT'
+Our Father in origin,
+   hallowed be your ref.
+May your commits come soon,
+   and may your pull requests be merged,
+   on master as it is in origin/master.
+Give us today our daily SHAs,
+   and forgive us our push -fs
+   as we have forgiven those who push -f against us.
+Lead us not into Subversion,
+   but deliver us from detached HEAD.
+For yours is the source code, and the power, and the glory, forever.
+Amen.
+EOT
+      ;;
+   'Jupiter')
+      cat <<'EOT'
+Jupiter Committer,
+   if on HEAD commits have been lost,
+   or if in the nation of versioning
+      the owed commit messages have been omitted,
+   let it be as if they had been made.
+
+Jupiter Committer,
+   if in your pull request there has been any flaw,
+      any defect, any contribution guidelines not followed,
+   if in your pull request there is a flaw,
+      either seen or unseen,
+   let it be as if there was not.
+EOT
+      ;;
+   'Kwisatz Haderach')
+      cat <<'EOT'
+I must not fear rebase.
+Fear is the history-killer.
+Fear is the little-death that births merge conflicts.
+I will face my fear.
+I will permit rebase to pass over my commits and rewrite my history.
+And when it has gone past I will turn the inner log to see its path.
+Where the rebase has gone there will be nothing.
+Only the tip will remain.
+EOT
+      ;;
+   *)
+      echo "\$DEITY not set.  You're on your own, bud."
+      ;;
+esac
