@@ -130,6 +130,7 @@ abbr -a frg 'rg --fixed-strings' # fgrep
 function rge -d "Ripgrep but exclude"
     rg '^((?!'$argv[1]').)*$' --pcre2
 end
+abbr -a --set-cursor find-strings 'rg --hidden --no-filename --no-line-number --no-heading "%" | sort | uniq'
 
 abbr -a agar 'sudo apt autoremove'
 abbr -a agi 'sudo apt install'
@@ -191,6 +192,7 @@ alias gr 'cd (git rev-parse --show-toplevel)'
 
 alias gaa 'git status; confirm "Add all?"; and git add -A'
 alias gcapf 'git status; confirm "Amend + Push Force?"; and git commit --amend -C HEAD && git push --force-with-lease'
+alias gcap 'git status; confirm "Amend + Push Force?"; and git commit --amend -C HEAD && git push'
 alias gitgud 'gaa; and gcapf' # Add all with confirmation after git status, commit amend, push force
 
 function gap -d "Git add one file, or prompt for all"

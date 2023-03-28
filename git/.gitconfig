@@ -13,6 +13,8 @@
 	excludesfile = ~/.config/git/gitignore
 	autocrlf = input
 	editor = vim
+	; https://github.com/dandavison/delta/issues/447
+	; pager = delta --features "$(defaults read -globalDomain AppleInterfaceStyle > /dev/null 2>&1 && echo dark-mode || echo light-mode)"
 	pager = delta
 [interactive]
 	diffFilter = delta --color-only
@@ -41,7 +43,7 @@
 	}; f"
 	ppr = "!git push-pull-request"
 	tree = log --graph --all --format=format:'%C(bold blue)%h%C(reset) - %C(bold green)(%ar)%C(reset) %C(white)%s%C(reset) %C(bold white). %an%C(reset)%C(bold yellow)%d%C(reset)' --abbrev-commit --date=relative
-	squash = "!s() { if [ ! -z \"$1\" ];then if [ ! \"$(git rev-parse --abbrev-ref HEAD)\" = \"$1\" ];then git rebase --interactive $(git merge-base HEAD $1) ;else echo \"HEAD can't rebase against itself.  You can't rebase against the branch you have checked out.\"; return 1; fi; else echo \"No argument supplied.  Pass in a branch that you want to interactively rebase against compared to your current HEAD.\"; return 1; fi } ; s"
+	squash = "!s() { if [ ! -z \"$1\" ];then if [ ! \"$(git rev-parse --abbrev-ref HEAD)\" = \"$1\" ];then git rebase --interactive $(git merge-base HEAD $1) ;else echo \"HEAD can't rebase against itself.  You can't rebase against the branch you have checked out.\"; return 1; fi; else echo \"No argument supplied.	Pass in a branch that you want to interactively rebase against compared to your current HEAD.\"; return 1; fi } ; s"
 	checkpoint = "!cp() { git add -A && git commit -m checkpoint; } ; cp"
 	reuse = "!r() { git commit -C \"${1:-HEAD}\"; git commit --amend --reset-author; }; r"
 	# TODO rewrite for fork workflow
@@ -88,10 +90,12 @@
 	colorMoved = default
 [delta]
 	navigate = true  # use n and N to move between diff sections
-	light = true    # set to true if you're in a terminal w/ a light background color (e.g. the default macOS terminal)
+	light = true
 	hyperlinks = true
 	line-numbers = true
 	side-by-side = true
+[delta "dark-mode"]
+	light = false
 [include]
 	path = ~/.config/git/tokyonight_day.gitconfig
 [status]

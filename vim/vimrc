@@ -39,6 +39,7 @@ call plug#begin()
 " Tmux integration
 Plug 'tpope/vim-obsession'
 " Plug 'edkolev/tmuxline.vim'
+Plug 'wincent/terminus'
 
 " Theming
 Plug 'vim-airline/vim-airline'
@@ -86,6 +87,7 @@ if has('autocmd')
 endif
 
 set shortmess-=A  " https://github.com/sheerun/vim-polyglot/issues/765"
+set shortmess-=S  " Show count of matches
 
 " PlugInstall [name ...] [#threads] 	Install plugins
 " PlugUpdate [name ...] [#threads] 	Install or update plugins
@@ -764,6 +766,7 @@ endif
 
 nmap <silent> <C-k> <Plug>(ale_previous_wrap)
 nmap <silent> <C-j> <Plug>(ale_next_wrap)
+nmap <silent> <C-]> <Plug>(lsp-definition)
 
 " let g:airline_theme = "tokyonight"
 let g:airline#extensions#ale#enabled = 1
