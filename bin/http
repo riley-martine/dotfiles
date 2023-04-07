@@ -1,7 +1,9 @@
 #!/usr/bin/env python3.10
 """Get information about an HTTP code."""
 
-# curl https://developer.mozilla.org/en-US/docs/Web/HTTP/Status > mdn_status.html
+# mkdir -p ~/.local/share/http
+# curl https://developer.mozilla.org/en-US/docs/Web/HTTP/Status > ~/.local/share/http/mdn_status.html
+# pip3.10 install beautifulsoup4
 
 import re
 import sys
@@ -11,10 +13,18 @@ from pathlib import Path
 from bs4 import BeautifulSoup
 
 soup = BeautifulSoup(
-    Path("/Users/rmartine/dev/http_status/mdn_status.html").read_text(), "html.parser"
+    (Path.home() / Path(".local/share/http/mdn_status.html")).read_text(
+        encoding="utf-8"
+    ),
+    "html.parser",
 )
 
 a = soup.find_all(href=f"/en-US/docs/Web/HTTP/Status/{sys.argv[1]}")
+
+if not a:
+    print(f"I do not know about HTTP code {sys.argv[1]}", file=sys.stderr)
+    sys.exit(1)
+
 code_text = a[1].code.text
 description = a[1].parent.fetchNextSiblings()[0].p.text
 
