@@ -687,7 +687,10 @@ brew-get \
     openssl \
     openssh \
     lynx \
-    html2text
+    html2text \
+    direnv \
+    jump \
+    reattach-to-user-namespace
 
 brew unlink openssh # needed so we can UseKeychain
 
