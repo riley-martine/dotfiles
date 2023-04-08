@@ -25,6 +25,9 @@ dotfiles=(
     ["$HOME/.config/git/tokyonight_day.gitconfig"]="git/config/tokyonight_day.gitconfig"
     ["$HOME/.config/git/gitmessage"]="git/config/gitmessage"
 
+    ["$HOME/.config/iterm2/tokyonight_day.itermcolors"]="iterm2/tokyonight_day.itermcolors"
+    ["$HOME/.config/iterm2/com.googlecode.iterm2.plist"]="iterm2/com.googlecode.iterm2.plist"
+
     ["$HOME/.config/bat/"]="bat/config/"
 
     ["$HOME/.config/fish/fish_plugins"]="fish/config/fish_plugins"
