@@ -633,7 +633,7 @@ add-update iterm2 \
     -o ~/.config/fish/conf.d/90_iterm2_shell_integration.fish'
 
 brew tap homebrew/cask-fonts
-brew-get --cask font-roboto
+brew-get --cask font-roboto font-blex-mono-nerd-font
 
 echo "Installing GNU utilities..."
 brew-get \
