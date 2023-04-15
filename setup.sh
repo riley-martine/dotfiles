@@ -1180,6 +1180,19 @@ brew-get --cask calibre
 echo "Installing LibreOffice..."
 brew-get --cask libreoffice
 
+echo "Installing Nextcloud..."
+brew-get --cask nextcloud
+
+echo "Installing veracrypt..."
+brew-get --cask veracrypt
+# TODO print this mayb
+# macfuse requires a kernel extension to work.
+#If the installation fails, retry after you enable it in:
+#  System Preferences → Security & Privacy → General
+
+#For more information, refer to vendor documentation or this Apple Technical Note:
+#  https://developer.apple.com/library/content/technotes/tn2459/_index.html
+
 echo "Installing rectangle..."
 brew-get --cask rectangle
 defaults write "com.knollsoft.Rectangle" SUEnableAutomaticChecks -bool FALSE
