@@ -970,7 +970,7 @@ SHELL=bash source "$HOME/perl5/perlbrew/etc/bashrc"
 set -u
 SHELL=bash perlbrew init
 
-latest="$(perlbrew available | sed -nE 's/.*(perl-.*)/\1/p' | head -n1)"
+latest="$(perlbrew available | /usr/bin/sed -nE 's/.*(perl-.*)/\1/p' | head -n1 | tr -d '[:space:]')"
 if ! perlbrew list | grep -qF "$latest"; then
     perlbrew install "$latest"
 fi
