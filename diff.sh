@@ -36,6 +36,8 @@ dotfiles=(
     ["$HOME/.config/fish/functions/__ssh_agent_is_started.fish"]="fish/config/functions/__ssh_agent_is_started.fish"
     ["$HOME/.config/fish/functions/__ssh_agent_start.fish"]="fish/config/functions/__ssh_agent_start.fish"
 
+    ["$HOME/Library/Application Support/ruff/pyproject.toml"]="ruff/pyproject.toml"
+
     ["$HOME/Documents/Tokyonight Day.terminal"]="terminal.app/Tokyonight Day.terminal"
 
     ["$HOME/bin/"]="bin"

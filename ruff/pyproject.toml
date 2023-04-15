@@ -1,0 +1,13 @@
+[tool.ruff]
+# https://beta.ruff.rs/docs/rules/
+# https://beta.ruff.rs/docs/settings
+
+select = [ "F", "E", "W", "C90", "I", "N", "UP", "ANN", "S", "B", "A", "C4", "EXE", "ISC", "ICN", "INP", "PIE", "RET", "SIM", "TID", "TCH", "PTH", "ARG", "ERA", "PLC", "PLE", "PLR", "PLW", "RUF"]
+
+# Ignore:
+# E501 line too long
+# pydocstyle rules to ensure docstring exists (I know already)
+# ANN101 self does not need to be typed
+ignore = [ "E501", "ANN101", "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107"]
+
+target-version = "py38"
