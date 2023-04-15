@@ -7,6 +7,8 @@ set -euo pipefail
 
 # TODO allowed patch for e.g. work starship.toml
 # TODO something about WIZARD and other symlinks
+# TODO why are things printed three times oops
+# TODO merge tomls for work starship
 
 declare -A dotfiles
 dotfiles=(
