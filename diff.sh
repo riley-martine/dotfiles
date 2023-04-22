@@ -20,6 +20,8 @@ dotfiles=(
 
     ["$HOME/.vale.ini"]="vale/.vale.ini"
 
+    ["$HOME/.alexrc.js"]="alex/.alexrc.js"
+
     ["$HOME/.config/starship.toml"]="starship/starship.toml"
 
     ["$HOME/.gitconfig"]="git/.gitconfig"
