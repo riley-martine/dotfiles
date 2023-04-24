@@ -1559,6 +1559,8 @@ cd -
 # TODO version control torrent scripts + plist
 #     AND BREW THEM HOLY HELL SERVICES
 # TODO Syncthing
+# TODO https://github.com/tmux/tmux/issues/3218
+# TODO undercurl proper tic overrides
 
 echo "The following must be done manually:"
 echo '  - Finder -> Preferences -> Sidebar
