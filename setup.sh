@@ -1454,6 +1454,16 @@ fi
 ~/.tmux/plugins/tpm/bin/update_plugins all
 add-update tpm '~/.tmux/plugins/tpm/bin/update_plugins all'
 
+# See also:
+# https://gist.github.com/bbqtd/a4ac060d6f6b9ea6fe3aabe735aa9d95
+# https://github.com/tmux/tmux/issues/2262
+echo "Adding tmux terminal info..."
+umask 077
+file=$(mktemp)
+[ -f "${file}" ] && curl --silent https://gist.githubusercontent.com/nicm/ea9cf3c93f22e0246ec858122d9abea1/raw/37ae29fc86e88b48dbc8a674478ad3e7a009f357/tmux-256color >"${file}"
+sudo /usr/bin/tic -x "${file}"
+rm "${file}"
+
 echo "Installing vim conf..."
 copy_dotfile "vim/vimrc" "$HOME/.vim/vimrc"
 curl --no-progress-bar -fLo  ~/.vim/autoload/plug.vim --create-dirs \
