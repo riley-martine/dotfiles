@@ -1457,7 +1457,7 @@ add-update tpm '~/.tmux/plugins/tpm/bin/update_plugins all'
 # See also:
 # https://gist.github.com/bbqtd/a4ac060d6f6b9ea6fe3aabe735aa9d95
 # https://github.com/tmux/tmux/issues/2262
-echo "Adding tmux terminal info..."
+echo "Adding tmux-256color terminal info..."
 umask 077
 file=$(mktemp)
 [ -f "${file}" ] && curl --silent https://gist.githubusercontent.com/nicm/ea9cf3c93f22e0246ec858122d9abea1/raw/37ae29fc86e88b48dbc8a674478ad3e7a009f357/tmux-256color >"${file}"
