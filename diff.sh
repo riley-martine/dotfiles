@@ -19,6 +19,7 @@ dotfiles=(
     ["$HOME/.vim/syntax/"]="vim/syntax"
 
     ["$HOME/.vale.ini"]="vale/.vale.ini"
+    ["$HOME/.shellcheckrc"]="shellcheck/.shellcheckrc"
 
     ["$HOME/.alexrc.js"]="alex/.alexrc.js"
 
