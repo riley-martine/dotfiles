@@ -1208,6 +1208,12 @@ echo "Follow prompts in app, then press enter to continue."
 read -r
 echo "Done installing rectangle."
 
+echo "Installing moonlander config software..."
+# brew tap homebrew/cask-drivers
+brew-get zsa-wally libusb
+go install github.com/zsa/wally-cli@latest
+# TODO flash firmware
+
 # TODO add bitwarden
 # https://github.com/kcrawford/dockutil/issues/127
 # https://github.com/pivotal/workstation-setup/blob/main/scripts/common/configuration-osx.sh
