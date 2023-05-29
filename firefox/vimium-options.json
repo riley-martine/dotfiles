@@ -1,0 +1,158 @@
+{
+  "settingsVersion": "1.67.6",
+  "exclusionRules": [
+    {
+      "pattern": "https?://mail.google.com/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://www.youtube.com/*",
+      "passKeys": "f"
+    },
+    {
+      "pattern": "https?://github.com/sessions/**",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://accounts.google.com/*",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://accounts.google.com/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://hackertyper.io/*",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://hackertyper.io/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://www.yourworldoftext.com/*",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://www.yourworldoftext.com/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://implicit.harvard.edu/*",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://implicit.harvard.edu/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://docs.google.com/*",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://docs.google.com/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://www.yourmorals.org/*",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://www.yourmorals.org/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://word-edit.officeapps.live.com/*",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://word-edit.officeapps.live.com/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://prodduke-my.sharepoint.com/*",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://prodduke-my.sharepoint.com/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://accounts.google.com/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://cloud.digitalocean.com/*",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://cloud.digitalocean.com/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://animixplay.to/*",
+      "passKeys": "t"
+    },
+    {
+      "pattern": "https?://animixplay.to/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://codeinterview.io/*",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://codeinterview.io/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://sigilengine.com/*",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://sigilengine.com/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://www.youtube.com/*",
+      "passKeys": "v"
+    },
+    {
+      "pattern": "https?://www.youtube.com/*",
+      "passKeys": "o"
+    },
+    {
+      "pattern": "https?://www.youtube.com/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://hackertyper.com/*",
+      "passKeys": "*"
+    },
+    {
+      "pattern": "https?://hackertyper.com/*",
+      "passKeys": ""
+    },
+    {
+      "pattern": "https?://github.com/*",
+      "passKeys": ""
+    }
+  ],
+  "filterLinkHints": false,
+  "waitForEnterForFilteredHints": true,
+  "hideHud": false,
+  "keyMappings": "# Insert your preferred key mappings here.\n# Make up/down work as expected\nunmap J\nunmap K\nmap J nextTab\nmap K previousTab",
+  "linkHintCharacters": "sadfjklewcmpgh",
+  "linkHintNumbers": "0123456789",
+  "newTabUrl": "about:newtab",
+  "nextPatterns": "==>,next,more,newer,>,›,→,»,≫,>>",
+  "previousPatterns": "prev,previous,back,older,<,‹,←,«,≪,<<",
+  "regexFindMode": false,
+  "ignoreKeyboardLayout": false,
+  "scrollStepSize": 60,
+  "smoothScroll": true,
+  "grabBackFocus": false,
+  "searchEngines": "w: https://www.wikipedia.org/w/index.php?title=Special:Search&search=%s Wikipedia\n\n# More examples.\n#\n# (Vimium supports search completion Wikipedia, as\n# above, and for these.)\n#\ng: https://www.google.com/search?q=%s Google\ny: https://www.youtube.com/results?search_query=%s Youtube\nd: https://duckduckgo.com/?q=%s DuckDuckGo\nhn: https://www.hnsearch.com/search#request/submissions&q=%s&start=0 HackerNews\ndef: http://dictionary.com/browse/%s Dictionary\nsyn: http://thesaurus.com/browse/%s Thesaurus\nway: https://web.archive.org/web/*/%s Wayback\nr: https://www.reddit.com/r/%s Subreddit\naz: https://www.amazon.com/s/?field-keywords=%s Amazon\nud: https://www.urbandictionary.com/define.php?term=%s UrbanDictionary\nwa: http://www.wolframalpha.com/input/?i=%s Wolfram|Alpha",
+  "searchUrl": "https://duckduckgo.com/?q=",
+  "userDefinedLinkHintCss": "div > .vimiumHintMarker {\n/* linkhint boxes */\nbackground: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFF785),\n  color-stop(100%,#FFC542));\nborder: 1px solid #E3BE23;\n}\n\ndiv > .vimiumHintMarker span {\n/* linkhint text */\ncolor: black;\nfont-weight: bold;\nfont-size: 12px;\n}\n\ndiv > .vimiumHintMarker > .matchingCharacter {\n}"
+}
