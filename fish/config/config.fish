@@ -37,6 +37,11 @@ abbr -a auto_clone_cd --position command --regex ".+\.git" --function git_clone_
 abbr -a auto_clone_cd_p --position command --regex "^git@.+" --function git_clone_into
 abbr -a auto_clone_cd_h --position command --regex "^https://github\.com.+" --function git_clone_into
 
+function vim_edit
+    echo vim $argv
+end
+abbr -a vim_edit_texts --position command --regex ".+\.(txt|java|py|ts|tsx)" --function vim_edit
+
 # Read: xargs multiple
 # https://stackoverflow.com/questions/6958689/running-multiple-commands-with-xargs
 abbr -a XM --position anywhere --set-cursor '| gxargs -d \'\n\' bash -c \'for arg do % "$arg"; done\' _'
@@ -209,6 +214,10 @@ abbr -a vimfish 'vim ~/.config/fish/config.fish'
 abbr -a refish 'source ~/.config/fish/config.fish'
 abbr -a newfish 'exec fish -l'
 
+# iterm2's semantic history is better actually ;.;
+# unless I can figure out how to make it open OSC 8 hyperlinks in vim
+# mayyybe auto-adding a #0 to them? https://iterm2.com/documentation-escape-codes.html
+# alias ls 'gls --color=always --hyperlink=always'
 abbr -a lsa 'ls -lah'
 
 # https://unix.stackexchange.com/questions/631733/how-to-write-a-command-to-history-in-fish-shell

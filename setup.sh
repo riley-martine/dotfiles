@@ -632,6 +632,11 @@ add-update iterm2 \
     'curl -L --no-progress-bar https://iterm2.com/shell_integration/fish \
     -o ~/.config/fish/conf.d/90_iterm2_shell_integration.fish'
 
+# Makes copying dotfiles easier
+# https://imarslo.gitbook.io/handbook/gitbook/app/iterm2
+# TODO check out this doc more
+defaults write com.googlecode.iterm2 "Coprocess MRU" -int 0
+
 brew tap homebrew/cask-fonts
 brew-get --cask font-roboto font-blex-mono-nerd-font
 
