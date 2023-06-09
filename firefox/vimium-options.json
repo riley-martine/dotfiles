@@ -10,10 +10,6 @@
       "passKeys": "f"
     },
     {
-      "pattern": "https?://github.com/sessions/**",
-      "passKeys": "*"
-    },
-    {
       "pattern": "https?://accounts.google.com/*",
       "passKeys": "*"
     },
@@ -134,8 +130,8 @@
       "passKeys": ""
     },
     {
-      "pattern": "https?://github.com/*",
-      "passKeys": ""
+      "pattern": "https?://ciechanow.ski/*",
+      "passKeys": "*"
     }
   ],
   "filterLinkHints": false,
