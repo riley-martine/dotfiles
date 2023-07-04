@@ -1582,6 +1582,7 @@ cd -
 # TODO Syncthing
 # TODO https://github.com/tmux/tmux/issues/3218
 # TODO undercurl proper tic overrides
+# TODO https://github.com/term7/MacOS-Privacy-and-Security-Enhancements/tree/main
 
 echo "The following must be done manually:"
 echo '  - Finder -> Preferences -> Sidebar
