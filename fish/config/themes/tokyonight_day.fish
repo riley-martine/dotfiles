@@ -1,6 +1,6 @@
     # TokyoNight Color Palette
     set -l foreground 3760bf
-    set -l selection 99a7df
+    set -l selection b6bfe2
     set -l comment 848cb5
     set -l red f52a65
     set -l orange b15c00
@@ -32,5 +32,3 @@
     set -g fish_pager_color_completion $foreground
     set -g fish_pager_color_description $comment
     set -g fish_pager_color_selected_background --background=$selection
-
-  

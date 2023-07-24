@@ -50,6 +50,8 @@
 	rebase-master = "!git fetch origin master:master && git rebase master"
 	rebase-main = "!git fetch origin main:main && git rebase main"
 	# https://softwaredoug.com/blog/2022/11/09/idiot-proof-git-aliases.html
+	# TODO impl remote tracking branch https://github.com/paulirish/git-open/blob/f772364eb8538411e6dbcf1f7cc23b958e190c8c/git-open#L60
+	# TODO test detached HEAD
 	pr = "!f() { \
 		open \"$(git ls-remote --get-url $(git config --get branch.$(git rev-parse --abbrev-ref HEAD).remote) \
 			| sed 's|git@github.com:\\(.*\\)$|https://github.com/\\1|' \
@@ -58,11 +60,14 @@
 			git config --get branch.$(git rev-parse --abbrev-ref HEAD).merge | cut -d '/' -f 3- \
 		)?expand=1\"; \
 		}; f"
-	# TODO impl remote tracking branch https://github.com/paulirish/git-open/blob/f772364eb8538411e6dbcf1f7cc23b958e190c8c/git-open#L60
-	# TODO test detached HEAD
 	hub = "!f() { \
-		baseURL=\"$(git ls-remote --get-url \
-			| sed 's|git@github.com:\\(.*\\)$|https://github.com/\\1|' \
+		if git remote get-url upstream >/dev/null 2>&1; then \
+			baseURL=\"$(git ls-remote --get-url upstream)\"; \
+		else \
+			baseURL=\"$(git ls-remote --get-url)\"; \
+		fi; \
+		baseURL=\"$(echo \"$baseURL\" \
+			| sed '/^http/! s|.*:\\(.*\\)$|https://github.com/\\1|' \
 			| sed 's|\\.git$||'; \
 		)\"; \
 		branch=\"$(git branch --show-current)\"; \
@@ -70,8 +75,8 @@
 		git branch -r | grep -q \"$branch\" || branch=\"$remoteMainBranch\"; \
 		gitRoot=\"$(git rev-parse --show-toplevel)\"; \
 		cd -- ${GIT_PREFIX:-.}; \
-		path=\"$(realpath --relative-to=\"$gitRoot\" \"${1:-$PWD}\")\"; \
-		open \"${baseURL}/tree/${branch}/${path}${2:+#L$2}\"; \
+		path=\"$(grealpath --relative-to=\"$gitRoot\" \"${1:-$PWD}\")\"; \
+		open \"${baseURL}/tree/${branch}/${path}${2:+#L$2}${3:+-L$3}\"; \
 	}; f"
 	change-email = "git-filter-repo --email-callback 'return email.replace(b\"${1:-}\", b\"${2:-}\")'"
 	whoami = "!f() { \
@@ -79,21 +84,25 @@
 		echo \"signing key: $(git config --get-all user.signingKey)\"; \
 		echo \"github: $(git config --get-all github.user)\"; \
 		}; f"
+	recent-branches-local = "!git for-each-ref --sort=committerdate refs/heads/ --format='%(refname:short) %(committerdate)'"
+	recent-branches-all = "!git for-each-ref --sort=committerdate refs/heads/ refs/remotes/ --format='%(refname:short) %(committerdate)'"
 [commit]
 	gpgsign = true
 	template = ~/.config/git/gitmessage
 [gpg]
 	program = gpg
 [merge]
-	conflictstyle = diff3
+	; conflictstyle = diff3
 [diff]
 	colorMoved = default
 [delta]
 	navigate = true  # use n and N to move between diff sections
 	light = true
 	hyperlinks = true
+	hyperlinks-file-link-format = "file://{path}#{line}"
 	line-numbers = true
 	side-by-side = true
+	wrap-max-lines = 100
 [delta "dark-mode"]
 	light = false
 [include]
@@ -106,3 +115,5 @@
 	manyFiles = true
 [protocol "file"]
 	allow = always
+[submodule]
+	recurse = true

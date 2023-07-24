@@ -195,7 +195,6 @@ pip-selfcheck.json
 .clang-format
 
 ## Diff
-*.patch
 *.diff
 
 ## Dropbox settings and caches

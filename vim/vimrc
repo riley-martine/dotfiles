@@ -21,6 +21,8 @@ let g:ale_lint_on_text_changed = 0
 let g:ale_lint_on_enter = 0
 let g:ale_sign_column_always = 1
 
+" let g:ycm_auto_trigger = 0
+let g:ycm_key_invoke_completion = '<C-o>'
 if &shell =~# 'fish$'
     set shell=/usr/bin/env\ bash
 endif
@@ -63,6 +65,11 @@ Plug 'embear/vim-localvimrc'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'airblade/vim-gitgutter'
 
+
+Plug 'roxma/vim-hug-neovim-rpc'
+Plug 'SpaceVim/nvim-yarp'
+Plug 'raghur/vim-ghost', {'do': '/opt/homebrew/bin/python3 -m pip install --user -r ~/.vim/plugged/vim-ghost/requirements_posix.txt'}
+
 " LSP/ALE
 " Make sure you have auxilary linters/fixers installed for ale
 " https://github.com/dense-analysis/ale/blob/master/supported-tools.md
@@ -77,14 +84,27 @@ Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoUpdateBinaries' }
 " \/ Also does sleuth (indent detection) for some reason...
 Plug 'sheerun/vim-polyglot'
 "Plug 'lervag/vimtex'
-"Plug 'rust-lang/rust.vim'
-"Plug 'arzg/vim-rust-syntax-ext'
-"Plug 'rhysd/rust-doc.vim'
+Plug 'rust-lang/rust.vim'
+Plug 'arzg/vim-rust-syntax-ext'
+Plug 'rhysd/rust-doc.vim'
+Plug 'seanyeh/talon.vim'
 
 call plug#end()
 if has('autocmd')
     filetype plugin indent on
 endif
+
+let g:ghost_darwin_app = 'iTerm2'
+function! s:SetupGhostBuffer()
+    if match(expand("%:a"), '\v/ghost-(github|reddit)\.com-')
+        set ft=markdown
+    endif
+endfunction
+
+augroup vim-ghost
+    au!
+    au User vim-ghost#connected call s:SetupGhostBuffer()
+augroup END
 
 set shortmess-=A  " https://github.com/sheerun/vim-polyglot/issues/765"
 set shortmess-=S  " Show count of matches
@@ -385,23 +405,11 @@ if executable(s:clip)
     augroup END
 endif
 
-" https://coderwall.com/p/if9mda/automatically-set-paste-mode-in-vim-when-pasting-in-insert-mode
-let &t_SI .= "\<Esc>[?2004h"
-let &t_EI .= "\<Esc>[?2004l"
-
-inoremap <special> <expr> <Esc>[200~ XTermPasteBegin()
-
 " press space in visual-block mode to prepend a space to the block (and re-select it)
 xnoremap <Space> I<Space><Esc>gvlolo
 " or tab (only sort of works - doesn't highlight correctly when not moving
 " by softtabstop. Do a space then a tab to see.)
 xnoremap <Tab> I<Tab><Esc>:<C-u>execute "normal gv" . &l:softtabstop . "lo" . &l:softtabstop . "lo"<CR>
-
-function! XTermPasteBegin()
-  set pastetoggle=<Esc>[201~
-  set paste
-  return ''
-endfunction
 
 " TODO teach how to fold subheadings
 " from: https://github.com/samrocketman/home/blob/main/dotfiles/.vimrc
@@ -578,8 +586,21 @@ augroup switching
 
   " Save on focus lost
   au FocusGained,BufEnter * :silent! checktime
-  autocmd FocusLost * silent! wa
+  " autocmd FocusLost * silent! wa
 augroup END
+
+" https://superuser.com/questions/132029/how-do-you-reload-your-vimrc-file-without-restarting-vim
+augroup vimrc     " Source vim configuration upon save
+  autocmd!
+
+  " TODO fix this not displaying some characters on reload
+  autocmd! BufWritePost $MYVIMRC source $MYVIMRC | echom "Reloaded " . $MYVIMRC | AirlineRefresh | redraw!
+  autocmd! BufWritePost $MYGVIMRC if has('gui_running') | so % | echom "Reloaded " . $MYGVIMRC | endif | redraw
+augroup END
+
+" Quickly open/reload vim
+nnoremap <leader>ev :split $MYVIMRC<CR>
+nnoremap <leader>sv :source $MYVIMRC<CR>
 
 " run :GoBuild or :GoTestCompile based on the go file
 function! s:build_go_files()
@@ -615,6 +636,12 @@ command! Wq wq
 
 command! TOC r!toc.pl "%:p"
 
+" Open GitHub to the current file, at the current line number(s)
+" See ~/.gitconfig for hub mapping
+nnoremap <leader>ghf :r!git hub "%:p"<CR>
+nnoremap <leader>ghl :r!git hub "%:p" <C-R>=line(".")<CR><CR>
+vnoremap <leader>ghl :r!git hub "%:p" <C-R>=line("'<")<CR> <C-R>=line("'>")<CR><CR>
+
 augroup NERDTree
     autocmd!
     " open NERDTree if no files specified
@@ -627,6 +654,8 @@ augroup END
 " Toggle NERDTree with <C-n>
 map <C-n> :NERDTreeToggle<CR>
 let NERDTreeIgnore = ['\.pyc$', '__pycache__']
+
+let g:TerminusAssumeITerm=1
 
 " https://github.com/dense-analysis/ale/commit/5453e0e1a43302226da1d1d753e162af0231f9d3
 " let g:localvimrc_sandbox=0
@@ -648,6 +677,7 @@ let g:ycm_language_server =
   \   },
   \ ]
 imap <silent> <C-l> <Plug>(YCMToggleSignatureHelp)
+imap <M-c> <plug>(YCMComplete)
 nnoremap <leader>fw <Plug>(YCMFindSymbolInWorkspace)
 nnoremap <leader>fd <Plug>(YCMFindSymbolInDocument)
 nnoremap <leader>jd :YcmCompleter GoTo<CR>
@@ -655,7 +685,7 @@ let g:ycm_auto_hover = ''
 let g:ycm_autoclose_preview_window_after_insertion = 1
 let g:ycm_complete_in_strings = 0
 
-"Just disable al YCM diagnostic options
+"Just disable all YCM diagnostic options
 let g:ycm_enable_diagnostic_signs = 0
 let g:ycm_enable_diagnostic_highlighting = 0
 let g:ycm_echo_current_diagnostic = 0
@@ -696,6 +726,7 @@ let g:ale_set_highlights = 0
 let g:go_def_mode='gopls'
 let g:go_info_mode='gopls'
 
+let g:lsp_settings_filetype_python = ['pyright-langserver', 'ruff-lsp']
 
 " Let vim-go handle linting.
 " Disable checkstyle for java for now. TODO enable it only if project specific
@@ -706,7 +737,7 @@ let g:ale_rust_cargo_use_clippy = 1
 let g:ale_linters = {
 \   'go': [],
 \   'java': ['javac', 'pmd'],
-\   'python': ['bandit', 'mypy', 'pylint', 'vulture', 'pylsp'],
+\   'python': ['mypy'],
 \   'markdown': ['alex', 'vale', 'markdownlint'],
 \   'lua': ['luac', 'selene'],
 \   'typescript': ['eslint'],
@@ -725,6 +756,7 @@ let g:ale_linters = {
 " languagetool/markdown
 
 let g:ale_fixers = {
+\   'python': ['isort', 'black', 'autoflake', 'ruff'],
 \   'sh': ['remove_trailing_lines', 'trim_whitespace'],
 \   'tex': ['remove_trailing_lines', 'trim_whitespace', 'latexindent'],
 \   'text': ['remove_trailing_lines', 'trim_whitespace'],
@@ -736,7 +768,6 @@ let g:ale_fixers = {
 \   'javascript': ['remove_trailing_lines', 'trim_whitespace', 'prettier', 'eslint'],
 \   'typescript': ['remove_trailing_lines', 'trim_whitespace', 'prettier'],
 \   'typescriptreact': ['remove_trailing_lines', 'trim_whitespace'],
-\   'python': ['isort', 'black', 'autoflake'],
 \   'puppet': ['puppetlint'],
 \   'lua': ['stylua', 'remove_trailing_lines', 'trim_whitespace'],
 \   'perl': ['perltidy'],
@@ -750,7 +781,7 @@ let g:ale_markdown_pandoc_options = '-f gfm -t gfm -s --columns=80  -'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_python_flake8_options = '--ignore=E501'
 let g:ale_python_pylint_options = '--disable=C0412'
-let g:ale_python_mypy_options = '--ignore-missing-imports --strict'
+let g:ale_python_mypy_options = '--ignore-missing-imports'
 " let g:ale_python_pylsp_config = ''
 let g:ale_sh_shfmt_options = '-i=4 -ci -sr -kp'
 let g:ale_sh_bashate_options = '-i E006'

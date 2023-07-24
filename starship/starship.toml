@@ -6,20 +6,19 @@ $shlvl\
 $singularity\
 $kubernetes\
 $directory\
+$python\
 $git_branch\
 $git_commit\
 $git_state\
 $git_metrics\
 $git_status\
-$docker_context\
+${custom.itermpath}\
 $package\
 $memory_usage\
-$aws\
 $gcloud\
 $openstack\
 $azure\
 $env_var\
-$custom\
 $jobs\
 $battery\
 $status\
@@ -60,6 +59,10 @@ error_symbol = "[ ☿](bold #587539)" # we handle errors by displaying the code
 min_time = 10_000  # Show command duration over 10,000 milliseconds (= 10 sec)
 format = "took [$duration]($style) "
 style = "bold #587539"
+
+[python]
+style = "bold #92a6d5"
+format = '[(\($virtualenv\))]($style)'
 
 [directory]
 truncation_length = 3
@@ -137,3 +140,10 @@ disabled = false
 style = "bold #8990b3"
 detect_folders = ["charts"]
 detect_files = ["kustomization.yaml"]
+
+[custom.itermpath]
+description = "Special tmux escape codes to tell iTerm about the path"
+command = """ printf "\\033Ptmux;\\033\\033]1337;CurrentDir=%s\\007\\033\\\\" $PWD """
+when = """ test "$TERM" = tmux-256color && test "$STARSHIP_SHELL" = fish """
+shell = ["sh"]
+format = "$output"

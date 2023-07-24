@@ -1,1 +1,3 @@
-starship init fish | source
+# starship init fish | source
+# must.. go... faster...
+source (/opt/homebrew/bin/starship init fish --print-full-init | psub)

@@ -40,7 +40,7 @@ abbr -a auto_clone_cd_h --position command --regex "^https://github\.com.+" --fu
 function vim_edit
     echo vim $argv
 end
-abbr -a vim_edit_texts --position command --regex ".+\.(txt|java|py|ts|tsx)" --function vim_edit
+abbr -a vim_edit_texts --position command --regex "^[^.].+\.(txt|java|py|ts|tsx)" --function vim_edit
 
 # Read: xargs multiple
 # https://stackoverflow.com/questions/6958689/running-multiple-commands-with-xargs
