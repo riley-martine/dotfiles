@@ -1014,7 +1014,6 @@ brew-get cfn-lint
 
 # css
 npm i -g vscode-langservers-extracted
-npm install -g csslint
 
 # docker
 npm install -g dockerfile_lint
