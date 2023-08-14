@@ -718,7 +718,8 @@ brew-get \
     ripgrep \
     ripgrep-all \
     hyperfine \
-    tz
+    tz \
+    mdcat
 
 add-update tldr 'tldr --update'
 
@@ -1582,6 +1583,7 @@ cd -
 # TODO https://github.com/tmux/tmux/issues/3218
 # TODO undercurl proper tic overrides
 # TODO https://github.com/term7/MacOS-Privacy-and-Security-Enhancements/tree/main
+# TODO https://furbo.org/2015/03/30/paste-without-style/
 
 echo "The following must be done manually:"
 echo '  - Finder -> Preferences -> Sidebar
