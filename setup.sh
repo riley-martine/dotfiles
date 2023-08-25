@@ -1468,6 +1468,7 @@ add-update tpm '~/.tmux/plugins/tpm/bin/update_plugins all'
 # See also:
 # https://gist.github.com/bbqtd/a4ac060d6f6b9ea6fe3aabe735aa9d95
 # https://github.com/tmux/tmux/issues/2262
+# TODO switch to https://gpanders.com/blog/the-definitive-guide-to-using-tmux-256color-on-macos/
 echo "Adding tmux-256color terminal info..."
 umask 077
 file=$(mktemp)

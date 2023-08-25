@@ -73,7 +73,7 @@ function compare_file {
 
     echo "=================================================================================="
     echo "edit files:"
-    echo "  vim $LOCAL $GIT +vsplit  -c ':1' -c ':wincmd l' -c ':bnext' -c ':1'"
+    echo "  vimdiff $LOCAL $GIT"
     echo "clobber local:"
     echo " command cp $GIT $LOCAL"
     echo "clobber remote:"

@@ -126,8 +126,10 @@ if type -q exa
 end
 
 
-if type -q bat
-    alias cat 'bat --paging=never'
+if status --is-interactive
+    if type -q bat
+        alias cat 'bat --paging=never'
+    end
 end
 
 alias rg 'rg --ignore-case'
@@ -237,7 +239,7 @@ function p
     set file (fzf --preview 'bat --color "always" {}' --bind='ctrl-o:accept')
     if string length -q $file
         # This way you can arrow up->enter to re-open
-        add_history_entry "vim $file"
+        add_history_entry "vim '$file'"
         vim $file
     end
 end
@@ -247,14 +249,17 @@ function pa
     set file (fzf --hidden --preview 'bat --color "always" {}' --bind='ctrl-o:accept')
     if string length -q $file
         # This way you can arrow up->enter to re-open
-        add_history_entry "vim $file"
+        add_history_entry "vim '$file'"
         vim $file
     end
 end
 
 bind \cp 'p'
 bind \cx edit_command_buffer
+# Lets us Ctrl-Z to both background and foreground
 bind \cz 'fg 2>/dev/null; commandline -f repaint'
+# Ctrl-C clears the screen on an empty command line
+bind \cc 'if test -z (commandline); clear; commandline -f repaint; else; __fish_cancel_commandline; end'
 
 alias rm 'rm -i'
 alias cp 'cp -i'
@@ -266,4 +271,5 @@ abbr -a hm 'history merge'
 set fish_greeting
 source ~/.config/fish/themes/tokyonight_day.fish
 set -x BAT_THEME 'tokyonight_day'
+set -x --path --append TERMINFO_DIRS $HOME/.local/share/terminfo
 # end

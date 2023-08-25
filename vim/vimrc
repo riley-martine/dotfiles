@@ -65,11 +65,6 @@ Plug 'embear/vim-localvimrc'
 Plug 'editorconfig/editorconfig-vim'
 Plug 'airblade/vim-gitgutter'
 
-
-Plug 'roxma/vim-hug-neovim-rpc'
-Plug 'SpaceVim/nvim-yarp'
-Plug 'raghur/vim-ghost', {'do': '/opt/homebrew/bin/python3 -m pip install --user -r ~/.vim/plugged/vim-ghost/requirements_posix.txt'}
-
 " LSP/ALE
 " Make sure you have auxilary linters/fixers installed for ale
 " https://github.com/dense-analysis/ale/blob/master/supported-tools.md
@@ -83,16 +78,26 @@ Plug 'vim-test/vim-test'
 Plug 'fatih/vim-go', { 'for': 'go', 'do': ':GoUpdateBinaries' }
 " \/ Also does sleuth (indent detection) for some reason...
 Plug 'sheerun/vim-polyglot'
-"Plug 'lervag/vimtex'
+Plug 'YaBoiBurner/adblock-syntax.vim'
+Plug 'lervag/vimtex'
 Plug 'rust-lang/rust.vim'
 Plug 'arzg/vim-rust-syntax-ext'
 Plug 'rhysd/rust-doc.vim'
 Plug 'seanyeh/talon.vim'
+Plug 'benknoble/vim-racket'
+Plug 'benknoble/scribble.vim'
+
+Plug 'roxma/vim-hug-neovim-rpc'
+Plug 'SpaceVim/nvim-yarp'
+Plug 'raghur/vim-ghost', {'do': '/opt/homebrew/bin/python3 -m pip install --user -r ~/.vim/plugged/vim-ghost/requirements_posix.txt'}
 
 call plug#end()
 if has('autocmd')
     filetype plugin indent on
 endif
+
+let g:racket_hash_lang_dict = { 'pollen': 'pollen.scribble.racket' }
+au BufRead,BufNewFile *.pp,*.pmd,*.pm,*.p,*.ptree call RacketDetectHashLang()
 
 let g:ghost_darwin_app = 'iTerm2'
 function! s:SetupGhostBuffer()
@@ -328,6 +333,24 @@ nnoremap j gj
 nnoremap k gk
 nnoremap gj j
 nnoremap gk k
+
+if &diff
+  " Jump to next change, then prev change. This puts us on the first change
+  " even if it is on line 1.
+  " https://vi.stackexchange.com/questions/3552/navigate-to-first-diff-in-diff-mode-on-startup
+  autocmd VimEnter * normal! ]c[c
+
+  " Don't know if I need the if block
+  " autocmd VimEnter *
+  " \ if line("'\"") >= 1 && line("'\"") <= line("$")
+  " \ |   exe "normal! ]c[c"
+  " \ | endif
+
+
+  " Jump to next change after getting or putting a chunk
+  nnoremap do <Cmd>diffget<CR>]c
+  nnoremap dp <Cmd>diffput<CR>]c
+endif
 "------------------------------------------------------------
 
 " Put plugins and dictionaries in this dir (also on Windows)
@@ -389,7 +412,7 @@ augroup vimStartup
   " (happens when dropping a file on gvim) and for a commit message (it's
   " likely a different one than last time).
   autocmd BufReadPost *
-    \ if line("'\"") >= 1 && line("'\"") <= line("$") && &ft !~# 'commit'
+    \ if line("'\"") >= 1 && line("'\"") <= line("$") && &ft !~# 'commit' && ! &diff
     \ |   exe "normal! g`\""
     \ | endif
 
@@ -840,6 +863,10 @@ set t_Co=256
 set background=light
 " let g:tokyonight_style = 'day'
 " colorscheme tokyonight
+
+" Undercurl
+let &t_Cs = "\e[4:3m"
+let &t_Ce = "\e[4:0m"
 
 " Tells you what group is below cursor for highlighting purposes
 function! SynStack()
