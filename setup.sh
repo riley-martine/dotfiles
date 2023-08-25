@@ -1303,7 +1303,7 @@ if ! gpg --list-secret-keys | grep -q github; then
               --with-colons --batch --status-fd=1 \
               --passphrase "$GPG_PASS" \
               --quick-generate-key \
-                  "Riley Martine (github) <riley.martine@protonmail.com>" \
+              "Oneirophage (codeberg) <oneirophage@pm.me>" \
                   default cert 1y |
             sed -E -n 's/\[GNUPG:\] KEY_CREATED P (.*)/\1/p'
     )"
