@@ -14,10 +14,12 @@ bold=$(tput bold)
 normal=$(tput sgr0)
 
 if [ "$(uname)" = Darwin ]; then
-    eval "$(ssh-agent)"
-    ssh-add --apple-load-keychain
+    eval "$(/usr/bin/ssh-agent)"
+    /usr/bin/ssh-add --apple-load-keychain
 fi
 
+# TODO parallelize
+# TODO collect failed logs and print them at the end
 failed=()
 for script in "$update_dir"/*; do
     echo "${bold}RUNNING SCRIPT: $(basename "$script")${normal}"

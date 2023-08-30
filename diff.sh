@@ -61,12 +61,13 @@ function compare_file {
 
     if ! [ -f "$GIT" ]; then
         echo "=================================================================================="
+        # TODO doesn't work in tmux scrollback
         echo "$GIT does not exist. Run:" >&2
-        echo " cp $LOCAL $GIT"
+        printf " cp \033]8;;file://%s\033\\%s\033]8;;\033\\ %s\n" "$LOCAL" "$LOCAL" "$GIT"
         return 0
     fi
 
-    if PAGER='cat' delta --width "$(tput cols)" "$(realpath "$LOCAL")" "$GIT"; then
+    if diff -u --strip-trailing-cr "$(realpath "$LOCAL")" "$GIT" | delta --pager cat --width "$(tput cols)"; then
         # echo "EQUAL: $LOCAL $GIT"
         return 0
     fi

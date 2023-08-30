@@ -96,8 +96,12 @@ if has('autocmd')
     filetype plugin indent on
 endif
 
-let g:racket_hash_lang_dict = { 'pollen': 'pollen.scribble.racket' }
+if !empty($IS_WORK)
+  " We use puppet at work
+  " TODO: make this more robust and work for both
+  let g:racket_hash_lang_dict = { 'pollen': 'pollen.scribble.racket' }
 au BufRead,BufNewFile *.pp,*.pmd,*.pm,*.p,*.ptree call RacketDetectHashLang()
+endif
 
 let g:ghost_darwin_app = 'iTerm2'
 function! s:SetupGhostBuffer()
@@ -545,6 +549,15 @@ augroup ft_vim
   \ setlocal tabstop=2
   \ | setlocal softtabstop=2
   \ | setlocal shiftwidth=2
+
+  " Don't highlight vim9script '#' comments unless we're really using vim9
+  " See: vim/runtime/ftplugin/vim.vim
+  autocmd FileType vim
+    \ if "\n" .. getline(1, 10)->join("\n") !~# '\n\s*vim9\%[script]\>'
+    \ |   syn clear vim9Comment
+    \ |   syn clear vim9LineComment
+    \ | endif
+
 
 augroup END
 

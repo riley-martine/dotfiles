@@ -60,6 +60,7 @@
 			git config --get branch.$(git rev-parse --abbrev-ref HEAD).merge | cut -d '/' -f 3- \
 		)?expand=1\"; \
 		}; f"
+	# Open file ($1) in GitHub, optionally from line $2 to $3.
 	hub = "!f() { \
 		if git remote get-url upstream >/dev/null 2>&1; then \
 			baseURL=\"$(git ls-remote --get-url upstream)\"; \
@@ -87,6 +88,8 @@
 	mirror-main = "! git checkout main && git remote update && git reset --hard upstream/main -- && git push --force-with-lease"
 	recent-branches-local = "!git for-each-ref --sort=committerdate refs/heads/ --format='%(refname:short) %(committerdate)'"
 	recent-branches-all = "!git for-each-ref --sort=committerdate refs/heads/ refs/remotes/ --format='%(refname:short) %(committerdate)'"
+	default-branch = "!basename $(git symbolic-ref refs/remotes/origin/HEAD)"
+	nb = "!git switch $(git default-branch) && git pull && git checkout -b"
 [commit]
 	gpgsign = true
 	template = ~/.config/git/gitmessage
