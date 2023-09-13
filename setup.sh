@@ -709,7 +709,7 @@ echo "Installing next-gen CLI utilities..."
 brew-get \
     git-delta \
     git-absorb \
-    exa \
+    eza \
     bat \
     duf \
     fzf \
