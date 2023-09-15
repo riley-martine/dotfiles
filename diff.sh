@@ -43,6 +43,8 @@ dotfiles=(
 
     ["$HOME/Documents/Tokyonight Day.terminal"]="terminal.app/Tokyonight Day.terminal"
 
+    ["$HOME/.config/python/global-requirements.txt"]="python/global-requirements.txt"
+
     ["$HOME/bin/"]="bin"
 
     ["$HOME/.local/share/update.d/"]="update.d"

@@ -4,6 +4,7 @@ set -euo pipefail
 # Updates the system. Runs every executable file in:
 update_dir="$HOME/.local/share/update.d"
 # This is non-standard; the user is responsible for populating the directory.
+# TODO: add "allow" mechanism like direnv?
 
 if [ ! -d "$update_dir" ]; then
     echo "$update_dir does not exist. Not running any updates."
@@ -12,20 +13,66 @@ fi
 
 bold=$(tput bold)
 normal=$(tput sgr0)
+red=$(tput setaf 1)
+green=$(tput setaf 2)
+export bold normal red green
 
-if [ "$(uname)" = Darwin ]; then
-    eval "$(/usr/bin/ssh-agent)"
+uname="$(uname)"
+if [ "$uname" = Darwin ]; then
+    ssh_msg="$(/usr/bin/ssh-agent)"
+    eval "$ssh_msg"
     /usr/bin/ssh-add --apple-load-keychain
 fi
 
-# TODO parallelize
-# TODO collect failed logs and print them at the end
-failed=()
-for script in "$update_dir"/*; do
-    echo "${bold}RUNNING SCRIPT: $(basename "$script")${normal}"
-    "$script" || failed+=("$script")
+echo "Ensuring sudo is cached"
+sudo -K
+sudo true
+
+tmp_dir="$(mktemp -d)"
+export tmp_dir
+echo "Using temp dir: $tmp_dir"
+trap 'rm -rf "$tmp_dir"' EXIT
+
+run_script () {
+    set -uo pipefail
+    script="$1"
+    script_name="$(basename "$script")"
+    log_file="${tmp_dir}/${script_name}.log"
+
+    echo "${bold}RUNNING SCRIPT: ${script_name}${normal}"
+
+    echo "$script" | tee "${log_file}.partial"
+    "$script" 2>&1 | tee -a "${log_file}.partial"
+
+    if [ "${PIPESTATUS[0]}" -eq 0 ]; then
+        echo "${bold}${green}SUCCESS: ${script_name}${normal}"
+        rm "${log_file}.partial"
+    else
+        echo "${bold}${red}FAILURE: ${script_name}${normal}"
+        # Only retain logs for failed runs
+        mv "${log_file}.partial" "$log_file"
+        false
+    fi
+}
+export -f run_script
+parallel --ll -j0 run_script ::: "$update_dir"/* || true
+
+# All logs are for failed runs
+for log in "$tmp_dir"/*.log; do
+    if [ -s "$log" ]; then
+        echo "${bold}LOG: $(basename "$log")${normal}"
+        cat "$log"
+        echo
+    fi
 done
 
-for i in "${failed[@]}"; do
-    echo "${bold}Failed: ${i}${normal}"
+# Overview at the end; could use joblog but we don't need all the details
+for log in "$tmp_dir"/*.log; do
+    if [ ! -s "$log" ]; then
+        continue
+    fi
+    echo "${bold}FAILED: $(basename "$log")${normal}"
 done
+
+stty sane
+tput reset
