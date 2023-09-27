@@ -246,7 +246,8 @@ end
 
 # Preview-all (includes hidden files)
 function pa
-    set file (fzf --hidden --preview 'bat --color "always" {}' --bind='ctrl-o:accept')
+    set -fa FZF_DEFAULT_COMMAND "--no-ignore" # assumes fd base command
+    set file (fzf --preview 'bat --color "always" {}' --bind='ctrl-o:accept')
     if string length -q $file
         # This way you can arrow up->enter to re-open
         add_history_entry "vim '$file'"
