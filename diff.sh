@@ -69,7 +69,7 @@ function compare_file {
         return 0
     fi
 
-    if diff -u --strip-trailing-cr "$(realpath "$LOCAL")" "$GIT" | delta --pager cat --width "$(tput cols)"; then
+    if diff -u --ignore-trailing-space --ignore-blank-lines --strip-trailing-cr "$(realpath "$LOCAL")" "$GIT" | delta --pager cat --width "$(tput cols)"; then
         # echo "EQUAL: $LOCAL $GIT"
         return 0
     fi
