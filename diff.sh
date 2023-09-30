@@ -97,6 +97,9 @@ function compare_maybe_dir {
         echo "=================================================================================="
         echo "Expected dotfile does not exist: $LOCAL" >&2
         echo "add to local:"
+        if ! [ -d "$(dirname "$LOCAL")" ]; then
+            printf " mkdir -p \"%s\" &&" "$(dirname "$LOCAL")"
+        fi
         echo " command cp $GIT $LOCAL"
         return
     fi
