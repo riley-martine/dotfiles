@@ -482,6 +482,8 @@ mkdir -p ~/dev
 mysides add "Dev" "file://$HOME/dev/"
 echo "Adding screenshots..."
 mysides add "Screenshots" "file://$HOME/Screenshots/"
+echo "Adding Music..."
+mysides add "Music" "file://$HOME/Music/"
 
 echo "Showing path and status bar..."
 defaults write com.apple.finder "ShowPathbar" -bool "true"
