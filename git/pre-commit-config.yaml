@@ -1,0 +1,31 @@
+# These are enabled for ALL repositories
+# They should be fast, and fix real situations.
+# They should always succeed (no linters) unless there is an actual issue (no noise).
+# They should only be opinionated in ways everyone can agree on
+#   (I am not trying to reformat anyone's files.)
+# They should not be language-specific. (Maybe??)
+repos:
+  - repo: https://github.com/zricethezav/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.4.0
+    hooks:
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+        exclude: ^vendor/
+      - id: trailing-whitespace
+        exclude: ^vendor/
+      # syntax verifiers
+      - id: check-json
+      - id: check-toml
+      - id: check-xml
+
+  - repo: https://github.com/jumanjihouse/pre-commit-hooks
+    rev: 3.0.0
+    hooks:
+      - id: forbid-binary
+        exclude: '^(.git-crypt\/)|(vendor\/)|(charts\/.*.tgz)|(docs\/.*.png)'

@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Run local existing hooks
+if [ -f .git/hooks/pre-commit ]; then
+    .git/hooks/pre-commit
+fi
+
+# start templated
+INSTALL_PYTHON=/opt/homebrew/opt/pre-commit/libexec/bin/python3.11
+ARGS=(hook-impl --config=.pre-commit-config.yaml --hook-type=pre-commit --skip-on-missing-config)
+# end templated
+
+HERE="$(cd "$(dirname "$0")" && pwd)"
+ARGS+=(--hook-dir "$HERE" -- "$@")
+
+GLOBAL_ARGS=(hook-impl --config="$HOME/.config/pre-commit/config.yaml" --hook-type=pre-commit)
+GLOBAL_ARGS+=(--hook-dir "$HERE" -- "$@")
+
+if [ -x "$INSTALL_PYTHON" ]; then
+    "$INSTALL_PYTHON" -mpre_commit "${GLOBAL_ARGS[@]}"
+    exec "$INSTALL_PYTHON" -mpre_commit "${ARGS[@]}"
+elif command -v pre-commit > /dev/null; then
+    pre-commit "${GLOBAL_ARGS[@]}"
+    exec pre-commit "${ARGS[@]}"
+else
+    echo '`pre-commit` not found.  Did you forget to activate your virtualenv?' 1>&2
+    exit 1
+fi

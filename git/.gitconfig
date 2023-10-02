@@ -1,7 +1,5 @@
 [user]
 	name = Riley Martine
-[include]
-	path = ~/.config/git/identity.gitconfig
 [credential]
 	 helper = osxkeychain
 [push]
@@ -16,6 +14,7 @@
 	; https://github.com/dandavison/delta/issues/447
 	; pager = delta --features "$(defaults read -globalDomain AppleInterfaceStyle > /dev/null 2>&1 && echo dark-mode || echo light-mode)"
 	pager = delta
+	hooksPath = ~/.config/git/hooks
 [interactive]
 	diffFilter = delta --color-only
 [alias]
@@ -124,3 +123,5 @@
 	allow = always
 [submodule]
 	recurse = true
+[include]
+	path = ~/.config/git/identity.gitconfig

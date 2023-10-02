@@ -29,6 +29,8 @@ dotfiles=(
     ["$HOME/.config/git/gitignore"]="git/config/gitignore"
     ["$HOME/.config/git/tokyonight_day.gitconfig"]="git/config/tokyonight_day.gitconfig"
     ["$HOME/.config/git/gitmessage"]="git/config/gitmessage"
+    ["$HOME/.config/pre-commit/config.yaml"]="git/pre-commit-config.yaml"
+    ["$HOME/.config/git/hooks/pre-commit"]="git/hooks/pre-commit"
 
     ["$HOME/.config/iterm2/tokyonight_day.itermcolors"]="iterm2/tokyonight_day.itermcolors"
     ["$HOME/.config/iterm2/com.googlecode.iterm2.plist"]="iterm2/com.googlecode.iterm2.plist"
