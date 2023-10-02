@@ -22,10 +22,10 @@ Since we're adding one pre-commit check, let's add some more as well --
 [`pre-commit`](https://pre-commit.com/) is the most widely used outside of the
 `npm` ecosystem, so we'll go with that.
 
-Our goal is to run arbitrary pre-commit (the tool) hooks on every commit, *on
-top* of whatever an individual repo uses -- `pre-commit`, `husky`, or just
-editing `.git/hooks`. It needs to work on all existing repos, not just new ones
-(so `init.templateDir` is out!).
+Our goal is to run arbitrary `pre-commit` (the tool) hooks on every commit, *on
+top* of whatever an individual repo uses -- `pre-commit`, `husky`, or editing
+`.git/hooks`. It needs to work on all existing repos, not only new ones (so
+`init.templateDir` is out!).
 
 First, [install `pre-commit`](https://pre-commit.com/#install). I suggest using
 `brew install pre-commit` if on macOS.
