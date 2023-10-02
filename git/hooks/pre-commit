@@ -2,8 +2,15 @@
 set -euo pipefail
 
 # Run local existing hooks
-if [ -f .git/hooks/pre-commit ]; then
-    .git/hooks/pre-commit
+PC=.git/hooks/pre-commit
+if [ -f $PC ]; then
+    if [ -x $PC ]; then
+        $PC
+    else
+        echo "$PC is not executable, this is probably an error." >&2
+        echo "run: chmod u+x $PC" >&2
+        exit 1
+    fi
 fi
 
 # start templated

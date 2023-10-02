@@ -7,7 +7,8 @@
 [`gitleaks`](https://github.com/gitleaks/gitleaks) is a great tool. It allows
 you to check for any accidentally committed secrets. It can do better though,
 running before every commit to make sure those secrets are never committed in
-the first place. But we don't want to set that up for every single repo individually. That's tedious and error prone -- what if we forget one?
+the first place. But we don't want to set that up for every single repo
+individually. That's tedious and error prone -- what if we forget one?
 
 What we want:
 
@@ -19,8 +20,8 @@ What we want:
 ### What to Use
 
 Since we're adding one pre-commit check, let's add some more as well --
-[`pre-commit`](https://pre-commit.com/) is the most widely used outside of the
-`npm` ecosystem, so we'll go with that.
+[`pre-commit`](https://pre-commit.com/) is the most widely used tool for this
+outside of the `npm` ecosystem, so we'll go with that.
 
 Our goal is to run arbitrary `pre-commit` (the tool) hooks on every commit, *on
 top* of whatever an individual repo uses -- `pre-commit`, `husky`, or editing
@@ -30,7 +31,7 @@ top* of whatever an individual repo uses -- `pre-commit`, `husky`, or editing
 First, [install `pre-commit`](https://pre-commit.com/#install). I suggest using
 `brew install pre-commit` if on macOS.
 
-Next, make a global hooks dir and put our special pre-commit hook in it:
+Next, make a global hooks dir and put our special `pre-commit` hook in it:
 
 ```shell
 # Note: If using a different set of hooks per-identity, adapt as needed
@@ -46,7 +47,8 @@ git config --global core.hooksPath "$HOME/.config/git/hooks"
 <summary>Re-do if pre-commit's hooks change too much</summary>
 
 ```shell
-# This puts the hook in hooks/, ignore the warnings about templateDir
+# This puts the base hook in hooks/
+# Ignore the warnings about templateDir. We're doing something unsupported.
 pre-commit init-templatedir ~/.config/git/
 ```
 
@@ -85,13 +87,11 @@ Create your `pre-commit` config and initialize the environments:
 ```shell
 mkdir -p ~/.config/pre-commit
 cp git/pre-commit-config.yaml ~/.config/pre-commit/config.yaml
-pre-commit autoupdate --config ~/.config/pre-commit/config.yaml --jobs 5
+pre-commit autoupdate --config ~/.config/pre-commit/config.yaml
 ```
 
 Add that last line [wherever you keep your update
-scripts](/update.d/pre-commit.sh).
-
-In your shell config, set `PRE_COMMIT_ALLOW_NO_CONFIG` to `1`.
+scripts](/update.d/pre-commit.sh). You should be good to go!
 
 ## Identity Dispatch
 
