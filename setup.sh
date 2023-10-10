@@ -1587,6 +1587,7 @@ cd -
 # TODO undercurl proper tic overrides
 # TODO https://github.com/term7/MacOS-Privacy-and-Security-Enhancements/tree/main
 # TODO https://furbo.org/2015/03/30/paste-without-style/
+# TODO https://github.com/james-see/fresh-mac
 
 echo "The following must be done manually:"
 echo '  - Finder -> Preferences -> Sidebar
