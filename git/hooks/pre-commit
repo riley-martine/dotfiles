@@ -1,36 +1,62 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -euo pipefail
 
-# Run local existing hooks
-PC=.git/hooks/pre-commit
-if [ -f $PC ]; then
-    if [ -x $PC ]; then
-        $PC
-    else
-        echo "$PC is not executable, this is probably an error." >&2
-        echo "run: chmod u+x $PC" >&2
-        exit 1
+HOOK_NAME="$(basename "$0")"
+
+run_existing_hook() {
+    local HOOKS_DIR="$1"
+    local HOOK="${HOOKS_DIR}/${HOOK_NAME}"
+
+    if [ -f "$HOOK" ]; then
+        if [ -x "$HOOK" ]; then
+            $HOOK
+        else
+            echo "$HOOK is not executable, this is probably an error." >&2
+            echo "run: chmod u+x $HOOK" >&2
+            exit 1
+        fi
     fi
+}
+
+run_existing_hook .git/hooks
+run_existing_hook .husky
+
+# Since most hooks don't specify a default stage, they run at every installed
+# stage unless default_stages is specified in the project's config. This
+# doesn't matter for normal use, but we install multiple hooks globally, and
+# don't want to run e.g. prettier on both the pre-commit and commit-msg stages.
+# This is still a hack; if a project legitimately wants to run a hook on
+# multiple stages, it will need to specify the stages in its config, or this
+# will need to be patched.
+PREFIX=""
+if [ -f .pre-commit-config.yaml ] && \
+    ! yq -e e '.default_stages' .pre-commit-config.yaml >/dev/null 2>&1; then
+    PREFIX="$(mktemp -d)/"
+    trap 'rm -rf "$PREFIX"' EXIT
+    yq e '.default_stages = ["pre-commit"]' .pre-commit-config.yaml > "$PREFIX".pre-commit-config.yaml
 fi
 
-# start templated
+
 INSTALL_PYTHON=/opt/homebrew/opt/pre-commit/libexec/bin/python3.11
-ARGS=(hook-impl --config=.pre-commit-config.yaml --hook-type=pre-commit --skip-on-missing-config)
-# end templated
+ARGS=(hook-impl --config="$PREFIX.pre-commit-config.yaml" --hook-type="$HOOK_NAME" --skip-on-missing-config)
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
 ARGS+=(--hook-dir "$HERE" -- "$@")
 
-GLOBAL_ARGS=(hook-impl --config="$HOME/.config/pre-commit/config.yaml" --hook-type=pre-commit)
+GLOBAL_ARGS=(hook-impl --config="$HOME/.config/pre-commit/config.yaml" --hook-type="$HOOK_NAME")
 GLOBAL_ARGS+=(--hook-dir "$HERE" -- "$@")
 
 if [ -x "$INSTALL_PYTHON" ]; then
-    "$INSTALL_PYTHON" -mpre_commit "${GLOBAL_ARGS[@]}"
-    exec "$INSTALL_PYTHON" -mpre_commit "${ARGS[@]}"
+    "$INSTALL_PYTHON" -mpre_commit "${GLOBAL_ARGS[@]}" | grep -v "no files to check"
+    if [ -f '.pre-commit-config.yaml' ]; then
+        exec "$INSTALL_PYTHON" -mpre_commit "${ARGS[@]}"
+    fi
 elif command -v pre-commit > /dev/null; then
-    pre-commit "${GLOBAL_ARGS[@]}"
-    exec pre-commit "${ARGS[@]}"
+    pre-commit "${GLOBAL_ARGS[@]}" | grep -v "no files to check"
+    if [ -f '.pre-commit-config.yaml' ]; then
+        exec pre-commit "${ARGS[@]}"
+    fi
 else
-    echo '`pre-commit` not found.  Did you forget to activate your virtualenv?' 1>&2
+    echo 'pre-commit not found. Did you forget to activate your virtualenv?' 1>&2
     exit 1
 fi
