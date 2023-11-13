@@ -69,6 +69,7 @@ Create your `pre-commit` config and initialize the environments:
 ```shell
 mkdir -p ~/.config/pre-commit
 cp git/pre-commit-config.yaml ~/.config/pre-commit/config.yaml
+
 # You may want to edit the config here, and add any additional hooks that
 # you want to *always* run.
 # See: https://pre-commit.com/hooks.html
