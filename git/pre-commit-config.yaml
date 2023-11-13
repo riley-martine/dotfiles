@@ -4,6 +4,7 @@
 # They should only be opinionated in ways everyone can agree on
 #   (I am not trying to reformat anyone's files.)
 # They should not be language-specific. (Maybe??)
+default_stages: [pre-commit]
 repos:
   - repo: https://github.com/zricethezav/gitleaks
     rev: v8.18.0
@@ -13,6 +14,11 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
+      - id: check-symlinks
       - id: check-case-conflict
       - id: check-merge-conflict
       - id: end-of-file-fixer
@@ -23,9 +29,23 @@ repos:
       - id: check-json
       - id: check-toml
       - id: check-xml
+      - id: check-yaml
+        exclude: '^(chart)|(charts)/'
+        args: ['--allow-multiple-documents']
 
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
     rev: 3.0.0
     hooks:
       - id: forbid-binary
         exclude: '^(.git-crypt\/)|(vendor\/)|(charts\/.*.tgz)|(docs\/.*.png)'
+
+  - repo: https://github.com/hugoh/pre-commit-fish.git
+    rev: v1.2
+    hooks:
+      - id: fish_syntax
+
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 2.7.2
+    hooks:
+      - id: editorconfig-checker
+        alias: ec
