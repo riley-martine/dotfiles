@@ -145,6 +145,4 @@ for config in "$HOME/.config/fish/conf.d"/*; do
     fi
 done
 
-fish installed.fish
-
 # TODO add "--install" flag
