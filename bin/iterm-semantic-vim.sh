@@ -63,12 +63,18 @@ if [ $DIFF_RUNNING -eq 0 ]; then
         echo ":e +$LINE $FILE \"\"; echo 'all' | history delete '^:e' >/dev/null; clear; vim +$LINE $FILE"
     fi
 else
-    if [ -z "$LINE" ]; then
+    # Switch to vim if possible
+    printf $'\cb'
+    printf 'M'
+
     printf '%b' '\e' # exit vim insert mode, if in
+
+    if [ -z "$LINE" ]; then
         # echo "vim $FILE"
         echo ":e $FILE \"\"; echo 'all' | history delete '^:e' >/dev/null; clear; vim $FILE"
     else
-        echo "vim +$LINE $FILE"
+        # echo "vim +$LINE $FILE"
+        echo ":e +$LINE $FILE \"\"; echo 'all' | history delete '^:e' >/dev/null; clear; vim +$LINE $FILE"
     fi
 fi
 

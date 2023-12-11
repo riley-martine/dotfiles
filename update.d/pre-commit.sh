@@ -10,6 +10,7 @@ git init
 
 pre-commit gc
 for conf in ~/.config/pre-commit/*.yaml; do
+    echo "Updating $conf"
     pre-commit autoupdate --config "$conf" --jobs 5
     pre-commit install-hooks --config "$conf"
 done

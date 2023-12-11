@@ -117,8 +117,6 @@
 	insteadOf = https://github.com/
 [url "git@codeberg.org:"]
 	insteadOf = https://codeberg.org/
-[feature]
-	manyFiles = true
 [protocol "file"]
 	allow = always
 [submodule]

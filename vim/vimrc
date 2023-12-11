@@ -586,7 +586,14 @@ augroup ft_web
   au BufNewFile, BufRead *.js, *.html, *.css, *.ts, *.tsx
       \ set tabstop=2
       \ | set softtabstop=2
-      \ | set shiftwidth=2
+      \ |
+
+  autocmd FileType javascript
+  \ setlocal tabstop=2
+  \ | setlocal softtabstop=2
+  \ | setlocal shiftwidth=2
+
+ set shiftwidth=2
 augroup END
 
 augroup ft_gitcommit
@@ -763,6 +770,11 @@ let g:go_def_mode='gopls'
 let g:go_info_mode='gopls'
 
 let g:lsp_settings_filetype_python = ['pyright-langserver', 'ruff-lsp']
+let b:ale_python_pyright_config = {
+  \ 'python': {
+  \   'venvPath': '$VIRTUAL_ENV',
+  \ },
+  \}
 
 " Let vim-go handle linting.
 " Disable checkstyle for java for now. TODO enable it only if project specific
@@ -817,7 +829,7 @@ let g:ale_markdown_pandoc_options = '-f gfm -t gfm -s --columns=80  -'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_python_flake8_options = '--ignore=E501'
 let g:ale_python_pylint_options = '--disable=C0412'
-let g:ale_python_mypy_options = '--ignore-missing-imports'
+" let g:ale_python_mypy_options = '--ignore-missing-imports'
 " let g:ale_python_pylsp_config = ''
 let g:ale_sh_shfmt_options = '-i=4 -ci -sr -kp'
 let g:ale_sh_bashate_options = '-i E006'

@@ -37,6 +37,21 @@ abbr -a auto_clone_cd --position command --regex ".+\.git" --function git_clone_
 abbr -a auto_clone_cd_p --position command --regex "^git@.+" --function git_clone_into
 abbr -a auto_clone_cd_h --position command --regex "^https://github\.com.+" --function git_clone_into
 
+abbr -a --position anywhere -- "--help" "--help 2>&1 | bat --plain --language=help --wrap=character"
+
+function popup-help
+  # handle piped input
+  if test -z "$argv"
+    set argv (cat)
+  end
+  tmux popup -E -w 80% -h 80% "$argv --help | bat --plain --language=help --wrap=character"
+end
+abbr -a ph popup-help
+
+set -x GIT_CONFIG_COUNT 1
+set -x GIT_CONFIG_KEY_0 core.hooksPath
+set -x GIT_CONFIG_VALUE_0 ~/.config/git/hooks
+
 function vim_edit
     echo vim $argv
 end
@@ -118,11 +133,12 @@ function pickone -d "Prints a random argument. Cleanses own call from history. H
 end
 
 
-# I'm not sold on exa but I'll try it
-if type -q exa
-    abbr -a l exa
-    abbr -a ll 'exa --long --all --group --header --git'
-    abbr -a lt 'exa --long --all --group --header --tree --level'
+# I'm not sold on eza but I'll try it
+if type -q eza
+    abbr -a l eza
+    abbr -a ll 'eza --long --all --group --header --git'
+    abbr -a lt 'eza --long --all --group --header --tree --level'
+    abbr -a tree 'eza --tree --git-ignore'
 end
 
 
@@ -132,6 +148,7 @@ if status --is-interactive
     end
 end
 
+set -x RIPGREP_CONFIG_PATH ~/.config/ripgreprc
 alias rg 'rg --ignore-case'
 abbr -a frg 'rg --fixed-strings' # fgrep
 function rge -d "Ripgrep but exclude"
@@ -192,10 +209,15 @@ abbr -a gca 'git commit --amend -C HEAD'
 
 abbr -a grb 'git rebase'
 abbr -a grbc 'git rebase --continue'
+abbr -a grba 'git rebase --abort'
+abbr -a grbi 'git rebase -i (git merge-base HEAD (git default-branch))'
 abbr -a grbm 'git rebase-master && git push --force-with-lease'
 
 # Git root
 alias gr 'cd (git rev-parse --show-toplevel)'
+
+# Git main|master
+alias gm 'git checkout $(git default-branch) && git pull'
 
 alias gaa 'git status; confirm "Add all?"; and git add -A'
 alias gcapf 'git status; confirm "Amend + Push Force?"; and git commit --amend -C HEAD && git push --force-with-lease'
@@ -234,13 +256,23 @@ function add_history_entry
   and history merge
 end
 
+# https://github.com/atuinsh/atuin/issues/1188
+function run_and_record_in_atuin
+    set -f id "$(atuin history start $argv)"
+    $argv
+    set -f cmd_status $status
+    atuin history end --exit $cmd_status "$id"
+    return $cmd_status
+end
+
+
 # Function instead of alias, so we can exit on ctrl-c
 function p
     set file (fzf --preview 'bat --color "always" {}' --bind='ctrl-o:accept')
     if string length -q $file
         # This way you can arrow up->enter to re-open
         add_history_entry "vim '$file'"
-        vim $file
+        run_and_record_in_atuin vim "$file"
     end
 end
 
@@ -251,7 +283,7 @@ function pa
     if string length -q $file
         # This way you can arrow up->enter to re-open
         add_history_entry "vim '$file'"
-        vim $file
+        run_and_record_in_atuin vim "$file"
     end
 end
 
@@ -261,6 +293,7 @@ bind \cx edit_command_buffer
 bind \cz 'fg 2>/dev/null; commandline -f repaint'
 # Ctrl-C clears the screen on an empty command line
 bind \cc 'if test -z (commandline); clear; commandline -f repaint; else; __fish_cancel_commandline; end'
+bind \cd 'if test -z (commandline); exit; else; __fish_cancel_commandline; end'
 
 alias rm 'rm -i'
 alias cp 'cp -i'

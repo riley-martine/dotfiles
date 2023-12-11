@@ -25,6 +25,7 @@ repos:
         exclude: ^vendor/
       - id: trailing-whitespace
         exclude: ^vendor/
+      - id: no-commit-to-branch  # default: master,main
       # syntax verifiers
       - id: check-json
       - id: check-toml
@@ -38,6 +39,11 @@ repos:
     hooks:
       - id: forbid-binary
         exclude: '^(.git-crypt\/)|(vendor\/)|(charts\/.*.tgz)|(docs\/.*.png)'
+
+  - repo: https://github.com/rmartine-ias/auto-jira-commit
+    rev: v1.2.6
+    hooks:
+      - id: auto-jira-commit
 
   - repo: https://github.com/hugoh/pre-commit-fish.git
     rev: v1.2

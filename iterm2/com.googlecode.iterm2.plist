@@ -19,6 +19,8 @@ Respond with one or more commands. Do not include any explanation or additional 
 	<false/>
 	<key>CommandSelection</key>
 	<true/>
+	<key>ConservativeURLGuessing</key>
+	<false/>
 	<key>CopySelection</key>
 	<false/>
 	<key>Custom Color Presets</key>
@@ -1821,7 +1823,7 @@ Respond with one or more commands. Do not include any explanation or additional 
 			<key>Character Encoding</key>
 			<integer>4</integer>
 			<key>Close Sessions On End</key>
-			<true/>
+			<integer>1</integer>
 			<key>Columns</key>
 			<integer>80</integer>
 			<key>Command</key>
@@ -2364,7 +2366,7 @@ Respond with one or more commands. Do not include any explanation or additional 
 			<key>Show Mark Indicators</key>
 			<false/>
 			<key>Show Status Bar</key>
-			<true/>
+			<false/>
 			<key>Silence Bell</key>
 			<true/>
 			<key>Smart Selection Rules</key>
@@ -2533,7 +2535,7 @@ Respond with one or more commands. Do not include any explanation or additional 
 					<key>action</key>
 					<string>StopTrigger</string>
 					<key>disabled</key>
-					<false/>
+					<true/>
 					<key>partial</key>
 					<false/>
 					<key>regex</key>
@@ -2551,7 +2553,7 @@ Respond with one or more commands. Do not include any explanation or additional 
 					<key>action</key>
 					<string>iTermHyperlinkTrigger</string>
 					<key>disabled</key>
-					<false/>
+					<true/>
 					<key>parameter</key>
 					<string>file://KVF4JFC21Y\(tab.currentSession.path)/\(matches[0])#</string>
 					<key>partial</key>
@@ -2563,7 +2565,7 @@ Respond with one or more commands. Do not include any explanation or additional 
 					<key>action</key>
 					<string>iTermHyperlinkTrigger</string>
 					<key>disabled</key>
-					<false/>
+					<true/>
 					<key>parameter</key>
 					<string>file://KVF4JFC21Y/Users/rmartine/\(matches[1])#</string>
 					<key>partial</key>
@@ -2575,7 +2577,7 @@ Respond with one or more commands. Do not include any explanation or additional 
 					<key>action</key>
 					<string>iTermHyperlinkTrigger</string>
 					<key>disabled</key>
-					<false/>
+					<true/>
 					<key>parameter</key>
 					<string>file://KVF4JFC21Y\(matches[0])#</string>
 					<key>partial</key>
@@ -2631,15 +2633,19 @@ Respond with one or more commands. Do not include any explanation or additional 
 	<key>OpenArrangementAtStartup</key>
 	<false/>
 	<key>OpenNoWindowsAtStartup</key>
-	<false/>
+	<true/>
 	<key>OpenTmuxWindowsIn</key>
 	<integer>2</integer>
 	<key>OptionClickMovesCursor</key>
 	<false/>
+	<key>OscColorReport16Bits</key>
+	<true/>
 	<key>PMPrintingExpandedStateForPrint2</key>
 	<false/>
 	<key>PasteTabToStringTabStopSize</key>
 	<integer>4</integer>
+	<key>PathsToIgnore</key>
+	<string></string>
 	<key>PerPaneBackgroundImage</key>
 	<false/>
 	<key>PointerActions</key>
@@ -2700,6 +2706,12 @@ Respond with one or more commands. Do not include any explanation or additional 
 	<integer>1</integer>
 	<key>StretchTabsToFillBar</key>
 	<true/>
+	<key>SupportDecsetMetaSendsEscape</key>
+	<true/>
+	<key>SuppressShellIntegrationUpgradeAnnouncementForHost_rmartine@KVF4JFC21Y</key>
+	<true/>
+	<key>SynchronizeQueryWithFindPasteboard</key>
+	<false/>
 	<key>TabStyleWithAutomaticOption</key>
 	<integer>5</integer>
 	<key>TabsHaveCloseButton</key>
@@ -2723,10 +2735,14 @@ Respond with one or more commands. Do not include any explanation or additional 
 	<integer>1</integer>
 	<key>TripleClickSelectsFullWrappedLines</key>
 	<false/>
+	<key>URLCharacterSet</key>
+	<string>.?\/:;%=&amp;_-,+~#@!*'(（)）[]</string>
+	<key>URLCharacterSetExclusions</key>
+	<string>¬|</string>
 	<key>UnderlineCursorHeight</key>
 	<real>2</real>
 	<key>UnderlineHyperlinks</key>
-	<false/>
+	<true/>
 	<key>UseAdaptiveFrameRate</key>
 	<false/>
 	<key>UseBorder</key>
@@ -2744,7 +2760,7 @@ Respond with one or more commands. Do not include any explanation or additional 
 	<key>findMode_iTerm</key>
 	<integer>0</integer>
 	<key>kCPKSelectionViewPreferredModeKey</key>
-	<integer>0</integer>
+	<integer>1</integer>
 	<key>kCPKSelectionViewShowHSBTextFieldsKey</key>
 	<false/>
 	<key>metalMaximizeThroughput</key>

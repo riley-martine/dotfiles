@@ -55,7 +55,7 @@ run_script () {
     fi
 }
 export -f run_script
-parallel --ll -j0 run_script ::: "$update_dir"/* || true
+parallel --lb -k -j1 run_script ::: "$update_dir"/* || true
 
 # All logs are for failed runs
 for log in "$tmp_dir"/*.log; do
@@ -75,4 +75,4 @@ for log in "$tmp_dir"/*.log; do
 done
 
 stty sane
-tput reset
+# tput reset
