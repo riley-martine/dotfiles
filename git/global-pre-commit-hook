@@ -54,12 +54,12 @@ GLOBAL_CONFIG="$(realpath "${GLOBAL_CONFIG/#\~/$HOME}")"
 GLOBAL_ARGS+=(--config="$GLOBAL_CONFIG" --hook-dir "$HERE" -- "$@")
 
 if [ -x "$INSTALL_PYTHON" ]; then
-    "$INSTALL_PYTHON" -mpre_commit "${GLOBAL_ARGS[@]}" | grep -v "no files to check"
+    "$INSTALL_PYTHON" -mpre_commit "${GLOBAL_ARGS[@]}" | { grep -v "no files to check" || true && [ "${PIPESTATUS[0]}" -eq 0 ]; }
     if [ -f '.pre-commit-config.yaml' ]; then
         exec "$INSTALL_PYTHON" -mpre_commit "${ARGS[@]}"
     fi
 elif command -v pre-commit > /dev/null; then
-    pre-commit "${GLOBAL_ARGS[@]}" | grep -v "no files to check"
+    pre-commit "${GLOBAL_ARGS[@]}" | { grep -v "no files to check" || true && [ "${PIPESTATUS[0]}" -eq 0 ]; }
     if [ -f '.pre-commit-config.yaml' ]; then
         exec pre-commit "${ARGS[@]}"
     fi
