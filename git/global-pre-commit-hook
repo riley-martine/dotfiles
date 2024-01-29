@@ -41,7 +41,7 @@ if [ -f .pre-commit-config.yaml ] && \
 fi
 
 
-INSTALL_PYTHON=/opt/homebrew/opt/pre-commit/libexec/bin/python3.11
+INSTALL_PYTHON=/opt/homebrew/opt/pre-commit/libexec/bin/python
 ARGS=(hook-impl --config="$PREFIX.pre-commit-config.yaml" --hook-type="$HOOK_NAME" --skip-on-missing-config)
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
