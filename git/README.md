@@ -122,7 +122,7 @@ Create `~/.config/direnv/direnvrc` with the following contents:
 strict_env
 
 pre-commit() {
-    if [[ "$1" = "install" ]]; then
+    if [[ "${1:-}" = "install" ]]; then
         echo "Patched pre-commit skipping unneeded install"
         return 0
     fi
