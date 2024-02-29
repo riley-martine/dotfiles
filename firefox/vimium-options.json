@@ -1,154 +1,142 @@
 {
-  "settingsVersion": "1.67.6",
   "exclusionRules": [
     {
-      "pattern": "https?://mail.google.com/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://mail.google.com/*"
     },
     {
-      "pattern": "https?://www.youtube.com/*",
-      "passKeys": "f"
+      "passKeys": "f",
+      "pattern": "https?://www.youtube.com/*"
     },
     {
-      "pattern": "https?://accounts.google.com/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://accounts.google.com/*"
     },
     {
-      "pattern": "https?://accounts.google.com/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://accounts.google.com/*"
     },
     {
-      "pattern": "https?://hackertyper.io/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://hackertyper.io/*"
     },
     {
-      "pattern": "https?://hackertyper.io/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://hackertyper.io/*"
     },
     {
-      "pattern": "https?://www.yourworldoftext.com/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://www.yourworldoftext.com/*"
     },
     {
-      "pattern": "https?://www.yourworldoftext.com/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://www.yourworldoftext.com/*"
     },
     {
-      "pattern": "https?://implicit.harvard.edu/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://implicit.harvard.edu/*"
     },
     {
-      "pattern": "https?://implicit.harvard.edu/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://implicit.harvard.edu/*"
     },
     {
-      "pattern": "https?://docs.google.com/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://docs.google.com/*"
     },
     {
-      "pattern": "https?://docs.google.com/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://docs.google.com/*"
     },
     {
-      "pattern": "https?://www.yourmorals.org/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://www.yourmorals.org/*"
     },
     {
-      "pattern": "https?://www.yourmorals.org/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://www.yourmorals.org/*"
     },
     {
-      "pattern": "https?://word-edit.officeapps.live.com/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://word-edit.officeapps.live.com/*"
     },
     {
-      "pattern": "https?://word-edit.officeapps.live.com/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://word-edit.officeapps.live.com/*"
     },
     {
-      "pattern": "https?://prodduke-my.sharepoint.com/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://prodduke-my.sharepoint.com/*"
     },
     {
-      "pattern": "https?://prodduke-my.sharepoint.com/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://prodduke-my.sharepoint.com/*"
     },
     {
-      "pattern": "https?://accounts.google.com/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://accounts.google.com/*"
     },
     {
-      "pattern": "https?://cloud.digitalocean.com/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://cloud.digitalocean.com/*"
     },
     {
-      "pattern": "https?://cloud.digitalocean.com/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://cloud.digitalocean.com/*"
     },
     {
-      "pattern": "https?://animixplay.to/*",
-      "passKeys": "t"
+      "passKeys": "t",
+      "pattern": "https?://animixplay.to/*"
     },
     {
-      "pattern": "https?://animixplay.to/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://animixplay.to/*"
     },
     {
-      "pattern": "https?://codeinterview.io/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://codeinterview.io/*"
     },
     {
-      "pattern": "https?://codeinterview.io/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://codeinterview.io/*"
     },
     {
-      "pattern": "https?://sigilengine.com/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://sigilengine.com/*"
     },
     {
-      "pattern": "https?://sigilengine.com/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://sigilengine.com/*"
     },
     {
-      "pattern": "https?://www.youtube.com/*",
-      "passKeys": "v"
+      "passKeys": "v",
+      "pattern": "https?://www.youtube.com/*"
     },
     {
-      "pattern": "https?://www.youtube.com/*",
-      "passKeys": "o"
+      "passKeys": "o",
+      "pattern": "https?://www.youtube.com/*"
     },
     {
-      "pattern": "https?://www.youtube.com/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://www.youtube.com/*"
     },
     {
-      "pattern": "https?://hackertyper.com/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://hackertyper.com/*"
     },
     {
-      "pattern": "https?://hackertyper.com/*",
-      "passKeys": ""
+      "passKeys": "",
+      "pattern": "https?://hackertyper.com/*"
     },
     {
-      "pattern": "https?://ciechanow.ski/*",
-      "passKeys": "*"
+      "passKeys": "*",
+      "pattern": "https?://ciechanow.ski/*"
     }
   ],
-  "filterLinkHints": false,
-  "waitForEnterForFilteredHints": true,
-  "hideHud": false,
   "keyMappings": "# Insert your preferred key mappings here.\n# Make up/down work as expected\nunmap J\nunmap K\nmap J nextTab\nmap K previousTab",
-  "linkHintCharacters": "sadfjklewcmpgh",
-  "linkHintNumbers": "0123456789",
-  "newTabUrl": "about:newtab",
+  "linkHintCharacters": "arstgmneio",
   "nextPatterns": "==>,next,more,newer,>,›,→,»,≫,>>",
-  "previousPatterns": "prev,previous,back,older,<,‹,←,«,≪,<<",
-  "regexFindMode": false,
-  "ignoreKeyboardLayout": false,
-  "scrollStepSize": 60,
-  "smoothScroll": true,
-  "grabBackFocus": false,
   "searchEngines": "w: https://www.wikipedia.org/w/index.php?title=Special:Search&search=%s Wikipedia\n\n# More examples.\n#\n# (Vimium supports search completion Wikipedia, as\n# above, and for these.)\n#\ng: https://www.google.com/search?q=%s Google\ny: https://www.youtube.com/results?search_query=%s Youtube\nd: https://duckduckgo.com/?q=%s DuckDuckGo\nhn: https://www.hnsearch.com/search#request/submissions&q=%s&start=0 HackerNews\ndef: http://dictionary.com/browse/%s Dictionary\nsyn: http://thesaurus.com/browse/%s Thesaurus\nway: https://web.archive.org/web/*/%s Wayback\nr: https://www.reddit.com/r/%s Subreddit\naz: https://www.amazon.com/s/?field-keywords=%s Amazon\nud: https://www.urbandictionary.com/define.php?term=%s UrbanDictionary\nwa: http://www.wolframalpha.com/input/?i=%s Wolfram|Alpha",
-  "searchUrl": "https://duckduckgo.com/?q=",
-  "userDefinedLinkHintCss": "div > .vimiumHintMarker {\n/* linkhint boxes */\nbackground: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFF785),\n  color-stop(100%,#FFC542));\nborder: 1px solid #E3BE23;\n}\n\ndiv > .vimiumHintMarker span {\n/* linkhint text */\ncolor: black;\nfont-weight: bold;\nfont-size: 12px;\n}\n\ndiv > .vimiumHintMarker > .matchingCharacter {\n}"
+  "searchUrl": "https://kagi.com/search?q=",
+  "settingsVersion": "2.0.6"
 }
