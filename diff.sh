@@ -17,6 +17,8 @@ dotfiles=(
 
     ["$HOME/.vim/vimrc"]="vim/vimrc"
     ["$HOME/.vim/syntax/"]="vim/syntax"
+    ["$HOME/.vim/customsnippets/"]="vim/customsnippets"
+
 
     ["$HOME/.vale.ini"]="vale/.vale.ini"
     ["$HOME/.shellcheckrc"]="shellcheck/.shellcheckrc"
