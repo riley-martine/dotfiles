@@ -119,34 +119,10 @@ sudo true
 
 # https://gist.github.com/ptc-mrucci/61772387878ed53a6c717d51a21d9371
 # some
-SCRIPT_DIR=$( dirname "$(readlink -f "$0")" )
+SCRIPT_PATH="$(readlink -f "$0")"
+SCRIPT_DIR=$( dirname "$SCRIPT_PATH" )
 export PATH="$SCRIPT_DIR/bin:$PATH"
-
-# This wraps brew install calls in a bundle command, so we don't get error messages
-# about the program already being installed, and don't have to do extra typing to write
-# the brewfiles ourselves.
-# https://github.com/Homebrew/brew/issues/2491
-brew-get() {
-    local PREFIX="brew"
-    local ARGS=""
-    for arg in "$@"; do
-        case "$arg" in
-            --cask)
-                PREFIX="cask"
-                shift
-                ;;
-            --HEAD)
-                # https://github.com/Homebrew/homebrew-bundle/issues/1042
-                ARGS=', args: ["head"]'
-                shift
-                ;;
-            *) ;;
-
-        esac
-    done
-
-    for arg in "$@"; do echo "${PREFIX} \"${arg}\"${ARGS}"; done | brew bundle --file=-
-}
+source "$SCRIPT_DIR/setup.d/utils.sh"
 
 # https://www.dzombak.com/blog/2021/11/macOS-Scripting-How-to-tell-if-the-Terminal-app-has-Full-Disk-Access.html
 if ! plutil -lint /Library/Preferences/com.apple.TimeMachine.plist > /dev/null; then
@@ -249,23 +225,7 @@ add-update homebrew 'brew update
 brew upgrade
 brew upgrade --cask --greedy'
 
-# Could've sworn I heard about this in this talk, but can't find it:
-# https://xeiaso.net/talks/rustconf-2022-sheer-terror-pam
-echo "Enabling touch-id for sudo..."
-
-if ! grep -qe "pam_tid.so" /etc/pam.d/sudo; then
-    sudo sed -i '' '2i\
-auth       sufficient     pam_tid.so
-' /etc/pam.d/sudo
-fi
-
-# https://birkhoff.me/make-sudo-authenticate-with-touch-id-in-a-tmux/
-brew-get pam-reattach # This is so we can use it in tmux sessions
-if ! grep -qe "pam_reattach.so" /etc/pam.d/sudo; then
-    sudo sed -i '' '2i\
-auth       optional       /opt/homebrew/lib/pam/pam_reattach.so
-' /etc/pam.d/sudo
-fi
+"$SCRIPT_DIR/setup.d/touch-id-sudo.sh"
 
 echo "Setting screenshots as jpg and not png, for smaller file size..."
 # TODO nvm?
@@ -299,7 +259,7 @@ defaults write com.apple.Safari ShowStatusBar -bool TRUE
 echo "Enabling restore of last session on re-launch..."
 defaults write com.apple.Safari AlwaysRestoreSessionAtLaunch -bool TRUE
 
-echo 'Setting Safari’s home page to `about:blank` for faster loading...'
+echo "Setting Safari's home page to 'about:blank' for faster loading..."
 defaults write com.apple.Safari HomePage -string "about:blank"
 
 echo "Enabling extenstion auto-update..."
@@ -1563,7 +1523,7 @@ WALL=wall.jpg
 # TODO where tf does this actually go
 sudo cp "$WALL" "/Library/User Pictures/"
 # https://github.com/rgcr/m-cli/blob/master/plugins/wallpaper
-osascript -e "tell application \"System Events\" to tell every desktop to set picture to \"/Library/User Pictures/$WALL\"
+osascript -e "tell application \"System Events\" to tell every desktop to set picture to \"/Library/User Pictures/$WALL\""
 
 cd -
 
