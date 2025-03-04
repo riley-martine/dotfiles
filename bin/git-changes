@@ -1,0 +1,7 @@
+#!/usr/bin/env fish
+git fetch origin
+set merge_base (git merge-base HEAD master)
+git log --reverse --format=format:"%H %s" $merge_base..HEAD | while read -l commit_hash commit_message
+    echo $commit_message
+    git diff $commit_hash^!
+end | pbcopy

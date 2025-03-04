@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 
 set -euxo pipefail
+exit 0
 
 BUILD_DIR=$(mktemp -d)
 trap 'rm -rf $BUILD_DIR' EXIT

@@ -1,2 +1,4 @@
 --hyperlink-format
 file://{host}{path}#{line}
+--hidden
+--glob=!.git

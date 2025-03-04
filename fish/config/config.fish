@@ -19,6 +19,9 @@ set -x LC_CTYPE en_US.UTF-8
 set -x EDITOR vim
 set -x VISUAL $EDITOR
 
+# https://github.com/atuinsh/atuin/discussions/1290
+set -x NO_MOTION true
+
 function fish_right_prompt_loading_indicator -a last_prompt
     echo -n "$last_prompt" | sed -r 's/\x1B\[[0-9;]*[JKmsu]//g' | read -zl uncolored_last_prompt
     echo -n (set_color brblack)"$uncolored_last_prompt"(set_color normal)
@@ -37,7 +40,7 @@ abbr -a auto_clone_cd --position command --regex ".+\.git" --function git_clone_
 abbr -a auto_clone_cd_p --position command --regex "^git@.+" --function git_clone_into
 abbr -a auto_clone_cd_h --position command --regex "^https://github\.com.+" --function git_clone_into
 
-abbr -a --position anywhere -- "--help" "--help 2>&1 | bat --plain --language=help --wrap=character"
+# abbr -a --position anywhere -- "--help" "--help 2>&1 | bat --plain --language=help --wrap=character"
 
 function popup-help
   # handle piped input
@@ -48,9 +51,9 @@ function popup-help
 end
 abbr -a ph popup-help
 
-set -x GIT_CONFIG_COUNT 1
-set -x GIT_CONFIG_KEY_0 core.hooksPath
-set -x GIT_CONFIG_VALUE_0 ~/.config/git/hooks
+# set -x GIT_CONFIG_COUNT 1
+# set -x GIT_CONFIG_KEY_0 core.hooksPath
+# set -x GIT_CONFIG_VALUE_0 ~/.config/git/hooks
 
 function vim_edit
     echo vim $argv
@@ -114,6 +117,11 @@ function knamespace -a 'ns' -d "Set kubernetes namespace context."
     kubectl config set-context --current --namespace=$ns
 end
 
+function ksecret -a 'secret' -d "Get kubernetes secret."
+    kubectl get secrets $secret -o json | jq '.data | map_values(@base64d)'
+end
+complete -c ksecret -w "kubectl get secrets"
+
 
 function mkcd --wraps mkdir -d "Create a directory and cd into it"
   command mkdir -p $argv
@@ -162,6 +170,8 @@ abbr -a agr 'sudo apt remove'
 abbr -a agu 'sudo apt update'
 abbr -a agud 'sudo apt update && sudo apt dist-upgrade'
 
+abbr -a ql 'qlmanage -p'
+
 function tzconv -a "from" -a "to" -a "time" -d "Convert a time between timezones"
     echo (TZ="$from" gdate --date $time +"%r %a %b %d") in (string split '/' -f2 $from) is:
     echo (TZ="$to" gdate --date='TZ="'$from'" '$time +"%r %a %b %d") in (string split '/' -f2 $to)
@@ -183,8 +193,13 @@ function sco -d "shellcheck open"
     open https://www.shellcheck.net/wiki/$argv[1]
 end
 
+function ro -d "ruff open"
+  open https://docs.astral.sh/ruff/rules/(string upper $argv[1])
+end
+
 abbr -a cl 'clear'
 
+abbr -a sshload '/usr/bin/ssh-add --apple-load-keychain'
 
 # Git shortcuts
 abbr -a g 'git'
@@ -217,7 +232,7 @@ abbr -a grbm 'git rebase-master && git push --force-with-lease'
 alias gr 'cd (git rev-parse --show-toplevel)'
 
 # Git main|master
-alias gm 'git checkout $(git default-branch) && git pull'
+alias gm 'git checkout $(git default-branch) && git pull --autostash'
 
 alias gaa 'git status; confirm "Add all?"; and git add -A'
 alias gcapf 'git status; confirm "Amend + Push Force?"; and git commit --amend -C HEAD && git push --force-with-lease'
@@ -243,6 +258,7 @@ abbr -a newfish 'exec fish -l'
 # mayyybe auto-adding a #0 to them? https://iterm2.com/documentation-escape-codes.html
 # alias ls 'gls --color=always --hyperlink=always'
 abbr -a lsa 'ls -lah'
+abbr -a sla 'sl -lah'
 
 # https://unix.stackexchange.com/questions/631733/how-to-write-a-command-to-history-in-fish-shell
 function add_history_entry

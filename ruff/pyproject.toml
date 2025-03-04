@@ -8,6 +8,8 @@ select = [ "F", "E", "W", "C90", "I", "N", "UP", "ANN", "S", "B", "A", "C4", "EX
 # E501 line too long
 # pydocstyle rules to ensure docstring exists (I know already)
 # ANN101 self does not need to be typed
-ignore = [ "E501", "ANN101", "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107"]
+# S607 relative path to binary
+# S603 https://github.com/astral-sh/ruff/issues/4045
+ignore = [ "E501", "ANN101", "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", "S607", "S603"]
 
-target-version = "py38"
+target-version = "py311"

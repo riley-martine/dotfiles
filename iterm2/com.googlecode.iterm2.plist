@@ -19,6 +19,8 @@ Respond with one or more commands. Do not include any explanation or additional 
 	<false/>
 	<key>CommandSelection</key>
 	<true/>
+	<key>Compress History</key>
+	<false/>
 	<key>ConservativeURLGuessing</key>
 	<false/>
 	<key>CopySelection</key>
@@ -1543,7 +1545,7 @@ Respond with one or more commands. Do not include any explanation or additional 
 	<key>MaxVertically</key>
 	<false/>
 	<key>MetalSlowFrameRate</key>
-	<real>60</real>
+	<real>30</real>
 	<key>MinimumWeightDifferenceForBoldFont</key>
 	<integer>4</integer>
 	<key>New Bookmarks</key>
@@ -2364,11 +2366,13 @@ Respond with one or more commands. Do not include any explanation or additional 
 			<key>Shortcut</key>
 			<string></string>
 			<key>Show Mark Indicators</key>
-			<false/>
+			<true/>
 			<key>Show Status Bar</key>
 			<false/>
 			<key>Silence Bell</key>
 			<true/>
+			<key>Smart Selection Actions Use Interpolated Strings</key>
+			<false/>
 			<key>Smart Selection Rules</key>
 			<array>
 				<dict>
@@ -2436,12 +2440,14 @@ Respond with one or more commands. Do not include any explanation or additional 
 					<string>\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,4}\b</string>
 				</dict>
 				<dict>
+					<key>actions</key>
+					<array/>
 					<key>notes</key>
 					<string>HTTP URL</string>
 					<key>precision</key>
 					<string>very_high</string>
 					<key>regex</key>
-					<string>((?&lt;!\()https?://([a-z0-9A-Z]+(:[a-zA-Z0-9]+)?@)?([a-z0-9A-Z][-a-z0-9A-Z]*\.)+[A-Za-z][-A-Za-z]*((:[0-9]+)?)(/[a-zA-Z0-9;/.\-_+%?&amp;@=#~()]*)?)|(https?://([a-z0-9A-Z]+(:[a-zA-Z0-9]+)?@)?([a-z0-9A-Z][-a-z0-9A-Z]*\.)+[A-Za-z][-A-Za-z]*((:[0-9]+)?)(/[a-zA-Z0-9;/.\-_+%?&amp;@=#~(]*)?)</string>
+					<string>((?&lt;!\()https?://([a-z0-9A-Z]+(:[a-zA-Z0-9]+)?@)?([a-z0-9A-Z][-a-z0-9A-Z]*\.)*[A-Za-z][-A-Za-z]*((:[0-9]+)?)(/[a-zA-Z0-9;/.\-_+%?&amp;@=#~()]*)?)|(https?://([a-z0-9A-Z]+(:[a-zA-Z0-9]+)?@)?([a-z0-9A-Z][-a-z0-9A-Z]*\.)*[A-Za-z][-A-Za-z]*((:[0-9]+)?)(/[a-zA-Z0-9;/.\-_+%?&amp;@=#~(]*)?)</string>
 				</dict>
 				<dict>
 					<key>notes</key>
@@ -2682,6 +2688,8 @@ Respond with one or more commands. Do not include any explanation or additional 
 	<true/>
 	<key>QuitWhenAllWindowsClosed</key>
 	<true/>
+	<key>RequireSlashInURLGuess</key>
+	<true/>
 	<key>ScrollWheelAcceleration</key>
 	<real>2.5</real>
 	<key>SeparateStatusBarsPerPane</key>
@@ -2689,7 +2697,7 @@ Respond with one or more commands. Do not include any explanation or additional 
 	<key>SeparateWindowTitlePerTab</key>
 	<true/>
 	<key>ShowFullScreenTabBar</key>
-	<true/>
+	<false/>
 	<key>ShowNewOutputIndicator</key>
 	<false/>
 	<key>ShowPaneTitles</key>
@@ -2738,14 +2746,16 @@ Respond with one or more commands. Do not include any explanation or additional 
 	<key>URLCharacterSet</key>
 	<string>.?\/:;%=&amp;_-,+~#@!*'(（)）[]</string>
 	<key>URLCharacterSetExclusions</key>
-	<string>¬|</string>
+	<string>¬</string>
 	<key>UnderlineCursorHeight</key>
 	<real>2</real>
 	<key>UnderlineHyperlinks</key>
 	<true/>
 	<key>UseAdaptiveFrameRate</key>
-	<false/>
+	<true/>
 	<key>UseBorder</key>
+	<false/>
+	<key>UseMetal</key>
 	<false/>
 	<key>UseTmuxStatusBar</key>
 	<true/>

@@ -87,8 +87,18 @@
 	mirror-main = "! git checkout main && git remote update && git reset --hard upstream/main -- && git push --force-with-lease"
 	recent-branches-local = "!git for-each-ref --sort=committerdate refs/heads/ --format='%(refname:short) %(committerdate)'"
 	recent-branches-all = "!git for-each-ref --sort=committerdate refs/heads/ refs/remotes/ --format='%(refname:short) %(committerdate)'"
-	default-branch = "!basename $(git symbolic-ref refs/remotes/origin/HEAD)"
+	default-branch = "!git remote show origin | sed -n '/HEAD branch/s/.*: //p'"
 	nb = "!git switch $(git default-branch) && git pull && git checkout -b"
+	# Fetch remote pull requests
+	pr-refs = "!f() { \
+		remote=\"${1:-origin}\"; \
+		if git remote get-url upstream >/dev/null 2>&1; then \
+			remote=upstream; \
+		fi; \
+		git fetch $remote refs/pull/*/head:refs/remotes/$remote/pr/*; \
+	}; f"
+	inthere = "! gh pr merge --auto --merge"
+	fixlastpr = "! git status; gum confirm 'Add all?' && git add -A "#&& git commit --amend -C HEAD && git rebase-master && git ppr && git inthere"
 [commit]
 	gpgsign = true
 	template = ~/.config/git/gitmessage
@@ -121,5 +131,9 @@
 	allow = always
 [submodule]
 	recurse = true
+[global-pre-commit]
+    configPath = "~/.config/pre-commit/config-personal.yaml"
 [include]
 	path = ~/.config/git/identity.gitconfig
+[fetch]
+	parallel = 0

@@ -36,6 +36,9 @@ if empty(glob(data_dir . '/autoload/plug.vim'))
   autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
 endif
 
+" https://github.com/junegunn/vim-plug/issues/1093
+let g:plug_threads = 10
+
 call plug#begin()
 
 " Tmux integration
@@ -54,6 +57,7 @@ Plug 'Valloric/YouCompleteMe', { 'do': './install.py --all' }
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
+Plug 'mattn/vim-gotmpl'
 Plug 'scrooloose/nerdtree'
 Plug 'ryanoasis/vim-devicons'
 " Plug 'jiangmiao/auto-pairs'
@@ -566,7 +570,10 @@ augroup ft_python
 
   au FileType python syn keyword pythonDecorator True None False self
   au BufNewFile,BufRead *.jinja set syntax=htmljinja
-  autocmd BufRead *.py set smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
+  autocmd BufRead *.py
+    \ set smartindent cinwords=if,elif,else,for,while,try,except,finally,def,class
+    \ | setlocal textwidth=88
+    \ | setlocal fo -=t
 augroup END
 
 augroup ft_puppet
@@ -577,8 +584,18 @@ augroup END
 
 augroup ft_groovy
   au!
+
+  autocmd FileType groovy
+  \ setlocal tabstop=4
+  \ | setlocal softtabstop=4
+  \ | setlocal shiftwidth=4
+
+  autocmd FileType groovy syn sync fromstart
   au FileType Jenkinsfile
       \ set filetype=Jenkinsfile.groovy
+      \ | setlocal tabstop=4
+      \ | setlocal softtabstop=4
+      \ | setlocal shiftwidth=4
 augroup END
 
 augroup ft_web
@@ -790,6 +807,7 @@ let g:ale_linters = {
 \   'lua': ['luac', 'selene'],
 \   'typescript': ['eslint'],
 \   'rust': ['cargo', 'analyzer'],
+\   'groovy': ['CodeNarc'],
 \}
 " TODO readd flake8
 " Prefer markdownlint to mdl as it's more up to date
@@ -829,7 +847,7 @@ let g:ale_markdown_pandoc_options = '-f gfm -t gfm -s --columns=80  -'
 let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:ale_python_flake8_options = '--ignore=E501'
 let g:ale_python_pylint_options = '--disable=C0412'
-" let g:ale_python_mypy_options = '--ignore-missing-imports'
+" let g:ale_python_mypy_options = '--strict'
 " let g:ale_python_pylsp_config = ''
 let g:ale_sh_shfmt_options = '-i=4 -ci -sr -kp'
 let g:ale_sh_bashate_options = '-i E006'

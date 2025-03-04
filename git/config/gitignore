@@ -22,6 +22,7 @@
 ## Log and archive files:
 *.log
 *.tgz
+!charts/**/*.tgz
 
 # System files
 
