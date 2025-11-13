@@ -2,7 +2,7 @@
 # not usr/bin/env so that this stays compatible
 
 # MacOS Setup Script
-# Copyright © 2023 Riley Martine
+# Copyright © 2025 Riley Martine
 
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@
 
 # GOALS:
 #  - Sets up a decent development workstation.
-#  - Works on a fresh MacOS Ventura install, with nothing set up
+#  - Works on a fresh MacOS Tahoe install, with nothing set up
 #  - As much as possible, does things without user intervention.
 #    - I am not going to write too many applescripts to click on things, PROBABLY.
 #  - When things need user intervention, do them as late as possible.
@@ -89,11 +89,68 @@ fi
 
 echo "Caching password..."
 sudo -K
-sudo true
+sudo echo sudo sudo
 
 ###################
 #    Functions    #
 ###################
+
+append() {
+    # Append a line to a config file, if not already present.
+    # Creates file if it does not exist.
+    # Prefixes text with a newline if file already exists.
+    # Arguments:
+    #   $1: the file to append to
+    #   $2: the text to append. can be multi-line.
+    #   $3: (optional) a pattern to search for, and return if found.
+    #       used for skipping if non-exact string match already exists.
+    #
+    # Taken in part from:
+    # https://github.com/junegunn/fzf/blob/master/install
+    
+    local conf_file="$1"
+    local text="$2"
+    local pat="${3:-}"
+    local lno=""
+    
+    echo "Update ${conf_file}:"
+    echo "  - $(echo "$text" | head -n1)"
+    if [[ $text == *$'\n'* ]]; then
+        echo "$text" | tail -n +2 | sed 's/^/    /'
+    fi
+    
+    if [ -f "$conf_file" ]; then
+        set +e
+        if [ $# -lt 3 ]; then
+            lno=$(\grep -nxF "$text" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
+        else
+            lno=$(\grep -nE "$pat" "$conf_file" | sed 's/:.*//' | tr '\n' ' ')
+        fi
+        set -e
+    fi
+    
+    if [ -n "$lno" ]; then
+        echo "    - Already exists: line #$lno"
+    else
+        [ -f "$conf_file" ] && echo >> "$conf_file"
+        echo "$text" >> "$conf_file"
+        echo "    + Added"
+    fi
+    echo
+}
+
+install-js() {
+    # Install a javascript program, globally, if it DNE
+    local -r package="$1"
+
+    if npm ls -g --depth 1 "$package" > /dev/null 2>&1; then
+	return
+    fi
+    
+    append "$HOME/.config/js/global-deps.txt" "$package"
+    npm install -g "$package"
+}
+
 
 # https://unix.stackexchange.com/questions/71253/what-should-shouldnt-go-in-zshenv-zshrc-zlogin-zprofile-zlogout
 # zsh:
@@ -121,11 +178,9 @@ sudo true
 # some
 SCRIPT_PATH="$(readlink -f "$0")"
 SCRIPT_DIR=$( dirname "$SCRIPT_PATH" )
-export PATH="$SCRIPT_DIR/bin:$PATH"
-source "$SCRIPT_DIR/setup.d/utils.sh"
 
 # https://www.dzombak.com/blog/2021/11/macOS-Scripting-How-to-tell-if-the-Terminal-app-has-Full-Disk-Access.html
-if ! plutil -lint /Library/Preferences/com.apple.TimeMachine.plist > /dev/null; then
+if ! plutil -lint /Library/Preferences/com.apple.TimeMachine.plist 2&> /dev/null; then
     echo "This script requires granting Terminal.app (or whatever terminal it is running in) Full Disk Access permissions."
     echo "Please navigate to System Preferences -> Security & Privacy -> Full Disk Access and check the box for Terminal."
     echo "Once you've done so, quit and reopen Terminal and re-run this script."
@@ -141,10 +196,15 @@ else
     arm=false
 fi
 echo "Done detecting system properties."
+export arm
 
-echo "Updating MacOS..."
-softwareupdate -i -a
-add-update macos 'softwareupdate -i -a'
+echo "Determining if this is a work computer..."
+IS_WORK=false
+if ps -ax | grep '[.]crowdstrike'; then
+  IS_WORK=true
+fi
+export IS_WORK
+echo "work computer: $IS_WORK"
 
 echo "Closing system preferences..."
 osascript -e 'tell application "System Preferences" to quit'
@@ -152,22 +212,20 @@ osascript -e 'tell application "System Preferences" to quit'
 echo "Disabling boot sound..."
 sudo nvram SystemAudioVolume=" "
 
-echo "Enabling MacOS auto-update..."
-defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
-defaults write com.apple.SoftwareUpdate CriticalUpdateInstall -int 1
-sudo defaults write \
-    /Library/Preferences/com.apple.SoftwareUpdate AutomaticCheckEnabled \
-    -bool TRUE
-sudo defaults write \
-    /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownload \
-    -bool TRUE
-sudo defaults write \
-    /Library/Preferences/com.apple.SoftwareUpdate \
-    AutomaticallyInstallMacOSUpdates \
-    -bool TRUE
-# App store auto-update
-sudo defaults write /Library/Preferences/com.apple.commerce.plist AutoUpdate \
-    -bool TRUE
+# TODO fix this?
+#echo "Enabling MacOS auto-update..."
+#defaults write com.apple.SoftwareUpdate ScheduleFrequency -int 1
+#defaults write com.apple.SoftwareUpdate CriticalUpdateInstall -int 1
+#sudo defaults write \
+#    /Library/Preferences/com.apple.SoftwareUpdate AutomaticCheckEnabled \
+#    -bool TRUE
+#sudo defaults write \
+#    /Library/Preferences/com.apple.SoftwareUpdate AutomaticDownload \
+#    -bool TRUE
+#sudo defaults write \
+#    /Library/Preferences/com.apple.SoftwareUpdate \
+#    AutomaticallyInstallMacOSUpdates \
+#    -bool TRUE
 
 echo "Installing developer tools..."
 if ! pkgutil --pkg-info=com.apple.pkg.CLTools_Executables > /dev/null; then
@@ -177,7 +235,7 @@ if ! pkgutil --pkg-info=com.apple.pkg.CLTools_Executables > /dev/null; then
     read -r
 fi
 
-if [ $arm = true ]; then
+if [ $arm = true ] && [ ! -f /Library/Apple/usr/libexec/oah/libRosettaRuntime ]; then
     echo "Installing rosetta..."
     /usr/sbin/softwareupdate --install-rosetta --agree-to-license
     echo "Done installing rosetta."
@@ -197,121 +255,101 @@ if ! which brew; then
         "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 fi
 
-echo "Disabling homebrew analytics..."
-brew analytics off
+BREW_PREFIX="/opt/homebrew"
+if [ $arm = false ]; then
+    BREW_PREFIX="/usr/local"
+fi
 
-echo "Updating homebrew..."
-brew update
-
-echo "Installing homebrew services..."
-brew tap homebrew/services
-
-# echo "Cleaning up homebrew installation..."
-# brew cleanup
-
-append ~/.zshrc '# Set PATH, MANPATH, etc., for Homebrew.'
-append ~/.zshrc 'eval "$(/opt/homebrew/bin/brew shellenv)"'
+append ~/.zshrc "eval \"\$("$BREW_PREFIX/bin/brew" shellenv)\""
 
 append ~/.bash_profile 'if [ -f ~/.bashrc ]; then .  ~/.bashrc; fi'
-append ~/.bashrc '# Set PATH, MANPATH, etc., for Homebrew.'
-append ~/.bashrc 'eval "$(/opt/homebrew/bin/brew shellenv)"'
+append ~/.bashrc "eval \"\$("$BREW_PREFIX/bin/brew" shellenv)\""
 
 mkdir -p ~/.config/fish/conf.d/
-append ~/.config/fish/conf.d/00_brew.fish 'eval (/opt/homebrew/bin/brew shellenv)'
+append ~/.config/fish/conf.d/00_brew.fish "eval \"\$("$BREW_PREFIX/bin/brew" shellenv)\""
 
-eval "$(/opt/homebrew/bin/brew shellenv)"
+eval "$($BREW_PREFIX/bin/brew shellenv)"
 
-add-update homebrew 'brew update
-brew upgrade
-brew upgrade --cask --greedy'
-
-"$SCRIPT_DIR/setup.d/touch-id-sudo.sh"
-
-echo "Setting screenshots as jpg and not png, for smaller file size..."
-# TODO nvm?
-defaults write com.apple.screencapture type png
-
-echo 'Disabling opening previous previewed files (e.g. PDFs) when opening a new one'
-defaults write com.apple.Preview ApplePersistenceIgnoreState YES
+#"$SCRIPT_DIR/setup.d/touch-id-sudo.sh"
 
 echo "Showing ~/Library and /Volumes folders..."
 chflags nohidden ~/Library
 xattr -d com.apple.FinderInfo ~/Library || true
-sudo chflags nohidden /Volumes
+chflags nohidden /Volumes
 
 # https://apple.stackexchange.com/questions/408716/setting-safari-preferences-from-script-on-big-sur
-echo "Configuring Safari settings..."
-echo "Disabling websites prompting to allow notifications..."
-defaults write com.apple.Safari CanPromptForPushNotifications -bool FALSE
-
-echo 'Setting find-in-page to "Contains Match" rather than "Starts with Match"...'
-defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
-
-echo 'Disabling history auto-erasing (default 1 year)...'
-sudo defaults write com.apple.Safari HistoryAgeInDaysLimit -int 365000
-
-echo "Showing the full URL in the address bar (note: this still hides the scheme)..."
-sudo defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool TRUE
-
-echo "Showing URLs on hover..."
-defaults write com.apple.Safari ShowStatusBar -bool TRUE
-
-echo "Enabling restore of last session on re-launch..."
-defaults write com.apple.Safari AlwaysRestoreSessionAtLaunch -bool TRUE
-
-echo "Setting Safari's home page to 'about:blank' for faster loading..."
-defaults write com.apple.Safari HomePage -string "about:blank"
-
-echo "Enabling extenstion auto-update..."
-defaults write com.apple.Safari InstallExtensionUpdatesAutomatically -bool TRUE
-
-echo "Switching default search provider to DuckDuckGo..."
-defaults write com.apple.Safari SearchProviderShortName 'DuckDuckGo'
-
-echo "Disabling some weasel-worded tracking code..."
-defaults write com.apple.Safari "WebKitPreferences.privateClickMeasurementEnabled" -bool FALSE
-
-echo "Enabling developer options..."
-defaults write com.apple.Safari IncludeDevelopMenu -bool TRUE
-defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool TRUE
-defaults write com.apple.Safari "WebKitPreferences.developerExtrasEnabled" -bool TRUE
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
-defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
-defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
-
-echo "Disabling auto-open of files..."
-defaults write com.apple.Safari AutoOpenSafeDownloads -bool FALSE
-
-echo "Disabling preloading top hit & safari suggestions so apple doesn't get them..."
-defaults write com.apple.Safari PreloadTopHit -bool FALSE
-defaults write com.apple.Safari UniversalSearchEnabled -bool FALSE
-defaults write com.apple.Safari SuppressSearchSuggestions -bool true
-
-echo "Hiding bookmarks bar..."
-defaults write com.apple.Safari ShowFavoritesBar -bool false
-
-echo "Hiding sidebar in top sites..."
-defaults write com.apple.Safari ShowSidebarInTopSites -bool false
-
-echo "Disabling auto-fill..."
-defaults write com.apple.Safari AutoFillFromAddressBook -bool false
-defaults write com.apple.Safari AutoFillPasswords -bool false
-defaults write com.apple.Safari AutoFillCreditCardData -bool false
-defaults write com.apple.Safari AutoFillMiscellaneousForms -bool false
-
-echo "Warning about fraudulent websites..."
-defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true
-
-echo "Disabling autoplay..."
-defaults write com.apple.Safari WebKitMediaPlaybackAllowsInline -bool false
-defaults write com.apple.SafariTechnologyPreview WebKitMediaPlaybackAllowsInline -bool false
-defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2AllowsInlineMediaPlayback -bool false
-defaults write com.apple.SafariTechnologyPreview com.apple.Safari.ContentPageGroupIdentifier.WebKit2AllowsInlineMediaPlayback -bool false
-
-echo "Enabling do-not-track..."
-defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
-
-echo "Done configuring Safari settings."
+#echo "Configuring Safari settings..."
+#echo "Disabling websites prompting to allow notifications..."
+#defaults write com.apple.Safari CanPromptForPushNotifications -bool FALSE
+#
+#echo 'Setting find-in-page to "Contains Match" rather than "Starts with Match"...'
+#defaults write com.apple.Safari FindOnPageMatchesWordStartsOnly -bool false
+#
+#echo 'Disabling history auto-erasing (default 1 year)...'
+#sudo defaults write com.apple.Safari HistoryAgeInDaysLimit -int 365000
+#
+#echo "Showing the full URL in the address bar (note: this still hides the scheme)..."
+#sudo defaults write com.apple.Safari ShowFullURLInSmartSearchField -bool TRUE
+#
+#echo "Showing URLs on hover..."
+#defaults write com.apple.Safari ShowStatusBar -bool TRUE
+#
+#echo "Enabling restore of last session on re-launch..."
+#defaults write com.apple.Safari AlwaysRestoreSessionAtLaunch -bool TRUE
+#
+#echo "Setting Safari's home page to 'about:blank' for faster loading..."
+#defaults write com.apple.Safari HomePage -string "about:blank"
+#
+#echo "Enabling extenstion auto-update..."
+#defaults write com.apple.Safari InstallExtensionUpdatesAutomatically -bool TRUE
+#
+#echo "Switching default search provider to DuckDuckGo..."
+#defaults write com.apple.Safari SearchProviderShortName 'DuckDuckGo'
+#
+#echo "Disabling some weasel-worded tracking code..."
+#defaults write com.apple.Safari "WebKitPreferences.privateClickMeasurementEnabled" -bool FALSE
+#
+#echo "Enabling developer options..."
+#defaults write com.apple.Safari IncludeDevelopMenu -bool TRUE
+#defaults write com.apple.Safari WebKitDeveloperExtrasEnabledPreferenceKey -bool TRUE
+#defaults write com.apple.Safari "WebKitPreferences.developerExtrasEnabled" -bool TRUE
+#defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2DeveloperExtrasEnabled -bool true
+#defaults write NSGlobalDomain WebKitDeveloperExtras -bool true
+#defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
+#
+#echo "Disabling auto-open of files..."
+#defaults write com.apple.Safari AutoOpenSafeDownloads -bool FALSE
+#
+#echo "Disabling preloading top hit & safari suggestions so apple doesn't get them..."
+#defaults write com.apple.Safari PreloadTopHit -bool FALSE
+#defaults write com.apple.Safari UniversalSearchEnabled -bool FALSE
+#defaults write com.apple.Safari SuppressSearchSuggestions -bool true
+#
+#echo "Hiding bookmarks bar..."
+#defaults write com.apple.Safari ShowFavoritesBar -bool false
+#
+#echo "Hiding sidebar in top sites..."
+#defaults write com.apple.Safari ShowSidebarInTopSites -bool false
+#
+#echo "Disabling auto-fill..."
+#defaults write com.apple.Safari AutoFillFromAddressBook -bool false
+#defaults write com.apple.Safari AutoFillPasswords -bool false
+#defaults write com.apple.Safari AutoFillCreditCardData -bool false
+#defaults write com.apple.Safari AutoFillMiscellaneousForms -bool false
+#
+#echo "Warning about fraudulent websites..."
+#defaults write com.apple.Safari WarnAboutFraudulentWebsites -bool true
+#
+#echo "Disabling autoplay..."
+#defaults write com.apple.Safari WebKitMediaPlaybackAllowsInline -bool false
+#defaults write com.apple.SafariTechnologyPreview WebKitMediaPlaybackAllowsInline -bool false
+#defaults write com.apple.Safari com.apple.Safari.ContentPageGroupIdentifier.WebKit2AllowsInlineMediaPlayback -bool false
+#defaults write com.apple.SafariTechnologyPreview com.apple.Safari.ContentPageGroupIdentifier.WebKit2AllowsInlineMediaPlayback -bool false
+#
+#echo "Enabling do-not-track..."
+#defaults write com.apple.Safari SendDoNotTrackHTTPHeader -bool true
+#
+#echo "Done configuring Safari settings."
 
 echo "Expanding save panel by default..."
 defaults write NSGlobalDomain NSNavPanelExpandedStateForSaveMode -bool true
@@ -342,20 +380,20 @@ echo "Setting up AdGuard DNS servers..."
 # Safari makes actual content blocking hard. See:
 # https://github.com/el1t/uBlock-Safari/issues/158
 
-if profiles show | grep -qe "dns.adguard-dns.com"; then
-    echo "DNS profile already installed, nothing to do."
-else
-    echo "DNS profile not yet installed."
-    profile_path="$(curl -X POST https://api.adguard-dns.io/public_api/v1/dns/mobile_config --data '{"dns_proto_type":"DOH","filtering_type":"DEFAULT"}' -H 'Content-Type: application/json' | sed -n 's/^{"download_link":"\(.*\)"}$/\1/p')"k
-    curl "https://api.adguard-dns.io${profile_path}" > adguard-dns.mobileconfig
-    open /System/Library/PreferencePanes/Profiles.prefPane adguard-dns.mobileconfig
-    echo "Manual intervention required. Please install profile. Press any key to continue."
-    read
-    rm adguard-dns.mobileconfig
-    echo "Flushing DNS cache..."
-    sudo dscacheutil -flushcache
-    sudo killall -HUP mDNSResponder
-fi
+#if profiles show | grep -qe "dns.adguard-dns.com"; then
+#    echo "DNS profile already installed, nothing to do."
+#else
+#    echo "DNS profile not yet installed."
+#    profile_path="$(curl -X POST https://api.adguard-dns.io/public_api/v1/dns/mobile_config --data '{"dns_proto_type":"DOH","filtering_type":"DEFAULT"}' -H 'Content-Type: application/json' | sed -n 's/^{"download_link":"\(.*\)"}$/\1/p')"k
+#    curl "https://api.adguard-dns.io${profile_path}" > adguard-dns.mobileconfig
+#    open /System/Library/PreferencePanes/Profiles.prefPane adguard-dns.mobileconfig
+#    echo "Manual intervention required. Please install profile. Press any key to continue."
+#    read
+#    rm adguard-dns.mobileconfig
+#    echo "Flushing DNS cache..."
+#    sudo dscacheutil -flushcache
+#    sudo killall -HUP mDNSResponder
+#fi
 
 echo "Always showing scroll bars, instead of just when scrolling..."
 defaults write NSGlobalDomain AppleShowScrollBars -string "Always"
@@ -363,9 +401,9 @@ defaults write NSGlobalDomain AppleShowScrollBars -string "Always"
 echo "Enabling tap-to-click..."
 # https://osxdaily.com/2014/01/31/turn-on-mac-touch-to-click-command-line/
 defaults write com.apple.AppleMultitouchTrackpad Clicking -bool TRUE
-sudo defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool TRUE
-sudo defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
-sudo defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+#sudo defaults write com.apple.driver.AppleBluetoothMultitouch.trackpad Clicking -bool TRUE
+#sudo defaults -currentHost write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
+#sudo defaults write NSGlobalDomain com.apple.mouse.tapBehavior -int 1
 
 echo "Setting dock to auto-hide..."
 defaults write com.apple.Dock autohide -bool TRUE
@@ -382,7 +420,11 @@ defaults -currentHost write com.apple.ImageCapture disableHotPlug -bool true
 echo "Setting language and locale..."
 defaults write NSGlobalDomain AppleLanguages -array "en-US"
 defaults write NSGlobalDomain AppleLocale -string "en_US"
-sudo systemsetup -settimezone 'America/Denver' > /dev/null
+timezone="$(date "+%Z")"
+if [ "$timezone" != "MST" ]; then
+    echo "Setting TZ from $timezone"
+    sudo systemsetup -settimezone 'America/Denver' > /dev/null
+fi
 
 echo "Configuring Finder..."
 echo "Setting new window to open to home directory..."
@@ -409,10 +451,6 @@ defaults write com.apple.finder FXRemoveOldTrashItems -bool TRUE
 echo "Setting default view to columns..."
 defaults write com.apple.finder "FXPreferredViewStyle" -string "clmv"
 
-echo "Keeping folders on top for sorting..."
-defaults write com.apple.finder "_FXSortFoldersFirst" -bool "true"
-defaults write com.apple.finder "_FXSortFoldersFirstOnDesktop" -bool "true"
-
 echo "Setting default search scope to current folder, instead of system-wide..."
 defaults write com.apple.finder FXDefaultSearchScope -string "SCcf"
 
@@ -429,21 +467,15 @@ defaults write com.apple.finder QuitMenuItem -bool true
 echo "Hiding tags..."
 defaults write com.apple.finder ShowRecentTags -bool FALSE
 
-echo "Modifying Favorites..."
-brew-get --cask mysides
-echo "Removing airdrop..."
-mysides remove / || true
-echo "Removing applications..."
-mysides remove Applications || true
-echo "Adding HOME..."
-mysides add "$(whoami)" "file://$HOME/"
-echo "Adding dev..."
-mkdir -p ~/dev
-mysides add "Dev" "file://$HOME/dev/"
-echo "Adding screenshots..."
-mysides add "Screenshots" "file://$HOME/Screenshots/"
-echo "Adding Music..."
-mysides add "Music" "file://$HOME/Music/"
+#echo "Modifying Favorites..."
+#brew install --quiet --cask mysides
+#echo "Adding dev..."
+#mkdir -p ~/dev
+#mysides add "Dev" "file://$HOME/dev/"
+#echo "Adding screenshots..."
+#mysides add "Screenshots" "file://$HOME/Screenshots/"
+#echo "Adding Music..."
+#mysides add "Music" "file://$HOME/Music/"
 
 echo "Showing path and status bar..."
 defaults write com.apple.finder "ShowPathbar" -bool "true"
@@ -453,43 +485,7 @@ killall Finder
 echo "Done configuring Finder."
 
 echo "Modifying spotlight search..."
-# MENU_SPOTLIGHT_SUGGESTIONS sends search queries to Apple
-
-# TODO I don't think this is working... it isn't changing what it says in sysprefs
-#  or what comes out of spotlight.
-# Maybe it needs to be in the same order?
-# defaults write com.apple.spotlight orderedItems -array \
-# 	'{"enabled" = 1;"name" = "APPLICATIONS";}' \
-# 	'{"enabled" = 1;"name" = "SYSTEM_PREFS";}' \
-# 	'{"enabled" = 1;"name" = "DIRECTORIES";}' \
-# 	'{"enabled" = 1;"name" = "PDF";}' \
-# 	'{"enabled" = 1;"name" = "MENU_DEFINITION";}' \
-# 	'{"enabled" = 1;"name" = "MENU_EXPRESSION";}' \
-# 	'{"enabled" = 1;"name" = "MENU_CONVERSION";}' \
-# 	'{"enabled" = 0;"name" = "FONTS";}' \
-# 	'{"enabled" = 0;"name" = "DOCUMENTS";}' \
-# 	'{"enabled" = 0;"name" = "MESSAGES";}' \
-# 	'{"enabled" = 0;"name" = "CONTACT";}' \
-# 	'{"enabled" = 0;"name" = "EVENT_TODO";}' \
-# 	'{"enabled" = 0;"name" = "IMAGES";}' \
-# 	'{"enabled" = 0;"name" = "BOOKMARKS";}' \
-# 	'{"enabled" = 0;"name" = "MUSIC";}' \
-# 	'{"enabled" = 0;"name" = "MOVIES";}' \
-# 	'{"enabled" = 0;"name" = "PRESENTATIONS";}' \
-# 	'{"enabled" = 0;"name" = "SPREADSHEETS";}' \
-# 	'{"enabled" = 0;"name" = "SOURCE";}' \
-# 	'{"enabled" = 0;"name" = "MENU_OTHER";}' \
-# 	'{"enabled" = 0;"name" = "MENU_SPOTLIGHT_SUGGESTIONS";}'
-
-# Load new settings before rebuilding the index
-# killall mds || true
-# Make sure indexing is enabled for the main volume
-# sudo mdutil -i on /
-# Rebuild the index from scratch
-# sudo mdutil -E /
-
-echo "Setting terminal to only use utf-8..."
-defaults write com.apple.terminal StringEncodings -array 4
+defaults write com.apple.assistant.support "Search Queries Data Sharing Status" -int 2
 
 echo "Enabling secure keyboard entry..."
 # See: https://security.stackexchange.com/a/47786/8918
@@ -524,15 +520,15 @@ echo "Setting screensaver to activate after 10m..."
 defaults -currentHost write com.apple.screensaver idleTime -int 600
 
 echo "Setting sleep to start at 10m..."
-sudo pmset -a displaysleep 10
-sudo pmset -b sleep 10
+#sudo pmset -a displaysleep 10
+#sudo pmset -b sleep 10
 
 # This MAY actually prompt for password immediately. It may also do nothing.
 defaults write com.apple.screensaver askForPassword -int 1
 defaults write com.apple.screensaver askForPasswordDelay -int 0
 
-echo "Enabling firewall..."
-sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
+#echo "Enabling firewall..."
+#sudo /usr/libexec/ApplicationFirewall/socketfilterfw --setglobalstate on
 
 echo "Disabling asking if disks should be used for time machine backup..."
 defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup -bool true
@@ -541,8 +537,10 @@ echo "Making external monitors look a bit better..."
 # https://tonsky.me/blog/monitors/
 defaults -currentHost write -g AppleFontSmoothing -int 0
 defaults write NSGlobalDomain AppleFontSmoothing -int 0
-sudo defaults write /Library/Preferences/com.apple.windowserver \
-    DisplayResolutionEnabled -bool true
+
+# I don't know what this does anymore
+#sudo defaults write /Library/Preferences/com.apple.windowserver \
+#    DisplayResolutionEnabled -bool true
 
 echo "Disabling some keyboard auto-fixers..."
 defaults write NSGlobalDomain NSAutomaticPeriodSubstitutionEnabled -bool false
@@ -562,12 +560,9 @@ echo "Setting computer name to not contain login name..."
 sudo scutil --set ComputerName "Computer"
 sudo scutil --set LocalHostName "Computer"
 sudo scutil --set HostName "Computer"
-sudo defaults write \
-    /Library/Preferences/SystemConfiguration/com.apple.smb.server NetBIOSName \
-    -string "Computer"
 
 echo "Installing quicklook plugins..."
-if ! defaults read "com.apple.preferences.extensions.QuickLook" | grep -qe QLMarkdown; then
+if ! command -v qlmarkdown_cli; then
     brew install --cask qlmarkdown
     xattr -r -d com.apple.quarantine /Applications/QLMarkdown.app
     defaults write org.sbarex.QLMarkdown SUEnableAutomaticChecks -bool FALSE
@@ -575,7 +570,7 @@ if ! defaults read "com.apple.preferences.extensions.QuickLook" | grep -qe QLMar
     open /Applications/QLMarkdown.app && sleep 5 && killall QLMarkdown
 fi
 
-if ! defaults read "com.apple.preferences.extensions.QuickLook" | grep -qe SyntaxHighlight; then
+if ! command -v syntax_highlight_cli; then
     brew install --cask --no-quarantine syntax-highlight
     echo "Opening Syntax Highlight to register extension..."
     open '/Applications/Syntax Highlight.app' &&
@@ -587,23 +582,22 @@ echo "Done installing quicklook plugins."
 
 # TODO other shell integration
 echo "Installing iTerm2..."
-brew-get --cask iterm2
+brew install --quiet --cask iterm2
 curl -L --no-progress-bar https://iterm2.com/shell_integration/fish \
     -o ~/.config/fish/conf.d/90_iterm2_shell_integration.fish
-add-update iterm2 \
-    'curl -L --no-progress-bar https://iterm2.com/shell_integration/fish \
-    -o ~/.config/fish/conf.d/90_iterm2_shell_integration.fish'
 
 # Makes copying dotfiles easier
 # https://imarslo.gitbook.io/handbook/gitbook/app/iterm2
 # TODO check out this doc more
 defaults write com.googlecode.iterm2 "Coprocess MRU" -int 0
 
-brew tap homebrew/cask-fonts
-brew-get --cask font-roboto font-blex-mono-nerd-font
+# For some reason it keeps reinstalling roboto
+if ! brew ls | grep -qe font-roboto; then
+    brew install --quiet --cask font-roboto font-blex-mono-nerd-font
+fi
 
 echo "Installing GNU utilities..."
-brew-get \
+brew install --quiet \
     bash \
     gawk \
     wget \
@@ -621,14 +615,14 @@ brew-get \
     coreutils \
     binutils \
     diffutils \
+    make \
     readline
 
-echo "will cite" | parallel --citation
+echo "will cite" | parallel --citation 2> /dev/null
 
-add-update gpg 'gpg --refresh-keys'
 
 echo "Installing various utilities..."
-brew-get \
+brew install --quiet \
     git \
     bash-completion \
     bash-language-server \
@@ -653,22 +647,30 @@ brew-get \
     imagemagick \
     openssl \
     openssh \
-    lynx \
     html2text \
-    direnv \
-    jump \
-    reattach-to-user-namespace
+    curl \
+    baobab \
+    gitleaks \
+    gojq \
+    pre-commit \
+    direnv
+    #reattach-to-user-namespace
 
-brew unlink openssh # needed so we can UseKeychain
+if [ "$IS_WORK" = true ]; then
+    brew install --quiet lastpass-cli aws-iam-authenticator awscli fluxcd/tap/flux helm kubectx kubernetes-cli kustomize postgresql@15 watchman
+    brew install --cask --quiet dbeaver-community
+fi
 
-brew-get --HEAD universal-ctags/universal-ctags/universal-ctags
+#brew unlink openssh # needed so we can UseKeychain
+
+brew install --quiet --HEAD universal-ctags/universal-ctags/universal-ctags
 
 echo "Installing zsh plugins..."
-brew-get \
+brew install --quiet \
     zsh-syntax-highlighting
 
 echo "Installing next-gen CLI utilities..."
-brew-get \
+brew install --quiet \
     git-delta \
     git-absorb \
     eza \
@@ -681,15 +683,14 @@ brew-get \
     ripgrep-all \
     hyperfine \
     tz \
-    mdcat
+    mdcat \
+    atuin
 
-add-update tldr 'tldr --update'
 
 /opt/homebrew/opt/fzf/install --all
-add-update fzf '/opt/homebrew/opt/fzf/install --all'
 
-echo "Installing texlive..."
-brew-get texlive
+#echo "Installing texlive..."
+#brew install --quiet texlive
 
 echo "Adding bash completion..."
 append ~/.bashrc \
@@ -705,7 +706,7 @@ fi'
 rm -f ~/.zcompdump
 
 # https://unix.stackexchange.com/questions/383365/zsh-compinit-insecure-directories-run-compaudit-for-list
-zsh -c 'autoload -Uz compinit && compinit && compaudit | xargs chmod g-w'
+chmod g-w "$BREW_PREFIX/share"
 
 echo "Setting editor..."
 append ~/.bashrc 'export EDITOR=vim'
@@ -715,114 +716,40 @@ append ~/.config/fish/conf.d/10_editor.fish 'set -x EDITOR vim'
 echo "Installing fisher..."
 fish -c 'curl -sL https://git.io/fisher | source && \
     fisher install jorgebucaran/fisher'
-add-update fisher 'fish -c "fisher update"'
 
 echo "Configuring starship..."
-brew-get starship
+brew install --quiet starship
 
 append ~/.zshrc 'eval "$(starship init zsh)"'
 append ~/.bashrc 'eval "$(starship init bash)"'
 append ~/.config/fish/conf.d/99_starship.fish 'starship init fish | source'
 
-echo "Installing python via pyenv..."
-brew-get pyenv
-
-# TODO consolidate appends
-append ~/.bashrc 'export PYENV_ROOT="$HOME/.pyenv"'
-append ~/.bashrc \
-    'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"'
-append ~/.bashrc 'eval "$(pyenv init -)"'
-append ~/.bashrc 'export PYTHON_CONFIGURE_OPTS="--enable-framework"'
-
-append ~/.zshrc 'export PYENV_ROOT="$HOME/.pyenv"'
-append ~/.zshrc \
-    'command -v pyenv >/dev/null || export PATH="$PYENV_ROOT/bin:$PATH"'
-append ~/.zshrc 'eval "$(pyenv init -)"'
-append ~/.zshrc 'export PYTHON_CONFIGURE_OPTS="--enable-framework"'
-
-fish -c 'set -Ux PYENV_ROOT $HOME/.pyenv'
-fish -c 'set -U fish_user_paths $PYENV_ROOT/bin $fish_user_paths'
-
-append ~/.config/fish/conf.d/30_pyenv.fish 'pyenv init - | source'
-append ~/.config/fish/conf.d/30_pyenv.fish \
-    'set -x PYTHON_CONFIGURE_OPTS "--enable-framework"'
-
 # https://github.com/pyenv/pyenv/wiki#suggested-build-environment
-brew-get openssl readline sqlite3 xz zlib tcl-tk
-
-eval "$(pyenv init -)"
-# Install latest stable python
-pyenv install --skip-existing \
-    "$(pyenv install --list | sed 's/ //g' | ggrep -P '^[\d\.]+$' | tail -n 1)"
-pyenv global "$(pyenv latest 3)"
-
-git clone https://github.com/pyenv/pyenv-update.git $(pyenv root)/plugins/pyenv-update
-
-# Update pyenv and plugins
-add-update pyenv 'pyenv update'
-
-# Update to latest python from pyenv
-# https://stackoverflow.com/questions/4664229/here-document-as-an-argument-to-bash-function
-# This is really cool; it lets us not have to escape anything.
-add-update pyenv "$(
-    cat << "EOF"
-pyenv install --skip-existing \
-    "$(pyenv install --list | sed 's/ //g' | ggrep -P '^[\d\.]+$' | tail -n 1)"
-pyenv global "$(pyenv latest 3)"
-EOF
-)"
-
-# Update installed fellas from each pyenv
-add-update pyenv "$(
-    cat << "EOF"
-pyenv versions --bare |
-    gxargs -d \$'\n' bash -c $'eval "$(pyenv init -)";
-    for arg; do
-        pyenv shell $arg
-        python --version
-        python -m pip install --upgrade pip
-        pip list --format=freeze |
-            grep -v "^\-e" |
-            cut -d = -f 1 |
-            xargs -n1 pip install -U
-    done' _
-EOF
-)"
-
-# We also have to add updates for brew python packages
-# TODO figure out expected fails like libtorrent
-add-update brew-python "$(
-    cat << "EOF"
-# Update pip itself
-brew list |
-    sed -rn 's/python@(.+)/\1/p' |
-    xargs -I{} bash -c '/opt/homebrew/bin/"python{}" -m pip install --upgrade pip'
-
-# Update packages installed by pip
-brew list |
-    sed -rn 's/python@(.+)/\1/p' |
-    xargs -I{} bash -c '/opt/homebrew/bin/"pip{}" list --format=freeze |
-        grep -v "^\-e" |
-        cut -d = -f 1 |
-        xargs -n1 pip{} install -U'
-EOF
-)"
+#brew install --quiet openssl readline sqlite3 xz zlib tcl-tk
 
 echo "Installing python packages..."
-brew-get pkg-config poppler python
+brew install --quiet pkg-config python uv pipx
+
+
+append ~/.bashrc 'export PATH=$PATH:$(brew --prefix python)/libexec/bin'
+append ~/.zshrc 'export PATH=$PATH:$(brew --prefix python)/libexec/bin'
+fish -c 'set -U fish_user_paths $(brew --prefix python)/libexec/bin $fish_user_paths'
+
 mkdir -p ~/.config/python
 # This is where I'm keeping my binaries to bring with on new python versions
-append ~/.config/python/global-requirements.txt "pdftotext"
-pip install -r  ~/.config/python/global-requirements.txt
-add-update pyenv 'pip install -r ~/.config/python/global-requirements.txt'
+# Except not pdftotext because uv tool install can't handle it
+#append ~/.config/python/global-requirements.txt "pdftotext"
+#cat ~/.config/python/global-requirements.txt | xargs uv tool install
+brew install --quiet xpdf
+
 
 #TODO should I use asdf, or fnm?
 # https://github.com/Schniz/fnm ooh its rust
 echo "Installing node and nvm..."
-# brew-get nvm node
+# brew install --quiet nvm node
 # TODO make this use latest tag
 # Review if appends are needed
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.3/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 mkdir -p ~/.nvm
 
 append ~/.zshrc 'export NVM_DIR="$HOME/.nvm"'
@@ -835,6 +762,7 @@ append ~/.bashrc '[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \.
 
 fish -c 'fisher install jorgebucaran/nvm.fish'
 
+
 # So despite installing nvm, we're going to use homebrew node for everything global.
 set +u
 # TODO fix
@@ -842,10 +770,8 @@ set +u
 # nvm use system
 set -u
 
-add-update npm 'npm update -g'
-
 echo "Installing go..."
-brew-get go
+brew install --quiet go
 
 append ~/.bashrc 'export PATH=$PATH:$(go env GOPATH)/bin'
 append ~/.bashrc 'export GOPATH="$HOME/go"'
@@ -859,10 +785,9 @@ fish -c 'set -U fish_user_paths $(go env GOPATH)/bin $fish_user_paths'
 
 echo 'Installing gup (go global update)'
 go install github.com/nao1215/gup@latest
-add-update go "gup update"
 
 echo "Installing rust..."
-brew-get rustup
+brew install --quiet rustup
 rustup-init -y
 source "$HOME/.cargo/env"
 
@@ -872,12 +797,10 @@ fish -c 'set -U fish_user_paths ~/.cargo/bin $fish_user_paths'
 
 cargo install cargo-update
 
-add-update rust "cargo install-update -a"
-add-update rust "rustup update"
 
 echo "Installing ruby..."
-brew-get rbenv ruby-build
-brew-get autoconf automake gdbm gmp \
+brew install --quiet rbenv ruby-build
+brew install --quiet autoconf automake gdbm gmp \
     libksba libtool libyaml openssl pkg-config readline
 
 append ~/.bashrc 'eval "$(rbenv init - bash)"'
@@ -899,14 +822,10 @@ if [ ! "$(rbenv global)" = "$latest" ]; then
     echo "updateme"
 fi
 
-add-update ruby 'gem update --system && gem update'
 
 echo 'Installing Java \(Temurin 8, 11, 17\) with jenv...'
-brew tap homebrew/cask-versions
-brew update
-brew tap homebrew/cask
-brew-get --cask temurin8 temurin11 temurin17
-brew-get jenv
+brew install --quiet --cask temurin@8 temurin@11 temurin@17
+brew install --quiet jenv
 
 append ~/.bashrc 'export PATH="$HOME/.jenv/bin:$PATH"'
 append ~/.bashrc 'eval "$(jenv init -)"'
@@ -923,30 +842,15 @@ jenv add /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
 jenv add /Library/Java/JavaVirtualMachines/temurin-17.jdk/Contents/Home
 # jenv enable-plugin export # Not for fish! Disable for fish!
 
-echo "Installing perl via perlbrew..."
-if ! type perlbrew; then
-    SHELL=bash curl -L https://install.perlbrew.pl | bash
-fi
+echo "Installing perl"
+brew install --quiet perl cpanminus
 
-append ~/.bashrc 'source ~/perl5/perlbrew/etc/bashrc'
-append ~/.zshrc 'source ~/perl5/perlbrew/etc/bashrc'
-append ~/.config/fish/conf.d/13_perlbrew.fish \
-    '. ~/perl5/perlbrew/etc/perlbrew.fish'
-
-set +u
-SHELL=bash source "$HOME/perl5/perlbrew/etc/bashrc"
-set -u
-SHELL=bash perlbrew init
-
-latest="$(perlbrew available | /usr/bin/sed -nE 's/.*(perl-.*)/\1/p' | head -n1 | tr -d '[:space:]')"
-if ! perlbrew list | grep -qF "$latest"; then
-    perlbrew install "$latest"
-fi
-perlbrew switch "$latest"
-
-if [ ! -f "$PERLBREW_ROOT/bin/cpanm" ]; then
-    perlbrew install-cpanm --yes
-fi
+PERL_MM_OPT="INSTALL_BASE=$HOME/perl5" echo yes | cpan local::lib
+append ~/.bashrc 'eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"'
+append ~/.zshrc 'eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"'
+append ~/.config/fish/conf.d/13-perl.fish 'set -x PERL_MB_OPT "--install_base \"$HOME/perl5\""'
+append ~/.config/fish/conf.d/13-perl.fish 'set -x PERL_MM_OPT "--install_base \"$HOME/perl5\""'
+eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"
 
 # TODO global perl deps
 cpanm Perl::Critic
@@ -956,43 +860,37 @@ cpanm Log::Log4perl
 cpanm Term::ReadLine::Perl
 cpanm App::cpanoutdated
 
-# add-update perl 'yes | perl -MCPAN -e "upgrade /(.\*)/"'
-add-update perl 'cpanm --self-upgrade || perlbrew install-cpanm --yes'
-add-update perl 'cpan-outdated -p | cpanm'
-
 echo "Installing lua via brew..."
-brew-get lua luarocks
+brew install --quiet lua luarocks
 
 echo "Installing linters and fixers..."
 # bash
-brew-get \
+brew install --quiet \
     shellcheck \
     shfmt \
     bash-language-server
 
-pip install bashate
-
 # cloudformation
-brew-get cfn-lint
+brew install --quiet cfn-lint
 
 # css
-npm i -g vscode-langservers-extracted
+install-js vscode-langservers-extracted
 
 # docker
-npm install -g dockerfile_lint
-brew-get hadolint
+install-js dockerfile_lint
+brew install --quiet hadolint
 
 # git
-brew-get gitlint
+brew install --quiet gitlint
 
 # go handled by vim-go
 
 # graphql
-npm install -g gqlint
+install-js gqlint
 
 # HCL
 brew tap hashicorp/tap
-brew-get \
+brew install --quiet \
     hashicorp/tap/packer \
     hashicorp/tap/terraform \
     hashicorp/tap/terraform-ls \
@@ -1004,48 +902,46 @@ brew-get \
 # Same for js
 
 # json
-npm install jsonlint -g
+install-js jsonlint
 
 # kotlin
-brew-get \
+brew install --quiet \
     kotlin-language-server \
     kotlin \
     ktlint
 
 # latex
-brew-get texlab
+brew install --quiet texlab
 
 #lua
-brew-get stylua
+brew install --quiet stylua
 luarocks install luacheck
 luarocks install lanes
 # TODO global lua deps
-add-update luarocks 'luarocks install luacheck'
-add-update luarocks 'luarocks install lanes'
 
 #md
-brew-get markdownlint-cli
+brew install --quiet markdownlint-cli
 
 # perl
 cpanm Perl::Critic
 
 # protobuf
 brew tap bufbuild/buf
-brew-get bufbuild/buf/buf
+brew install --quiet bufbuild/buf/buf
 
 # python
 # This way these come with us to new python versions
 append ~/.config/python/global-requirements.txt 'black'
 append ~/.config/python/global-requirements.txt 'isort'
-append ~/.config/python/global-requirements.txt 'autoflake'
 append ~/.config/python/global-requirements.txt 'bandit[toml]'
-append ~/.config/python/global-requirements.txt 'vulture'
 append ~/.config/python/global-requirements.txt 'mypy'
-append ~/.config/python/global-requirements.txt 'pylint'
-append ~/.config/python/global-requirements.txt 'mccabe'
-append ~/.config/python/global-requirements.txt 'pylsp-rope'
 append ~/.config/python/global-requirements.txt 'python-lsp-server[rope]'
-pip install -r  ~/.config/python/global-requirements.txt
+cat ~/.config/python/global-requirements.txt | xargs -n 1 uv tool install
+
+# For uv
+append ~/.bashrc 'export PATH=$HOME/.local/bin:$PATH'
+append ~/.zshrc 'export PATH=$HOME/.local/bin:$PATH'
+fish -c 'set -U fish_user_paths $HOME/.local/bin $fish_user_paths'
 
 # puppet
 gem install puppet-lint
@@ -1056,69 +952,56 @@ rustup component add rust-analyzer
 ln -sf "$(rustup which --toolchain stable rust-analyzer)" ~/.cargo/bin/
 
 # typescript
-npm install -g typescript \
-    ts-node
-
-# TODO text valerc
-brew-get \
-    vale \
-    languagetool \
-    redpen
-
-add-update vale 'vale sync'
-
-npm install alex --global
+install-js typescript
+install-js ts-node
 
 # vim
-npm install -g vim-language-server
-pip install vim-vint
+install-js vim-language-server
+append ~/.config/python/global-requirements.txt 'vim-vint'
+uv tool install vim-vint
 
 # xml
-brew-get libxml2
+brew install --quiet libxml2
 ln -sf /opt/homebrew/opt/libxml2/bin/xmllint /opt/homebrew/bin/
 
 # yaml
-npm install -g yaml-language-server
-brew-get yamllint
+install-js yaml-language-server
+brew install --quiet yamllint
 
 # TODO sdkman
 
 echo "Installing Docker..."
-brew-get --cask Docker
 # Not bothering with k8s. I do not see myself using it for local dev.
 
 # Bash completion
-etc=/Applications/Docker.app/Contents/Resources/etc
-ln -sf "$etc"/docker.bash-completion \
-    "$(brew --prefix)"/etc/bash_completion.d/docker
-ln -sf "$etc"/docker-compose.bash-completion \
-    "$(brew --prefix)"/etc/bash_completion.d/docker-compose
-
-# zsh completion
-ln -sf "$etc"/docker.zsh-completion \
-    "$(brew --prefix)"/share/zsh/site-functions/_docker
-ln -sf "$etc"/docker-compose.zsh-completion \
-    "$(brew --prefix)"/share/zsh/site-functions/_docker-compose
-
-# fish completion
-mkdir -p ~/.config/fish/completions
-ln -sf "$etc"/docker.fish-completion \
-    ~/.config/fish/completions/docker.fish
-ln -sf "$etc"/docker-compose.fish-completion \
-    ~/.config/fish/completions/docker-compose.fish
+#etc=/Applications/Docker.app/Contents/Resources/etc
+#ln -sf "$etc"/docker.bash-completion \
+#    "$(brew --prefix)"/etc/bash_completion.d/docker
+#ln -sf "$etc"/docker-compose.bash-completion \
+#    "$(brew --prefix)"/etc/bash_completion.d/docker-compose
+#
+## zsh completion
+#ln -sf "$etc"/docker.zsh-completion \
+#    "$(brew --prefix)"/share/zsh/site-functions/_docker
+#ln -sf "$etc"/docker-compose.zsh-completion \
+#    "$(brew --prefix)"/share/zsh/site-functions/_docker-compose
+#
+## fish completion
+#mkdir -p ~/.config/fish/completions
+#ln -sf "$etc"/docker.fish-completion \
+#    ~/.config/fish/completions/docker.fish
+#ln -sf "$etc"/docker-compose.fish-completion \
+#    ~/.config/fish/completions/docker-compose.fish
 
 echo "Installing Firefox..."
-brew-get --cask firefox
+brew install --quiet --cask firefox
 
 echo "Installing Discord..."
-brew-get --cask discord
+brew install --quiet --cask discord
 
-echo "Installing Bitwarden..."
-brew-get --cask bitwarden
-brew-get bitwarden-cli
 
 echo "Installing lunar..."
-brew-get --cask lunar
+brew install --quiet --cask lunar
 # TODO configure lunar
 # TODO night and day configs
 # TODO test
@@ -1132,67 +1015,87 @@ defaults write com.lunar.Lunar lunarProOnTrial -bool false
 defaults write com.lunar.Lunar lunarProAccessDialogShown -bool true
 
 echo "Installing keepingyouawake..."
-brew-get --cask keepingyouawake
+brew install --quiet --cask keepingyouawake
 # TODO settigns
 
-echo "Installing Signal..."
-brew-get --cask signal
 
 echo "Installing VLC..."
-brew-get --cask vlc
+brew install --quiet --cask vlc
 
 echo "Installing Calibre..."
-brew-get --cask calibre
+brew install --quiet --cask calibre
 
-echo "Installing LibreOffice..."
-brew-get --cask libreoffice
-
-echo "Installing Nextcloud..."
-brew-get --cask nextcloud
-
-echo "Installing veracrypt..."
-brew-get --cask veracrypt
-# TODO print this mayb
-# macfuse requires a kernel extension to work.
-#If the installation fails, retry after you enable it in:
-#  System Preferences → Security & Privacy → General
-
-#For more information, refer to vendor documentation or this Apple Technical Note:
-#  https://developer.apple.com/library/content/technotes/tn2459/_index.html
+brew install --quiet --cask handbrake-app logitune
 
 echo "Installing rectangle..."
-brew-get --cask rectangle
+brew install --quiet --cask rectangle
 defaults write "com.knollsoft.Rectangle" SUEnableAutomaticChecks -bool FALSE
 defaults write "com.knollsoft.Rectangle" alternateDefaultShortcuts -bool TRUE
 defaults write "com.knollsoft.Rectangle" launchOnLogin -bool TRUE
 defaults write "com.knollsoft.Rectangle" SUHasLaunchedBefore -bool TRUE
 
 # TODO only do this if not installed yet
-open '/Applications/Rectangle.app'
-# Needed because we can't write to Accessibility without SIP disabled
-# https://github.com/jacobsalmela/tccutil#sip-notice
-echo "Follow prompts in app, then press enter to continue."
-read -r
+rectangleHasLaunched="$(defaults read com.knollsoft.Rectangle SUHasLaunchedBefore)"
+if [ $rectangleHasLaunched != 1 ]; then
+    open '/Applications/Rectangle.app'
+    # Needed because we can't write to Accessibility without SIP disabled
+    # https://github.com/jacobsalmela/tccutil#sip-notice
+    echo "Follow prompts in app, then press enter to continue."
+    read -r
+fi
 echo "Done installing rectangle."
 
 echo "Installing moonlander config software..."
 # brew tap homebrew/cask-drivers
-brew-get zsa-wally libusb
-go install github.com/zsa/wally-cli@latest
+brew install --quiet keymapp libusb
 # TODO flash firmware
 
-# TODO add bitwarden
+if [ $IS_WORK != true ]; then
+    echo "Installing Bitwarden..."
+    brew install --quiet --cask bitwarden
+    brew install --quiet bitwarden-cli
+
+    echo "Installing Signal..."
+    brew install --quiet --cask signal
+
+    echo "Installing LibreOffice..."
+    brew install --quiet --cask libreoffice
+    
+    echo "Installing Nextcloud..."
+    brew install --quiet --cask nextcloud
+    
+    echo "Installing veracrypt..."
+    brew install --quiet --cask veracrypt
+    # TODO print this mayb
+    # macfuse requires a kernel extension to work.
+    #If the installation fails, retry after you enable it in:
+    #  System Preferences → Security & Privacy → General
+    
+    #For more information, refer to vendor documentation or this Apple Technical Note:
+    #  https://developer.apple.com/library/content/technotes/tn2459/_index.html
+fi
+
 # https://github.com/kcrawford/dockutil/issues/127
 # https://github.com/pivotal/workstation-setup/blob/main/scripts/common/configuration-osx.sh
 echo "Cleaning up Dock..."
-brew-get --cask hpedrorodrigues/tools/dockutil
+brew install --quiet dockutil
 dockutil --list |
     awk -F'\t' '{print "dockutil --remove \""$1"\" --no-restart"}' |
     sh
-dockutil --add /Applications/Firefox.app --no-restart
-dockutil --add /Applications/iTerm.app --no-restart
-# dockutil --add /System/Applications/Utilities/Terminal.app --no-restart
-dockutil --add /System/Applications/System\ Settings.app --no-restart
+if [ $IS_WORK = true ]; then
+    dockutil --add /Applications/Calendar.app --no-restart
+    dockutil --add /Applications/Firefox.app --no-restart
+    dockutil --add /Applications/Slack.app --no-restart
+    dockutil --add /Applications/iTerm.app --no-restart
+    dockutil --add /System/Applications/System\ Settings.app --no-restart
+else
+    dockutil --add /Applications/iTerm.app --no-restart
+    dockutil --add /Applications/Discord.app --no-restart
+    dockutil --add /Applications/Signal.app --no-restart
+    dockutil --add /Applications/Firefox.app --no-restart
+    dockutil --add '/Applications/FL Studio 20.app' --no-restart
+    dockutil --add /System/Applications/System\ Settings.app --no-restart
+fi
 killall Dock
 
 echo "Setting default browser..."
@@ -1238,6 +1141,13 @@ login_bitwarden() {
     fi
 }
 
+login_lastpass() {
+    echo "Logging in to Lastpass cli..."
+    if ! lpass status -q; then
+        lpass login rmartine@integralads.com
+    fi
+}
+
 login_github() {
     echo "Logging in to github..."
     if ! gh auth status; then
@@ -1245,27 +1155,35 @@ login_github() {
         GH_PROMPT_DISABLED="true" gh auth login \
             --hostname github.com \
             --git-protocol ssh \
-            --scopes write:gpg_key admin:public_key
+            --scopes write:gpg_key --scopes admin:public_key
     fi
 }
 
 # https://serverfault.com/questions/818289/add-second-sub-key-to-unattended-gpg-key#962553
 echo "Generating GPG key for github..."
-if ! gpg --list-secret-keys | grep -q github; then
-    login_bitwarden
+if ! gpg --list-secret-keys | grep -q ultimate; then
     login_github
 
-    # https://bitwarden.com/help/cli/#create
-    GPG_PASS_ID="$(bw get template item | jq ".type = 2 | .secureNote.type = 0 | .notes = \"$(bw generate --length 32)\" | .name = \"GPG key MacOS $(date)\"" | bw encode | bw create item | jq -r '.id')"
-    bw sync
-    GPG_PASS="$(bw get notes "$GPG_PASS_ID")"
+    if [ $IS_WORK = true ]; then
+	login_lastpass
+	GPG_PASS_ID="GPG key MacOS $(date)"
+        GPG_PASS="$(lpass generate "$GPG_PASS_ID" 32)"
+	GPG_USER="Riley Martine <rmartine@integralads.com>"
+    else
+        login_bitwarden
+        # https://bitwarden.com/help/cli/#create
+        GPG_PASS_ID="$(bw get template item | jq ".type = 2 | .secureNote.type = 0 | .notes = \"$(bw generate --length 32)\" | .name = \"GPG key MacOS $(date)\"" | bw encode | bw create item | jq -r '.id')"
+        bw sync
+        GPG_PASS="$(bw get notes "$GPG_PASS_ID")"
+	GPG_USER="Riley Martine <riley.martine@protonmail.com>"
+    fi
 
     KEYID="$(
            gpg \
               --with-colons --batch --status-fd=1 \
               --passphrase "$GPG_PASS" \
               --quick-generate-key \
-              "Oneirophage (codeberg) <oneirophage@pm.me>" \
+              "$GPG_USER" \
                   default cert 1y |
             sed -E -n 's/\[GNUPG:\] KEY_CREATED P (.*)/\1/p'
     )"
@@ -1277,7 +1195,7 @@ if ! gpg --list-secret-keys | grep -q github; then
     gpg --armor --export "$KEYID" | gh gpg-key add
 
     # https://gist.github.com/bmhatfield/cc21ec0a3a2df963bffa3c1f884b676b
-    brew-get pinentry-mac
+    brew install --quiet pinentry-mac
     append ~/.gnupg/gpg-agent.conf \
         "pinentry-program $(brew --prefix)/bin/pinentry-mac"
     append ~/.gnupg/gpg.conf "use-agent"
@@ -1298,37 +1216,46 @@ try
     end tell
 end try
 EOF
-
 fi
 
 echo "Generating ssh key for github..."
 mkdir -p ~/.ssh
 
-brew unlink openssh # needed so we can UseKeychain
+#brew unlink openssh # needed so we can UseKeychain
 append ~/.ssh/config "Host *.github.com
   AddKeysToAgent yes
   UseKeychain yes
   IdentityFile ~/.ssh/id_github"
 
 if [ ! -f ~/.ssh/id_github ]; then
-    login_bitwarden
     login_github
+    gh auth refresh -h github.com -s admin:ssh_signing_key
 
-    SSH_PASS_ID="$(bw get template item |
-        jq ".type = 2 | \
-            .secureNote.type = 0 | \
-            .notes = \"$(bw generate --length 32)\" | \
-            .name = \"Github SSH key MacOS $(date)\"" |
-        bw encode |
-        bw create item |
-        jq -r '.id')"
 
-    bw sync
-    SSH_PASS="$(bw get notes "$SSH_PASS_ID")"
+    if [ $IS_WORK = true ]; then
+        login_lastpass
+	SSH_PASS_ID="GitHub SSH key MacOS $(date)"
+        SSH_PASS="$(lpass generate "SSH_PASS_ID" 32)"
+	SSH_USER="rmartine@integralads.com"
+    else
+        login_bitwarden
+        SSH_PASS_ID="$(bw get template item |
+            jq ".type = 2 | \
+                .secureNote.type = 0 | \
+                .notes = \"$(bw generate --length 32)\" | \
+                .name = \"Github SSH key MacOS $(date)\"" |
+            bw encode |
+            bw create item |
+            jq -r '.id')"
+
+        bw sync
+        SSH_PASS="$(bw get notes "$SSH_PASS_ID")"
+	SSH_USER="riley.martine@protonmail.com"
+    fi
 
     ssh-keygen \
         -t ed25519 \
-        -C "riley.martine@protonmail.com" \
+        -C "$SSH_USER" \
         -f ~/.ssh/id_github \
         -N "$SSH_PASS"
 
@@ -1338,7 +1265,7 @@ if [ ! -f ~/.ssh/id_github ]; then
     ap=$(mktemp)
     [ -f "${ap}" ] && cat << EOF > "$ap"
 #!/bin/bash
-# Parameter $1 passed to the script is the prompt text
+# Parameter \$1 passed to the script is the prompt text
 # READ Secret from STDIN and echo it
 read SECRET
 echo "\$SECRET"
@@ -1351,6 +1278,8 @@ EOF
     rm "${ap}"
     umask "$mask"
 
+    gh ssh-key add ~/.ssh/id_github.pub --type authentication
+    gh ssh-key add ~/.ssh/id_github.pub --type signing
 fi
 
 # https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
@@ -1369,16 +1298,12 @@ echo "Setting PATH to include ~/bin..."
 fish -c 'set -U fish_user_paths $HOME/bin $fish_user_paths'
 # TODO bash and zsh
 
-echo "Installing fonts..."
-brew tap homebrew/cask-fonts
-# TODO replace w/ the one I want
-brew-get --cask font-meslo-lg-nerd-font
-
 echo "Installing sundial..."
 brew tap riley-martine/sundial https://github.com/riley-martine/sundial
-brew-get riley-martine/sundial/sundial
+brew install --quiet riley-martine/sundial/sundial
 sundial --city Denver
 
+exit
 echo "Configuring dotfiles..."
 mkdir -p ~/dev
 if [ ! -d ~/dev/dotfiles ]; then
@@ -1425,7 +1350,6 @@ if [ ! -d ~/.tmux/plugins/tpm ]; then
 fi
 ~/.tmux/plugins/tpm/bin/install_plugins
 ~/.tmux/plugins/tpm/bin/update_plugins all
-add-update tpm '~/.tmux/plugins/tpm/bin/update_plugins all'
 
 # See also:
 # https://gist.github.com/bbqtd/a4ac060d6f6b9ea6fe3aabe735aa9d95
@@ -1447,7 +1371,6 @@ curl --no-progress-bar -fLo  ~/.vim/autoload/plug.vim --create-dirs \
 # https://github.com/ycm-core/YouCompleteMe#installation
 brew install cmake
 vim +PlugUpgrade +PlugInstall +PlugUpdate +qall
-add-update vim 'vim +PlugUpgrade +PlugInstall +PlugUpdate +qall'
 
 #TODO review and make sure we got em all
 #better, unify w/ diff.sh
@@ -1469,7 +1392,6 @@ copy_dotfile "fish/config.fish" "$HOME/.config/fish/config.fish"
 copy_dotfile "fish/themes/tokyonight_day.fish" \
     "$HOME/.config/fish/themes/tokyonight_day.fish"
 fish -c 'fisher update'
-add-update fisher 'fish -c "fisher update"'
 
 copy_dotfile "bin/random-words" "$HOME/bin/random-words"
 
