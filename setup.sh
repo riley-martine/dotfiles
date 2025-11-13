@@ -591,9 +591,10 @@ curl -L --no-progress-bar https://iterm2.com/shell_integration/fish \
 # TODO check out this doc more
 defaults write com.googlecode.iterm2 "Coprocess MRU" -int 0
 
+brew install --quiet --cask font-blex-mono-nerd-font font-meslo-lg-nerd-font
 # For some reason it keeps reinstalling roboto
 if ! brew ls | grep -qe font-roboto; then
-    brew install --quiet --cask font-roboto font-blex-mono-nerd-font
+    brew install --quiet --cask font-roboto 
 fi
 
 echo "Installing GNU utilities..."
