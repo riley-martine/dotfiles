@@ -2,7 +2,37 @@
 # https://beta.ruff.rs/docs/rules/
 # https://beta.ruff.rs/docs/settings
 
-select = [ "F", "E", "W", "C90", "I", "N", "UP", "ANN", "S", "B", "A", "C4", "EXE", "ISC", "ICN", "INP", "PIE", "RET", "SIM", "TID", "TCH", "PTH", "ARG", "ERA", "PLC", "PLE", "PLR", "PLW", "RUF"]
+select = [
+ "A",
+ "ANN",
+ "ARG",
+ "B",
+ "C4",
+ "C90",
+ "E",
+ "ERA",
+ "EXE",
+ "F",
+ "I",
+ "ICN",
+ "INP",
+ "ISC",
+ "N",
+ "PIE",
+ "PLC",
+ "PLE",
+ "PLR",
+ "PLW",
+ "PTH",
+ "RET",
+ "RUF",
+ "S",
+ "SIM",
+ "TCH",
+ "TID",
+ "UP",
+ "W",
+ ]
 
 # Ignore:
 # E501 line too long

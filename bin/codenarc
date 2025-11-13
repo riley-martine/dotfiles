@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+export FILE="$1"
+shift 1
+# docker run --rm -v "$FILE":/ws/"$(basename "$FILE")" --user "$(id -u)":"$(id -g)" codenarc -includes="./$(basename "$FILE")" "$@"
+docker run --rm -v "$FILE":/ws/"$(basename "$FILE")" codenarc -includes="./$(basename "$FILE")" "$@"

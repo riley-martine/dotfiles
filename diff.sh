@@ -23,8 +23,6 @@ dotfiles=(
     ["$HOME/.vale.ini"]="vale/.vale.ini"
     ["$HOME/.shellcheckrc"]="shellcheck/.shellcheckrc"
 
-    ["$HOME/.alexrc.js"]="alex/.alexrc.js"
-
     ["$HOME/.config/starship.toml"]="starship/starship.toml"
 
     ["$HOME/.gitconfig"]="git/.gitconfig"
@@ -85,11 +83,11 @@ function compare_file {
 
     echo "=================================================================================="
     echo "edit files:"
-    echo "  vimdiff $LOCAL $GIT"
+    echo "  vimdiff '$LOCAL' '$GIT'"
     echo "clobber local:"
-    echo " command cp $GIT $LOCAL"
+    echo " command cp '$GIT' '$LOCAL'"
     echo "clobber remote:"
-    echo " command cp $LOCAL $GIT"
+    echo " command cp '$LOCAL' '$GIT'"
 }
 
 # Recurse

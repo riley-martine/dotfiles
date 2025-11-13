@@ -1,3 +1,7 @@
+# Get editor completions based on the config schema
+"$schema" = 'https://starship.rs/config-schema.json'
+# https://starship.rs/presets/tokyo-night
+
 format = """
 $username\
 $hostname\
@@ -15,15 +19,11 @@ $git_status\
 ${custom.itermpath}\
 $package\
 $memory_usage\
-$gcloud\
-$openstack\
-$azure\
 $env_var\
-$jobs\
 $battery\
 $status\
 $shell\
-$character\
+\n$character\
 """
 
 #     set -l foreground 3760bf
@@ -52,13 +52,20 @@ command_timeout = 2000
 # 🜁 ☾ ☉⯰⯱
 [character]
 # error_symbol = "[❌ ](bold red)"
-success_symbol = "[ ☿](bold #587539)"
-error_symbol = "[ ☿](bold #587539)" # we handle errors by displaying the code
+success_symbol = "[☿](bold #587539)"
+error_symbol = "[☿](bold #587539)" # we handle errors by displaying the code
 
 [cmd_duration]
 min_time = 10_000  # Show command duration over 10,000 milliseconds (= 10 sec)
 format = "took [$duration]($style) "
 style = "bold #587539"
+
+[time]
+disabled = false
+# black/white clock unicode symbol: ⏰
+format = '[\[$time\]]($style)'
+style = "bold #07879d"
+time_format = '%M:%S.%3f'
 
 [python]
 style = "bold #92a6d5"
@@ -70,10 +77,12 @@ truncation_length = 3
 # truncation_symbol = "…"
 # truncation_symbol = "[…]/"
 style = "bold #2e7de9"
+# style = "fg:#e3e5e5 bg:#769ff0"
 format = "[$path]($style)[$read_only]($read_only_style)"
 truncation_symbol = "⋮"
 truncate_to_repo = false
 repo_root_style = "bold #6172b0"
+# repo_root_style = "fg:#e3e5e5 bg:#769ff0"
 repo_root_format = "[|$repo_root]($repo_root_style)[$path]($style)[$read_only]($read_only_style)"
 read_only_style = "bold #07879d"
 read_only = " "
@@ -111,8 +120,9 @@ modified = "~"
 
 [git_commit]
 tag_symbol = ' '
+only_detached = false
 style = "bold #9854f1"
-format = '[\(ﰖ$hash$tag\)]($style)'
+format = '[\($hash$tag\)]($style)'
 
 # Disable the package module, hiding it from the prompt completely
 [package]

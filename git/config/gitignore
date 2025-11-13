@@ -210,3 +210,6 @@ secring.*
 ## JEnv local Java version configuration file
 .java-version
 .factorypath
+
+
+.claude/
