@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-ssh nextcloud -t 'update-system; exit'
+ssh nextcloud -C "export TERM=\"$TERM\"; update-system; exit"

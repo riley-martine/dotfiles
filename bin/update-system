@@ -1,21 +1,25 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -euxo pipefail
 
 # Updates the system. Runs every executable file in:
 update_dir="$HOME/.local/share/update.d"
 # This is non-standard; the user is responsible for populating the directory.
 # TODO: add "allow" mechanism like direnv?
+# TODO update self when SSHing
 
 if [ ! -d "$update_dir" ]; then
     echo "$update_dir does not exist. Not running any updates."
     exit 1
 fi
 
+set +e
 bold=$(tput bold)
 normal=$(tput sgr0)
 red=$(tput setaf 1)
 green=$(tput setaf 2)
 export bold normal red green
+tput reset
+set -e
 
 uname="$(uname)"
 if [ "$uname" = Darwin ]; then
@@ -24,9 +28,11 @@ if [ "$uname" = Darwin ]; then
     /usr/bin/ssh-add --apple-load-keychain
 fi
 
-echo "Ensuring sudo is cached"
-sudo -K
-sudo true
+if command -v sudo; then
+    echo "Ensuring sudo is cached"
+    sudo -K
+    sudo true
+fi
 
 tmp_dir="$(mktemp -d)"
 export tmp_dir
@@ -55,7 +61,24 @@ run_script () {
     fi
 }
 export -f run_script
+if ! command -v parallel; then
+    failed=()
+    for script in "$update_dir"/*; do
+        echo "${bold}RUNNING SCRIPT: $(basename "$script")${normal}"
+        "$script" || failed+=("$script")
+    done
+
+    for i in "${failed[@]}"; do
+        echo "${bold}Failed: ${i}${normal}"
+    done
+    exit ${#failed[@]}
+fi
+
+# parallel --lb -j0 run_script ::: "$update_dir"/* || true
 parallel --lb -k -j1 run_script ::: "$update_dir"/* || true
+
+stty sane
+command -v tput && tput reset
 
 # All logs are for failed runs
 for log in "$tmp_dir"/*.log; do
@@ -72,7 +95,7 @@ for log in "$tmp_dir"/*.log; do
         continue
     fi
     echo "${bold}FAILED: $(basename "$log")${normal}"
+    cat "$log"
 done
 
 stty sane
-# tput reset

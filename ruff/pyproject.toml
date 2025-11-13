@@ -4,20 +4,21 @@
 
 select = [
  "A",
- "ANN",
+ "ANN", # flake8-annotations
  "ARG",
+ "ASYNC", # flake8-async
  "B",
  "C4",
- "C90",
+ "C90", # mccabe
  "E",
  "ERA",
  "EXE",
- "F",
- "I",
+ "F",   # pyflakes
+ "I",   # isort
  "ICN",
  "INP",
  "ISC",
- "N",
+ "N",   # pep8-naming
  "PIE",
  "PLC",
  "PLE",
@@ -26,20 +27,26 @@ select = [
  "PTH",
  "RET",
  "RUF",
- "S",
+ "S",   # flake8-bandit
  "SIM",
  "TCH",
  "TID",
- "UP",
- "W",
- ]
+ "UP",  # pyupgrade
+ "YTT", # flake8-2020
+ "W", # pycodestyle
+]
 
-# Ignore:
-# E501 line too long
-# pydocstyle rules to ensure docstring exists (I know already)
-# ANN101 self does not need to be typed
-# S607 relative path to binary
-# S603 https://github.com/astral-sh/ruff/issues/4045
-ignore = [ "E501", "ANN101", "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107", "S607", "S603"]
+ignore = [
+    # E501 line too long
+    # pydocstyle rules to ensure docstring exists (I know already)
+    "E501",
+    # ANN101 self does not need to be typed
+    "ANN101",
+    # No required docstrings
+    "D100", "D101", "D102", "D103", "D104", "D105", "D106", "D107",
+    # S607 relative path to binary
+    # S603 https://github.com/astral-sh/ruff/issues/4045
+    "S607", "S603",
+]
 
-target-version = "py311"
+target-version = "py314"

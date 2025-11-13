@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 RANDOM=$(date '+%s')
 WORDFILE="$HOME/.wordlist"
 NUMWORDS=${1:-2} # The arg should be the number of words needed

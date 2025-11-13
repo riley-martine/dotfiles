@@ -1,4 +1,4 @@
-# for things not checked into git..
+# for things not checked into git.
 if test -e "$HOME/.extra.fish";
     source ~/.extra.fish
 end
@@ -63,6 +63,8 @@ abbr -a vim_edit_texts --position command --regex "^[^.].+\.(txt|java|py|ts|tsx)
 # Read: xargs multiple
 # https://stackoverflow.com/questions/6958689/running-multiple-commands-with-xargs
 abbr -a XM --position anywhere --set-cursor '| gxargs -d \'\n\' bash -c \'for arg do % "$arg"; done\' _'
+
+abbr -a yta 'cd ~/Documents/_fl_studio/samplesz/raw && yt-dlp -f ba (pbpaste)'
 
 # Configuration for tools
 # LESS with colors
@@ -322,4 +324,11 @@ set fish_greeting
 source ~/.config/fish/themes/tokyonight_day.fish
 set -x BAT_THEME 'tokyonight_day'
 set -x --path --append TERMINFO_DIRS $HOME/.local/share/terminfo
+set -x --path --append fish_complete_path $HOME/.nix-profile/share/fish/vendor_completions.d/
+
+set -x GIT_CONFIG_COUNT 1
+set -x GIT_CONFIG_KEY_0 core.hooksPath
+set -x GIT_CONFIG_VALUE_0 ~/.config/git/hooks
+
+alias imgurup 'npx @rasch/imgur-cli ~/Downloads/(ls -t ~/Downloads | head -n1)'
 # end

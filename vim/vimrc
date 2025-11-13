@@ -21,6 +21,27 @@ let g:ale_lint_on_text_changed = 0
 let g:ale_lint_on_enter = 0
 let g:ale_sign_column_always = 1
 
+let g:lsp_settings = {
+      \ 'rust-analyzer': {
+      \   'initialization_options': {
+      \     'cargo': {
+      \       'buildScripts': {
+      \         'enable': v:true,
+      \       },
+      \     },
+      \     'procMacro': {
+      \       'enable': v:true,
+      \     },
+      \     'completion': {
+      \       'autoimport': { 'enable': v:true },
+      \     },
+      \   },
+      \ },
+    \ }
+
+let g:lsp_log_verbose = 1
+let g:lsp_log_file = expand('~/vim-lsp.log')
+
 " let g:ycm_auto_trigger = 0
 let g:ycm_key_invoke_completion = '<C-o>'
 if &shell =~# 'fish$'
@@ -49,11 +70,11 @@ Plug 'wincent/terminus'
 " Theming
 Plug 'vim-airline/vim-airline'
 Plug 'riley-martine/tokyonight.nvim',
-      \ { 'branch': 'gen-vim',
-      \   'as': 'tokyonight',
-      \   'do': 'mkdir -p autoload/airline/themes; '
-      \        . 'mv -f extras/vim_airline/*.vim autoload/airline/themes/; '
-      \        . 'mv -f extras/vim/*.vim colors/'}
+    \ { 'branch': 'gen-vim',
+    \   'as': 'tokyonight',
+    \   'do': 'mkdir -p autoload/airline/themes; '
+    \    . 'mv -f extras/vim_airline/*.vim autoload/airline/themes/; '
+    \    . 'mv -f extras/vim/*.vim colors/'}
 
 " Behavior
 Plug 'tmhedberg/SimpylFold'
@@ -62,7 +83,6 @@ Plug 'Valloric/YouCompleteMe', { 'do': './install.py --all' }
 Plug 'ludovicchabant/vim-gutentags'
 Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
 Plug 'junegunn/fzf.vim'
-Plug 'mattn/vim-gotmpl'
 Plug 'scrooloose/nerdtree'
 Plug 'ryanoasis/vim-devicons'
 " Plug 'jiangmiao/auto-pairs'
@@ -747,6 +767,7 @@ let g:UltiSnipsJumpBackwardTrigger='<c-k>'
 let g:UltiSnipsEditSplit='tabdo'
 let g:UltiSnipsSnippetDirectories=['bundle/vim-snippets/UltiSnips', 'customsnippets']
 
+let g:ycm_rust_toolchain_root=$HOME."/.cargo/bin/"
 let g:ycm_language_server =
   \ [
   \   {
@@ -828,6 +849,7 @@ let g:ale_linters = {
 \   'typescript': ['eslint'],
 \   'rust': ['cargo', 'analyzer'],
 \   'groovy': ['CodeNarc'],
+\   'tex': ['chktex', 'lacheck', 'texlab'],
 \}
 " TODO readd flake8
 " Prefer markdownlint to mdl as it's more up to date
@@ -842,6 +864,7 @@ let g:ale_linters = {
 " languagetool/markdown
 
 let g:ale_fixers = {
+\   'nix': ['nixfmt'],
 \   'python': ['ruff', 'ruff_format'],
 \   'sh': ['remove_trailing_lines', 'trim_whitespace'],
 \   'tex': ['remove_trailing_lines', 'trim_whitespace', 'latexindent'],

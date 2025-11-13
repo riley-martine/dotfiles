@@ -103,6 +103,13 @@
 		echo \"signing key: $(git config --get-all user.signingKey)\"; \
 		echo \"github: $(git config --get-all github.user)\"; \
 		}; f"
+	# TODO rename
+	add-me = "!f() { \
+		origin=\"$(printf \"git@github.com:%s/%s\" \"$(git config github.user)\" \"$(basename \"$(git ls-remote --get-url)\")\")\"; \
+		git remote rename origin upstream; \
+		git remote add origin \"$origin\"; \
+		git fetch --all; \
+		}; f"
 	mirror-main = "! git checkout main && git remote update && git reset --hard upstream/main -- && git push --force-with-lease"
 	recent-branches-local = "!git for-each-ref --sort=committerdate refs/heads/ --format='%(refname:short) %(committerdate)'"
 	recent-branches-all = "!git for-each-ref --sort=committerdate refs/heads/ refs/remotes/ --format='%(refname:short) %(committerdate)'"
@@ -146,6 +153,8 @@
 	insteadOf = https://github.com/
 [url "git@codeberg.org:"]
 	insteadOf = https://codeberg.org/
+[feature]
+	manyFiles = true
 [protocol "file"]
 	allow = always
 [submodule]
