@@ -117,9 +117,9 @@ Plug 'seanyeh/talon.vim'
 Plug 'benknoble/vim-racket'
 Plug 'benknoble/scribble.vim'
 
-Plug 'roxma/vim-hug-neovim-rpc'
-Plug 'SpaceVim/nvim-yarp'
-Plug 'raghur/vim-ghost', {'do': '/opt/homebrew/bin/python3 -m pip install --user -r ~/.vim/plugged/vim-ghost/requirements_posix.txt'}
+"Plug 'roxma/vim-hug-neovim-rpc'
+"Plug 'SpaceVim/nvim-yarp'
+"Plug 'raghur/vim-ghost', {'do': '/opt/homebrew/bin/python3 -m pip install --user -r ~/.vim/plugged/vim-ghost/requirements_posix.txt'}
 
 call plug#end()
 if has('autocmd')

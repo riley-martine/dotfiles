@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-cpanm --self-upgrade || perlbrew install-cpanm --yes
+cpanm --self-upgrade
 
 cpan-outdated -p | cpanm

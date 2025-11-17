@@ -42,6 +42,7 @@ dotfiles=(
 
     ["$HOME/.config/yamllint/config"]="yamllint_config.yaml"
 
+    ["$HOME/.config/fish/conf.d/"]="fish/config/conf.d"
     ["$HOME/.config/fish/fish_plugins"]="fish/config/fish_plugins"
     ["$HOME/.config/fish/config.fish"]="fish/config/config.fish"
     ["$HOME/.config/fish/themes/"]="fish/config/themes"

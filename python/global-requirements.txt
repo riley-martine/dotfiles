@@ -1,10 +1,6 @@
-pdftotext
-
 black
 
 isort
-
-autoflake
 
 bandit[toml]
 
@@ -12,10 +8,6 @@ vulture
 
 mypy
 
-pylint
-
-mccabe
-
-pylsp-rope
-
 python-lsp-server[rope]
+
+vim-vint

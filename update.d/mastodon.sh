@@ -1,6 +1,11 @@
 #!/usr/bin/env bash
 set -euxo pipefail
 
+if [[ -n "${IS_WORK:-}" ]]; then
+  echo "Skip mastodon archiving"
+  exit 0
+fi
+
 mkdir -p ~/Nextcloud/Mastodon/
 cd ~/Nextcloud/Mastodon/
 

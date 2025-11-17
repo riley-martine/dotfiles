@@ -107,18 +107,18 @@ append() {
     #
     # Taken in part from:
     # https://github.com/junegunn/fzf/blob/master/install
-    
+
     local conf_file="$1"
     local text="$2"
     local pat="${3:-}"
     local lno=""
-    
+
     echo "Update ${conf_file}:"
     echo "  - $(echo "$text" | head -n1)"
     if [[ $text == *$'\n'* ]]; then
         echo "$text" | tail -n +2 | sed 's/^/    /'
     fi
-    
+
     if [ -f "$conf_file" ]; then
         set +e
         if [ $# -lt 3 ]; then
@@ -128,7 +128,7 @@ append() {
         fi
         set -e
     fi
-    
+
     if [ -n "$lno" ]; then
         echo "    - Already exists: line #$lno"
     else
@@ -146,7 +146,7 @@ install-js() {
     if npm ls -g --depth 1 "$package" > /dev/null 2>&1; then
 	return
     fi
-    
+
     append "$HOME/.config/js/global-deps.txt" "$package"
     npm install -g "$package"
 }
@@ -180,12 +180,12 @@ SCRIPT_PATH="$(readlink -f "$0")"
 SCRIPT_DIR=$( dirname "$SCRIPT_PATH" )
 
 # https://www.dzombak.com/blog/2021/11/macOS-Scripting-How-to-tell-if-the-Terminal-app-has-Full-Disk-Access.html
-if ! plutil -lint /Library/Preferences/com.apple.TimeMachine.plist 2&> /dev/null; then
-    echo "This script requires granting Terminal.app (or whatever terminal it is running in) Full Disk Access permissions."
-    echo "Please navigate to System Preferences -> Security & Privacy -> Full Disk Access and check the box for Terminal."
-    echo "Once you've done so, quit and reopen Terminal and re-run this script."
-    exit 1
-fi
+#if ! plutil -lint /Library/Preferences/com.apple.TimeMachine.plist 2&> /dev/null; then
+#    echo "This script requires granting Terminal.app (or whatever terminal it is running in) Full Disk Access permissions."
+#    echo "Please navigate to System Preferences -> Security & Privacy -> Full Disk Access and check the box for Terminal."
+#    echo "Once you've done so, quit and reopen Terminal and re-run this script."
+#    exit 1
+#fi
 
 echo "Detecting system properties..."
 if [ "$(arch)" = "arm64" ]; then
@@ -562,7 +562,7 @@ sudo scutil --set LocalHostName "Computer"
 sudo scutil --set HostName "Computer"
 
 echo "Installing quicklook plugins..."
-if ! command -v qlmarkdown_cli; then
+if ! command -v qlmarkdown_cli >/dev/null; then
     brew install --cask qlmarkdown
     xattr -r -d com.apple.quarantine /Applications/QLMarkdown.app
     defaults write org.sbarex.QLMarkdown SUEnableAutomaticChecks -bool FALSE
@@ -570,7 +570,7 @@ if ! command -v qlmarkdown_cli; then
     open /Applications/QLMarkdown.app && sleep 5 && killall QLMarkdown
 fi
 
-if ! command -v syntax_highlight_cli; then
+if ! command -v syntax_highlight_cli >/dev/null; then
     brew install --cask --no-quarantine syntax-highlight
     echo "Opening Syntax Highlight to register extension..."
     open '/Applications/Syntax Highlight.app' &&
@@ -583,8 +583,6 @@ echo "Done installing quicklook plugins."
 # TODO other shell integration
 echo "Installing iTerm2..."
 brew install --quiet --cask iterm2
-curl -L --no-progress-bar https://iterm2.com/shell_integration/fish \
-    -o ~/.config/fish/conf.d/90_iterm2_shell_integration.fish
 
 # Makes copying dotfiles easier
 # https://imarslo.gitbook.io/handbook/gitbook/app/iterm2
@@ -594,7 +592,7 @@ defaults write com.googlecode.iterm2 "Coprocess MRU" -int 0
 brew install --quiet --cask font-blex-mono-nerd-font font-meslo-lg-nerd-font
 # For some reason it keeps reinstalling roboto
 if ! brew ls | grep -qe font-roboto; then
-    brew install --quiet --cask font-roboto 
+    brew install --quiet --cask font-roboto
 fi
 
 echo "Installing GNU utilities..."
@@ -654,8 +652,9 @@ brew install --quiet \
     gitleaks \
     gojq \
     pre-commit \
-    direnv
-    #reattach-to-user-namespace
+    direnv \
+    flock \
+    reattach-to-user-namespace
 
 if [ "$IS_WORK" = true ]; then
     brew install --quiet lastpass-cli aws-iam-authenticator awscli fluxcd/tap/flux helm kubectx kubernetes-cli kustomize postgresql@15 watchman
@@ -854,12 +853,7 @@ append ~/.config/fish/conf.d/13-perl.fish 'set -x PERL_MM_OPT "--install_base \"
 eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"
 
 # TODO global perl deps
-cpanm Perl::Critic
-cpanm CPAN::DistnameInfo
-cpanm Text::Levenshtein
-cpanm Log::Log4perl
-cpanm Term::ReadLine::Perl
-cpanm App::cpanoutdated
+cpanm Perl::Critic CPAN::DistnameInfo Text::Levenshtein Log::Log4perl Term::ReadLine::Perl App::cpanoutdated
 
 echo "Installing lua via brew..."
 brew install --quiet lua luarocks
@@ -994,15 +988,10 @@ echo "Installing Docker..."
 #ln -sf "$etc"/docker-compose.fish-completion \
 #    ~/.config/fish/completions/docker-compose.fish
 
-echo "Installing Firefox..."
-brew install --quiet --cask firefox
+echo "Installing casks..."
+brew install --quiet --cask firefox discord lunar keepingyouawake vlc calibre handbrake-app logitune rectangle
 
-echo "Installing Discord..."
-brew install --quiet --cask discord
-
-
-echo "Installing lunar..."
-brew install --quiet --cask lunar
+echo "Configuring lunar..."
 # TODO configure lunar
 # TODO night and day configs
 # TODO test
@@ -1015,27 +1004,14 @@ defaults write com.lunar.Lunar lunarProActive -bool false
 defaults write com.lunar.Lunar lunarProOnTrial -bool false
 defaults write com.lunar.Lunar lunarProAccessDialogShown -bool true
 
-echo "Installing keepingyouawake..."
-brew install --quiet --cask keepingyouawake
 # TODO settigns
 
-
-echo "Installing VLC..."
-brew install --quiet --cask vlc
-
-echo "Installing Calibre..."
-brew install --quiet --cask calibre
-
-brew install --quiet --cask handbrake-app logitune
-
-echo "Installing rectangle..."
-brew install --quiet --cask rectangle
+echo "Configuring rectangle..."
 defaults write "com.knollsoft.Rectangle" SUEnableAutomaticChecks -bool FALSE
 defaults write "com.knollsoft.Rectangle" alternateDefaultShortcuts -bool TRUE
 defaults write "com.knollsoft.Rectangle" launchOnLogin -bool TRUE
 defaults write "com.knollsoft.Rectangle" SUHasLaunchedBefore -bool TRUE
 
-# TODO only do this if not installed yet
 rectangleHasLaunched="$(defaults read com.knollsoft.Rectangle SUHasLaunchedBefore)"
 if [ $rectangleHasLaunched != 1 ]; then
     open '/Applications/Rectangle.app'
@@ -1047,9 +1023,7 @@ fi
 echo "Done installing rectangle."
 
 echo "Installing moonlander config software..."
-# brew tap homebrew/cask-drivers
 brew install --quiet keymapp libusb
-# TODO flash firmware
 
 if [ $IS_WORK != true ]; then
     echo "Installing Bitwarden..."
@@ -1061,17 +1035,17 @@ if [ $IS_WORK != true ]; then
 
     echo "Installing LibreOffice..."
     brew install --quiet --cask libreoffice
-    
+
     echo "Installing Nextcloud..."
     brew install --quiet --cask nextcloud
-    
+
     echo "Installing veracrypt..."
     brew install --quiet --cask veracrypt
     # TODO print this mayb
     # macfuse requires a kernel extension to work.
     #If the installation fails, retry after you enable it in:
     #  System Preferences → Security & Privacy → General
-    
+
     #For more information, refer to vendor documentation or this Apple Technical Note:
     #  https://developer.apple.com/library/content/technotes/tn2459/_index.html
 fi
@@ -1304,7 +1278,6 @@ brew tap riley-martine/sundial https://github.com/riley-martine/sundial
 brew install --quiet riley-martine/sundial/sundial
 sundial --city Denver
 
-exit
 echo "Configuring dotfiles..."
 mkdir -p ~/dev
 if [ ! -d ~/dev/dotfiles ]; then
@@ -1344,7 +1317,7 @@ copy_dotfile() {
 
 echo "Installing tmux conf..."
 copy_dotfile "tmux/.tmux.conf" "$HOME/.tmux.conf"
-copy_dotfile "tmux/tokyonight_day.tmux" \
+copy_dotfile "tmux/config/tokyonight_day.tmux" \
     "$HOME/.config/tmux/tokyonight_day.tmux"
 if [ ! -d ~/.tmux/plugins/tpm ]; then
     git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
@@ -1365,12 +1338,15 @@ rm "${file}"
 
 echo "Installing vim conf..."
 copy_dotfile "vim/vimrc" "$HOME/.vim/vimrc"
+copy_dotfile "vim/syntax/groovy.vim" "$HOME/.vim/syntax/groovy.vim"
+copy_dotfile "vim/syntax/sh.vim" "$HOME/.vim/syntax/sh.vim"
+copy_dotfile "vim/customsnippets/markdown.snippets" "$HOME/.vim/customsnippets/markdown.vim"
 curl --no-progress-bar -fLo  ~/.vim/autoload/plug.vim --create-dirs \
     https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
 # YCM reqs
 # Unsure if e.g. nvm node yields a completer. See:
 # https://github.com/ycm-core/YouCompleteMe#installation
-brew install cmake
+brew install --quiet cmake
 vim +PlugUpgrade +PlugInstall +PlugUpdate +qall
 
 #TODO review and make sure we got em all
@@ -1378,25 +1354,22 @@ vim +PlugUpgrade +PlugInstall +PlugUpdate +qall
 copy_dotfile "starship/starship.toml" "$HOME/.config/starship.toml"
 
 copy_dotfile "git/.gitconfig" "$HOME/.gitconfig"
-copy_dotfile "git/identity.gitconfig" "$HOME/.config/git/identity.gitconfig"
-copy_dotfile "git/tokyonight_day.gitconfig" \
+copy_dotfile "git/config/tokyonight_day.gitconfig" \
     "$HOME/.config/git/tokyonight_day.gitconfig"
-copy_dotfile "git/gitmessage" "$HOME/.config/git/gitmessage"
-copy_dotfile "git/gitignore" "$HOME/.config/git/gitignore"
+copy_dotfile "git/config/gitmessage" "$HOME/.config/git/gitmessage"
+copy_dotfile "git/config/gitignore" "$HOME/.config/git/gitignore"
 
-copy_dotfile "bat/tokyonight_day.tmTheme" \
+copy_dotfile "bat/config/themes/tokyonight_day.tmTheme" \
     "$HOME/.config/bat/themes/tokyonight_day.tmTheme"
 bat cache --build
 
-copy_dotfile "fish/fish_plugins" "$HOME/.config/fish/fish_plugins"
-copy_dotfile "fish/config.fish" "$HOME/.config/fish/config.fish"
-copy_dotfile "fish/themes/tokyonight_day.fish" \
+copy_dotfile "fish/config/fish_plugins" "$HOME/.config/fish/fish_plugins"
+copy_dotfile "fish/config/config.fish" "$HOME/.config/fish/config.fish"
+copy_dotfile "fish/config/themes/tokyonight_day.fish" \
     "$HOME/.config/fish/themes/tokyonight_day.fish"
 fish -c 'fisher update'
 
 copy_dotfile "bin/random-words" "$HOME/bin/random-words"
-
-copy_dotfile "bin/update.d/lulu.sh" "$HOME/.local/share/update.d/lulu.sh"
 
 # https://apple.stackexchange.com/questions/344401/how-to-programatically-set-terminal-theme-profile
 theme=$(< terminal.app/Tokyonight\ Day.xml)
@@ -1441,12 +1414,14 @@ else
     echo "Unable to locate user picture" >&2
 fi
 
-echo "Setting wallpaper..."
-WALL=wall.jpg
-# TODO where tf does this actually go
-sudo cp "$WALL" "/Library/User Pictures/"
-# https://github.com/rgcr/m-cli/blob/master/plugins/wallpaper
-osascript -e "tell application \"System Events\" to tell every desktop to set picture to \"/Library/User Pictures/$WALL\""
+if [ $IS_WORK != true ]; then
+    echo "Setting wallpaper..."
+    WALL=wall.jpg
+    # TODO where tf does this actually go
+    sudo cp "$WALL" "/Library/User Pictures/"
+    # https://github.com/rgcr/m-cli/blob/master/plugins/wallpaper
+    osascript -e "tell application \"System Events\" to tell every desktop to set picture to \"/Library/User Pictures/$WALL\""
+fi
 
 cd -
 
