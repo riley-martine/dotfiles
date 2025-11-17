@@ -796,6 +796,7 @@ append ~/.zshrc 'export PATH=$PATH:~/.cargo/bin'
 fish -c 'set -U fish_user_paths ~/.cargo/bin $fish_user_paths'
 
 cargo install cargo-update
+cargo install urlencode
 
 
 echo "Installing ruby..."
@@ -912,6 +913,7 @@ brew install --quiet texlab
 brew install --quiet stylua
 luarocks install luacheck
 luarocks install lanes
+cargo install selene
 # TODO global lua deps
 
 #md
@@ -919,6 +921,7 @@ brew install --quiet markdownlint-cli
 
 # perl
 cpanm Perl::Critic
+brew install --quiet perltidy
 
 # protobuf
 brew tap bufbuild/buf
