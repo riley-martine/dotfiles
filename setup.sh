@@ -687,6 +687,7 @@ brew install --quiet \
     mdcat \
     atuin
 
+mkdir -p "$HOME/Library/Application Support/eza"
 
 /opt/homebrew/opt/fzf/install --all
 

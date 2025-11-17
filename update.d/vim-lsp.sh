@@ -12,7 +12,7 @@ update_lsp () {
     file_extension="$2"
 
     vim -c ":LspUninstallServer $lsp_name" -c ":qa"
-    vim "$tmp_dir/file.$file_extension" -S <(echo -e "LspInstallServer! $lsp_name\n while index(lsp_settings#installed_servers(), {'version': '', 'name': '$lsp_name'}) == -1 \n sleep 1 \n endwhile \n :qa")
+    vim "$tmp_dir/file.$file_extension" -S <(echo -e "call lsp_settings#init()\n LspInstallServer! $lsp_name\n while index(lsp_settings#installed_servers(), {'version': '', 'name': '$lsp_name'}) == -1 \n sleep 1 \n endwhile \n :qa")
 }
 
 update_lsp "bash-language-server" "sh"
