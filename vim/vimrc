@@ -844,7 +844,7 @@ let g:ale_linters = {
 \   'go': [],
 \   'java': ['javac', 'pmd'],
 \   'python': ['mypy'],
-\   'markdown': ['alex', 'vale', 'markdownlint'],
+\   'markdown': ['markdownlint'],
 \   'lua': ['luac', 'selene'],
 \   'typescript': ['eslint'],
 \   'rust': ['cargo', 'analyzer'],

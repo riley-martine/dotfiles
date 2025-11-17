@@ -143,11 +143,12 @@ install-js() {
     # Install a javascript program, globally, if it DNE
     local -r package="$1"
 
+    append "$HOME/.config/js-global-deps.txt" "$package"
+
     if npm ls -g --depth 1 "$package" > /dev/null 2>&1; then
-	return
+      return
     fi
 
-    append "$HOME/.config/js/global-deps.txt" "$package"
     npm install -g "$package"
 }
 
@@ -266,11 +267,11 @@ append ~/.bash_profile 'if [ -f ~/.bashrc ]; then .  ~/.bashrc; fi'
 append ~/.bashrc "eval \"\$("$BREW_PREFIX/bin/brew" shellenv)\""
 
 mkdir -p ~/.config/fish/conf.d/
-append ~/.config/fish/conf.d/00_brew.fish "eval \"\$("$BREW_PREFIX/bin/brew" shellenv)\""
+# append ~/.config/fish/conf.d/00_brew.fish "eval \"\$("$BREW_PREFIX/bin/brew" shellenv)\""
 
 eval "$($BREW_PREFIX/bin/brew shellenv)"
 
-#"$SCRIPT_DIR/setup.d/touch-id-sudo.sh"
+"$SCRIPT_DIR/setup.d/touch-id-sudo.sh"
 
 echo "Showing ~/Library and /Volumes folders..."
 chflags nohidden ~/Library
@@ -722,7 +723,7 @@ brew install --quiet starship
 
 append ~/.zshrc 'eval "$(starship init zsh)"'
 append ~/.bashrc 'eval "$(starship init bash)"'
-append ~/.config/fish/conf.d/99_starship.fish 'starship init fish | source'
+# append ~/.config/fish/conf.d/99_starship.fish 'starship init fish | source'
 
 # https://github.com/pyenv/pyenv/wiki#suggested-build-environment
 #brew install --quiet openssl readline sqlite3 xz zlib tcl-tk
@@ -752,16 +753,10 @@ echo "Installing node and nvm..."
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
 mkdir -p ~/.nvm
 
-append ~/.zshrc 'export NVM_DIR="$HOME/.nvm"'
-append ~/.zshrc '[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"'
-append ~/.zshrc '[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"'
-
-append ~/.bashrc 'export NVM_DIR="$HOME/.nvm"'
-append ~/.bashrc '[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"'
-append ~/.bashrc '[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"'
+append ~/.zshrc 'source ~/.profile'
+append ~/.bashrc 'source ~/.profile'
 
 fish -c 'fisher install jorgebucaran/nvm.fish'
-
 
 # So despite installing nvm, we're going to use homebrew node for everything global.
 set +u
@@ -823,7 +818,6 @@ if [ ! "$(rbenv global)" = "$latest" ]; then
     echo "updateme"
 fi
 
-
 echo 'Installing Java \(Temurin 8, 11, 17\) with jenv...'
 brew install --quiet --cask temurin@8 temurin@11 temurin@17
 brew install --quiet jenv
@@ -834,9 +828,9 @@ append ~/.bashrc 'eval "$(jenv init -)"'
 append ~/.zshrc 'export PATH="$HOME/.jenv/bin:$PATH"'
 append ~/.zshrc 'eval "$(jenv init -)"'
 
-append ~/.config/fish/conf.d/53_jenv.fish 'set PATH "$HOME"/.jenv/bin "$PATH"'
-append ~/.config/fish/conf.d/53_jenv.fish \
-    "status --is-interactive; and jenv init - | source"
+# append ~/.config/fish/conf.d/53_jenv.fish 'set PATH "$HOME"/.jenv/bin "$PATH"'
+# append ~/.config/fish/conf.d/53_jenv.fish \
+    # "status --is-interactive; and jenv init - | source"
 
 jenv add /Library/Java/JavaVirtualMachines/temurin-8.jdk/Contents/Home
 jenv add /Library/Java/JavaVirtualMachines/temurin-11.jdk/Contents/Home
@@ -847,11 +841,15 @@ echo "Installing perl"
 brew install --quiet perl cpanminus
 
 PERL_MM_OPT="INSTALL_BASE=$HOME/perl5" echo yes | cpan local::lib
-append ~/.bashrc 'eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"'
-append ~/.zshrc 'eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"'
-append ~/.config/fish/conf.d/13-perl.fish 'set -x PERL_MB_OPT "--install_base \"$HOME/perl5\""'
-append ~/.config/fish/conf.d/13-perl.fish 'set -x PERL_MM_OPT "--install_base \"$HOME/perl5\""'
-eval "$(perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"
+append ~/.bashrc 'eval "$(SHELL=bash perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"'
+append ~/.zshrc 'eval "$(SHELL=zsh perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"'
+append ~/.config/fish/conf.d/13-perl.fish 'eval "$(SHELL=fish perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"'
+
+append ~/.bashrc 'export PATH=$HOME/perl5/bin:$PATH'
+append ~/.zshrc 'export PATH=$HOME/perl5/bin:$PATH'
+fish -c 'set -U fish_user_paths $HOME/perl5/bin $fish_user_paths'
+
+eval "$(SHELL=bash perl -I$HOME/perl5/lib/perl5 -Mlocal::lib=$HOME/perl5)"
 
 # TODO global perl deps
 cpanm Perl::Critic CPAN::DistnameInfo Text::Levenshtein Log::Log4perl Term::ReadLine::Perl App::cpanoutdated
@@ -940,9 +938,6 @@ cat ~/.config/python/global-requirements.txt | xargs -n 1 uv tool install
 append ~/.bashrc 'export PATH=$HOME/.local/bin:$PATH'
 append ~/.zshrc 'export PATH=$HOME/.local/bin:$PATH'
 fish -c 'set -U fish_user_paths $HOME/.local/bin $fish_user_paths'
-
-# puppet
-gem install puppet-lint
 
 # rust
 rustup component add rust-src
