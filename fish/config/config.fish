@@ -148,7 +148,7 @@ if type -q eza
     abbr -a l eza
     abbr -a ll 'eza --long --all --group --header --git'
     abbr -a lt 'eza --long --all --group --header --tree --level'
-    abbr -a tree 'eza --tree --git-ignore'
+    abbr -a tree 'eza --tree --git-ignore --all'
 end
 
 
