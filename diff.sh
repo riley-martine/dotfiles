@@ -46,6 +46,7 @@ dotfiles=(
     ["$HOME/.config/fish/fish_plugins"]="fish/config/fish_plugins"
     ["$HOME/.config/fish/config.fish"]="fish/config/config.fish"
     ["$HOME/.config/fish/themes/"]="fish/config/themes"
+    ["$HOME/.config/fish/functions/jenv.fish"]="fish/config/functions/jenv.fish"
 
     ["$HOME/Library/Application Support/ruff/pyproject.toml"]="ruff/pyproject.toml"
 
