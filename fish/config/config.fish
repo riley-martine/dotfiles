@@ -75,7 +75,7 @@ set -x PAGER 'less -F'
 set -x MANPAGER 'less +Gg' # Goes to end and then start of file; this gives a percentage complete.
 
 set -x FZF_DEFAULT_COMMAND "fd --type f --hidden -E '.git/'"
-set -x FZF_DEFAULT_OPTS "$FZF_DEFAULT_OPTS --bind=ctrl-c:abort,'ctrl-o:execute(vim {})+abort'"
+set -x FZF_DEFAULT_OPTS "$FZF_DEFAULT_OPTS --tmux 90%,60% --layout reverse --border --bind=ctrl-c:abort,'ctrl-o:execute(vim {})+abort'"
 set -x GPG_TTY (tty)
 
 set -x pact_do_not_track "true"
