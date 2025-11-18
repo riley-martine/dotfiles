@@ -1,4 +1,9 @@
 {
+  "keyMappings": "# Insert your preferred key mappings here.\n# Make up/down work as expected\nunmap J\nunmap K\nmap J nextTab\nmap K previousTab",
+  "linkHintCharacters": "arstgmneio",
+  "nextPatterns": "==>,next,more,newer,>,›,→,»,≫,>>",
+  "searchEngines": "w: https://www.wikipedia.org/w/index.php?title=Special:Search&search=%s Wikipedia\n\n# More examples.\n#\n# (Vimium supports search completion Wikipedia, as\n# above, and for these.)\n#\ng: https://www.google.com/search?q=%s Google\ny: https://www.youtube.com/results?search_query=%s Youtube\nd: https://duckduckgo.com/?q=%s DuckDuckGo\nhn: https://www.hnsearch.com/search#request/submissions&q=%s&start=0 HackerNews\ndef: http://dictionary.com/browse/%s Dictionary\nsyn: http://thesaurus.com/browse/%s Thesaurus\nway: https://web.archive.org/web/*/%s Wayback\nr: https://www.reddit.com/r/%s Subreddit\naz: https://www.amazon.com/s/?field-keywords=%s Amazon\nud: https://www.urbandictionary.com/define.php?term=%s UrbanDictionary\nwa: http://www.wolframalpha.com/input/?i=%s Wolfram|Alpha",
+  "settingsVersion": "2.3.1",
   "exclusionRules": [
     {
       "passKeys": "",
@@ -132,11 +137,5 @@
       "passKeys": "*",
       "pattern": "https?://ciechanow.ski/*"
     }
-  ],
-  "keyMappings": "# Insert your preferred key mappings here.\n# Make up/down work as expected\nunmap J\nunmap K\nmap J nextTab\nmap K previousTab",
-  "linkHintCharacters": "arstgmneio",
-  "nextPatterns": "==>,next,more,newer,>,›,→,»,≫,>>",
-  "searchEngines": "w: https://www.wikipedia.org/w/index.php?title=Special:Search&search=%s Wikipedia\n\n# More examples.\n#\n# (Vimium supports search completion Wikipedia, as\n# above, and for these.)\n#\ng: https://www.google.com/search?q=%s Google\ny: https://www.youtube.com/results?search_query=%s Youtube\nd: https://duckduckgo.com/?q=%s DuckDuckGo\nhn: https://www.hnsearch.com/search#request/submissions&q=%s&start=0 HackerNews\ndef: http://dictionary.com/browse/%s Dictionary\nsyn: http://thesaurus.com/browse/%s Thesaurus\nway: https://web.archive.org/web/*/%s Wayback\nr: https://www.reddit.com/r/%s Subreddit\naz: https://www.amazon.com/s/?field-keywords=%s Amazon\nud: https://www.urbandictionary.com/define.php?term=%s UrbanDictionary\nwa: http://www.wolframalpha.com/input/?i=%s Wolfram|Alpha",
-  "searchUrl": "https://kagi.com/search?q=",
-  "settingsVersion": "2.0.6"
+  ]
 }
