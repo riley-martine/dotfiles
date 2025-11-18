@@ -1,0 +1,37 @@
+# https://atuin.sh/docs/config
+
+update_check = false
+
+# sync_address = "https://api.atuin.sh"
+
+## which filter mode to use
+## possible values: global, host, session, directory
+filter_mode = "host"
+
+# filter_mode_shell_up_key_binding = "directory"
+workspaces = true
+
+## which style to use
+## possible values: auto, full, compact
+style = "compact"
+
+## the maximum number of lines the interface should take up
+## set it to 0 to always go full screen
+inline_height = 20
+
+## enable or disable showing a preview of the selected command
+## useful when the command is longer than the terminal width and is cut off
+show_preview = true
+# show_help = false
+
+history_filter = [
+   "^pickone",
+   "^:e",
+]
+
+## what to do when the escape key is pressed when searching
+## possible values: return-original, return-query
+# exit_mode = "return-original"
+
+## characters that count as a part of a word
+# word_chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

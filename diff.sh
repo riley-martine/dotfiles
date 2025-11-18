@@ -25,6 +25,8 @@ dotfiles=(
 
     ["$HOME/.config/starship.toml"]="starship/starship.toml"
 
+    ["$HOME/.config/atuin/config.toml"]="atuin/config.toml"
+
     ["$HOME/.gitconfig"]="git/.gitconfig"
     ["$HOME/.config/git/gitignore"]="git/config/gitignore"
     ["$HOME/.config/git/tokyonight_day.gitconfig"]="git/config/tokyonight_day.gitconfig"
