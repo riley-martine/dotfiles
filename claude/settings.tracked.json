@@ -61,7 +61,9 @@
     "frontend-design@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
     "superpowers@claude-plugins-official": false,
-    "brooks-lint@brooks-lint-marketplace": true
+    "brooks-lint@brooks-lint-marketplace": true,
+    "claude-md-management@claude-plugins-official": true,
+    "rust-analyzer-lsp@claude-plugins-official": true
   },
   "skipDangerousModePermissionPrompt": true,
   "theme": "light-daltonized",
@@ -78,5 +80,7 @@
     "claude-opus-5-5": {
       "effortLevel": "high"
     }
-  }
+  },
+  "tui": "fullscreen",
+  "switchModelsOnFlag": false
 }

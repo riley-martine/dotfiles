@@ -159,11 +159,13 @@ done
 
 # All my fish configs are in the form 30_pyenv.fish
 # So we can exclude the ones created by fish_plugins
-for config in "$HOME/.config/fish/conf.d"/*; do
-    if basename "$config" | grep -qE '^\d\d' ; then
-        gitconfig=fish/config/conf.d/"$(basename "$config")"
-        compare_file "$config" "$gitconfig"
-    fi
+declare -A fish_confs
+for config in "$HOME/.config/fish/conf.d"/* fish/config/conf.d/*; do
+    name="$(basename "$config")"
+    [[ $name =~ ^[0-9]{2} ]] && fish_confs["$name"]=1
+done
+for name in "${!fish_confs[@]}"; do
+    compare_maybe_dir "$HOME/.config/fish/conf.d/$name" "fish/config/conf.d/$name"
 done
 
 ./claude/settings-check.sh || true

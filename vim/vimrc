@@ -37,6 +37,11 @@ let g:lsp_settings = {
       \     },
       \   },
       \ },
+      \ 'tinymist': {
+      \   'initialization_options': {
+      \     'lint': { 'enabled': v:true, 'when': 'onSave' },
+      \   },
+      \ },
       \ 'typescript-language-server': {
       \   'root_uri_patterns': ['.git/'],
       \ },
@@ -119,6 +124,7 @@ Plug 'rhysd/rust-doc.vim'
 Plug 'seanyeh/talon.vim'
 Plug 'benknoble/vim-racket'
 Plug 'benknoble/scribble.vim'
+Plug 'kaarmu/typst.vim'
 
 "Plug 'roxma/vim-hug-neovim-rpc'
 "Plug 'SpaceVim/nvim-yarp'
@@ -876,6 +882,7 @@ let g:ale_linters = {
 " See: https://github.com/dense-analysis/ale/issues/3379 and associated PR for
 " languagetool/markdown
 
+" \   'javascript': ['remove_trailing_lines', 'trim_whitespace', 'prettier', 'eslint'],
 let g:ale_fixers = {
 \   'nix': ['nixfmt'],
 \   'python': ['ruff', 'ruff_format'],
@@ -894,6 +901,7 @@ let g:ale_fixers = {
 \   'lua': ['stylua', 'remove_trailing_lines', 'trim_whitespace'],
 \   'perl': ['perltidy'],
 \   'rust': ['remove_trailing_lines', 'trim_whitespace'],
+\   'typst': ['remove_trailing_lines', 'trim_whitespace', 'typstyle'],
 \   '*': ['remove_trailing_lines', 'trim_whitespace'],
 \}
 " ALE hands a fixer the buffer as a temp file outside the repo, where

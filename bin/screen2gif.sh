@@ -16,5 +16,5 @@ IFS=$'\n\t'
 # Works™ (though I've also struggled getting the cli version's colors right)
 
 folder="$(defaults read com.apple.screencapture location)"
-screencap="$(gfind "$folder"/*.mov -printf "%T@\0%p\n" | sort -n | tail -1 | cut -d '' -f2)"
+screencap="$(gfind "$folder"/*.mov -printf "%T@\0%p\n" | sort -n | tail -1 | gcut -d '' -f2)"
 open -a Gifski "$screencap"

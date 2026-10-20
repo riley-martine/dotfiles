@@ -10,3 +10,4 @@ python-lsp-server[rope]
 pyright
 
 vim-vint
+daff
