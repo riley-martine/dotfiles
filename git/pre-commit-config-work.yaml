@@ -7,7 +7,7 @@
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.29.0
+    rev: v8.30.0
     hooks:
       - id: gitleaks
 
@@ -15,6 +15,7 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-added-large-files
+        exclude: (^|/)uv\.lock$
       - id: check-ast
       - id: check-executables-have-shebangs
       - id: check-shebang-scripts-are-executable
@@ -51,7 +52,7 @@ repos:
       - id: fish_syntax
 
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 3.4.1
+    rev: 3.6.1
     hooks:
       - id: editorconfig-checker
         alias: ec

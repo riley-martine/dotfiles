@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+Nightly `brew upgrade claude-code@latest`, because DISABLE_AUTOUPDATER=1 is set in
+~/.claude/settings.json and the homebrew cask is the only thing that moves it.
+
+Install:
+  cp launchd/local.upgrade-claude-code.plist ~/Library/LaunchAgents/
+  launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/local.upgrade-claude-code.plist
+
+launchd expands neither `~` nor `$HOME` in ProgramArguments, so the path is
+resolved by a shell instead -- hardcoding /Users/<name> is what this indirection
+buys us out of.
+-->
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>local.upgrade-claude-code</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/sh</string>
+        <string>-c</string>
+        <string>exec "$HOME/bin/upgrade-claude-code"</string>
+    </array>
+    <key>StartCalendarInterval</key>
+    <dict>
+        <key>Hour</key>
+        <integer>4</integer>
+        <key>Minute</key>
+        <integer>0</integer>
+    </dict>
+    <key>StandardOutPath</key>
+    <string>/tmp/upgrade-claude-code.stdout.log</string>
+    <key>StandardErrorPath</key>
+    <string>/tmp/upgrade-claude-code.stderr.log</string>
+</dict>
+</plist>

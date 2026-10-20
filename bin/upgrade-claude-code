@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+log_file="/tmp/upgrade-claude-code.log"
+
+notify_failure() {
+    local msg="$1"
+    osascript -e "display alert \"Claude Code Upgrade Failed\" message \"$msg\" as critical"
+}
+
+{
+    /opt/homebrew/bin/brew update
+    /opt/homebrew/bin/brew upgrade claude-code@latest
+} > "$log_file" 2>&1 || {
+    notify_failure "$(tail -5 "$log_file" | tr '"' "'")"
+    exit 1
+}

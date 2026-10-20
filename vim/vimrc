@@ -37,6 +37,9 @@ let g:lsp_settings = {
       \     },
       \   },
       \ },
+      \ 'typescript-language-server': {
+      \   'root_uri_patterns': ['.git/'],
+      \ },
     \ }
 
 let g:lsp_log_verbose = 1
@@ -533,6 +536,16 @@ func FoldTextMarkdown()
   return substitute(foldtext(), '^[^0-9]\+\([^:]\+\): ```\(.*\)$', l:replace_expr, '')
 endfunc
 
+augroup ft_dotenv
+  au!
+
+  " vim-polyglot gives .env files ft=sh, so shellcheck flags every assignment
+  " as an unused variable.
+  au BufNewFile,BufRead .env,.env.*,*.env
+    \ let b:ale_sh_shellcheck_exclusions = 'SC2034'
+
+augroup END
+
 augroup ft_gitconfig
   au!
 
@@ -547,7 +560,7 @@ augroup END
 augroup ft_ts
   au!
 
-  au BufNewFile,BufRead *.tsx set filetype=typescriptreact
+  " au BufNewFile,BufRead *.tsx set filetype=typescript
 
   autocmd FileType typescript
   \ setlocal tabstop=2
@@ -732,8 +745,8 @@ vnoremap <leader>ghl :r!git hub "%:p" <C-R>=line("'<")<CR> <C-R>=line("'>")<CR><
 augroup NERDTree
     autocmd!
     " open NERDTree if no files specified
-    autocmd StdinReadPre * let s:std_in=1
-    autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
+    " autocmd StdinReadPre * let s:std_in=1
+    " autocmd VimEnter * if argc() == 0 && !exists("s:std_in") | NERDTree | endif
     " close vim if only window left open is NERDTree
     autocmd bufenter * if (winnr("$") == 1 && exists("b:NERDTree") && b:NERDTree.isTabTree()) | q | endif
 augroup END
@@ -798,7 +811,7 @@ set completeopt-=preview
 set completeopt+=popup
 
 nmap <C-P> :FZF<CR>
-
+nmap cp :let @* = expand("%")<cr>
 " let g:ctrlp_working_path_mode = 'rwa'
 " let g:ctrlp_clear_cache_on_exit = 0
 " let g:ctrlp_show_hidden = 1
@@ -844,7 +857,7 @@ let g:ale_linters = {
 \   'go': [],
 \   'java': ['javac', 'pmd'],
 \   'python': ['mypy'],
-\   'markdown': ['markdownlint'],
+\   'markdown': ['markdownlint_cli2'],
 \   'lua': ['luac', 'selene'],
 \   'typescript': ['eslint'],
 \   'rust': ['cargo', 'analyzer'],
@@ -871,7 +884,7 @@ let g:ale_fixers = {
 \   'text': ['remove_trailing_lines', 'trim_whitespace'],
 \   'json': ['remove_trailing_lines', 'trim_whitespace'],
 \   'yaml': ['remove_trailing_lines', 'trim_whitespace'],
-\   'markdown': ['trim_whitespace', 'remove_trailing_lines'],
+\   'markdown': ['trim_whitespace', 'remove_trailing_lines', 'FixMarkdownlintCli2'],
 \   'css': ['prettier', 'remove_trailing_lines', 'trim_whitespace'],
 \   'html': ['remove_trailing_lines', 'trim_whitespace'],
 \   'javascript': ['remove_trailing_lines', 'trim_whitespace', 'prettier', 'eslint'],
@@ -883,6 +896,20 @@ let g:ale_fixers = {
 \   'rust': ['remove_trailing_lines', 'trim_whitespace'],
 \   '*': ['remove_trailing_lines', 'trim_whitespace'],
 \}
+" ALE hands a fixer the buffer as a temp file outside the repo, where
+" markdownlint-cli2 can't reach .markdownlint-cli2.jsonc by walking up from the
+" file and falls back to the working directory instead. Pointing cwd at the real
+" file's directory restores the repo config and any nested ones. The linter needs
+" no equivalent; it is passed the real path.
+" Defined here rather than in a .lvimrc because localvimrc sandboxes those, and a
+" function defined in the sandbox stays sandboxed when called — autoloading ALE's
+" fixer from it dies on E48 and aborts the entire fixer chain.
+func! FixMarkdownlintCli2(buffer) abort
+  let l:fix = ale#fixers#markdownlint_cli2#Fix(a:buffer)
+  let l:fix.cwd = '%s:h'
+  return l:fix
+endfunc
+
 " let g:ale_java_checkstyle_options = '-p=$HOME/.checkstyle.xml'
 let g:ale_html_tidy_options = '-i -q -language en' " --doctype omit
 let b:ale_javascript_prettier_options = '--prose-wrap always'

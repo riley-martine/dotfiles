@@ -212,4 +212,15 @@ secring.*
 .factorypath
 
 
-.claude/
+# Claude Code
+.claude/*.local.json
+.claude/**/*.log
+CLAUDE.local.md
+.playwright-mcp/
+
+# Gemini CLI
+gemini-debug.log
+.gemini-clipboard/
+
+TODO
+TODO.md

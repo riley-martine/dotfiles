@@ -274,9 +274,9 @@ eval "$($BREW_PREFIX/bin/brew shellenv)"
 "$SCRIPT_DIR/setup.d/touch-id-sudo.sh"
 
 echo "Showing ~/Library and /Volumes folders..."
-chflags nohidden ~/Library
-xattr -d com.apple.FinderInfo ~/Library || true
-chflags nohidden /Volumes
+#chflags nohidden ~/Library
+#xattr -d com.apple.FinderInfo ~/Library || true
+#chflags nohidden /Volumes
 
 # https://apple.stackexchange.com/questions/408716/setting-safari-preferences-from-script-on-big-sur
 #echo "Configuring Safari settings..."
@@ -572,7 +572,8 @@ if ! command -v qlmarkdown_cli >/dev/null; then
 fi
 
 if ! command -v syntax_highlight_cli >/dev/null; then
-    brew install --cask --no-quarantine syntax-highlight
+    brew install --cask syntax-highlight
+    xattr -r -d com.apple.quarantine '/Applications/Syntax Highlight.app'
     echo "Opening Syntax Highlight to register extension..."
     open '/Applications/Syntax Highlight.app' &&
         sleep 5 &&
@@ -910,13 +911,13 @@ brew install --quiet texlab
 
 #lua
 brew install --quiet stylua
-luarocks install luacheck
-luarocks install lanes
+#luarocks install luacheck
+#luarocks install lanes
 cargo install selene
 # TODO global lua deps
 
 #md
-brew install --quiet markdownlint-cli
+brew install --quiet markdownlint-cli2
 
 # perl
 cpanm Perl::Critic
@@ -988,7 +989,7 @@ echo "Installing Docker..."
 #    ~/.config/fish/completions/docker-compose.fish
 
 echo "Installing casks..."
-brew install --quiet --cask firefox discord lunar keepingyouawake vlc calibre handbrake-app logitune rectangle
+brew install --quiet --cask firefox discord lunar keepingyouawake vlc calibre handbrake-app logitune rectangle claude-code wispr-flow orbstack
 
 echo "Configuring lunar..."
 # TODO configure lunar

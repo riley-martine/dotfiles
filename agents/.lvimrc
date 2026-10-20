@@ -1,0 +1,13 @@
+if resolve(expand('%:p:h')) !=# resolve(expand('<sfile>:p:h'))
+    finish
+endif
+if index(['agents-shared.md', 'agents-shared.extra.md', 'Makefile'], expand('%:t')) < 0
+    finish
+endif
+
+let &l:makeprg = 'make -s -C ' . shellescape(expand('<sfile>:p:h'))
+
+augroup agents_rebuild
+    autocmd! * <buffer>
+    autocmd BufWritePost <buffer> silent make!
+augroup END
