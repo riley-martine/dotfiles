@@ -4,10 +4,9 @@ isort
 
 bandit[toml]
 
-vulture
-
 mypy
 
 python-lsp-server[rope]
+pyright
 
 vim-vint

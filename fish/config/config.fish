@@ -249,6 +249,7 @@ function gap -d "Git add one file, or prompt for all"
        git status; confirm "Add all?"; and git add -A
     end
 end
+set -x GH_NO_UPDATE_NOTIFIER 1
 
 abbr -a vimrc 'vim ~/.vim/vimrc'
 abbr -a vimfish 'vim ~/.config/fish/config.fish'
@@ -324,7 +325,7 @@ set fish_greeting
 source ~/.config/fish/themes/tokyonight_day.fish
 set -x BAT_THEME 'tokyonight_day'
 set -x --path --append TERMINFO_DIRS $HOME/.local/share/terminfo
-set -x --path --append fish_complete_path $HOME/.nix-profile/share/fish/vendor_completions.d/
+set --append fish_complete_path $HOME/.nix-profile/share/fish/vendor_completions.d
 
 set -x GIT_CONFIG_COUNT 1
 set -x GIT_CONFIG_KEY_0 core.hooksPath
@@ -332,3 +333,13 @@ set -x GIT_CONFIG_VALUE_0 ~/.config/git/hooks
 
 alias imgurup 'npx @rasch/imgur-cli ~/Downloads/(ls -t ~/Downloads | head -n1)'
 # end
+
+test -e {$HOME}/.iterm2_shell_integration.fish ; and source {$HOME}/.iterm2_shell_integration.fish
+
+
+# Added by OrbStack: command-line tools and integration
+# This won't be added again if you remove it.
+source ~/.orbstack/shell/init2.fish 2>/dev/null || :
+
+# opencode
+fish_add_path ~/.opencode/bin

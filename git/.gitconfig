@@ -125,6 +125,7 @@
 	}; f"
 	inthere = "! gh pr merge --auto --merge"
 	fixlastpr = "! git status; gum confirm 'Add all?' && git add -A "#&& git commit --amend -C HEAD && git rebase-master && git ppr && git inthere"
+	difft = "! GIT_EXTERNAL_DIFF=difft git diff"
 [commit]
 	gpgsign = true
 	template = ~/.config/git/gitmessage
@@ -146,7 +147,6 @@
 	light = false
 [include]
 	path = ~/.config/git/tokyonight_day.gitconfig
-	path = ~/.config/git/delta-themes.gitconfig
 [status]
 	showUntrackedFiles = all
 [url "git@github.com:"]
@@ -159,9 +159,16 @@
 	allow = always
 [submodule]
 	recurse = true
+	fetchJobs = 4
 [global-pre-commit]
     configPath = "~/.config/pre-commit/config-personal.yaml"
 [include]
 	path = ~/.config/git/identity.gitconfig
 [fetch]
-	parallel = 0
+	parallel = 4
+[credential "https://github.com"]
+	helper =
+	helper = !/opt/homebrew/bin/gh auth git-credential
+[credential "https://gist.github.com"]
+	helper =
+	helper = !/opt/homebrew/bin/gh auth git-credential

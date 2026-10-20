@@ -7,11 +7,12 @@ set -euo pipefail
 
 # TODO allowed patch for e.g. work starship.toml
 # TODO something about WIZARD and other symlinks
-# TODO why are things printed three times oops
 # TODO merge tomls for work starship
 
 declare -A dotfiles
 dotfiles=(
+    ["$HOME/.zshenv"]=".zshenv"
+
     ["$HOME/.tmux.conf"]="tmux/.tmux.conf"
     ["$HOME/.config/tmux/"]="tmux/config"
 
@@ -44,7 +45,6 @@ dotfiles=(
 
     ["$HOME/.config/yamllint/config"]="yamllint_config.yaml"
 
-    ["$HOME/.config/fish/conf.d/"]="fish/config/conf.d"
     ["$HOME/.config/fish/fish_plugins"]="fish/config/fish_plugins"
     ["$HOME/.config/fish/config.fish"]="fish/config/config.fish"
     ["$HOME/.config/fish/themes/"]="fish/config/themes"
@@ -59,6 +59,20 @@ dotfiles=(
     ["$HOME/bin/"]="bin"
 
     ["$HOME/.local/share/update.d/"]="update.d"
+
+    # AGENTS.md includes private agents-shared.extra.md content; neither is mirrored.
+    ["$HOME/.agents/Makefile"]="agents/Makefile"
+    ["$HOME/.agents/agents-shared.md"]="agents/agents-shared.md"
+    ["$HOME/.agents/.lvimrc"]="agents/.lvimrc"
+    ["$HOME/.agents/.gitignore"]="agents/.gitignore"
+
+    # ~/.claude/settings.json is deliberately absent: it mixes global settings
+    # with machine-specific ones, so it can't be compared as a whole file.
+    # claude/settings-check.sh handles it, and runs at the end of this script.
+    ["$HOME/.claude/CLAUDE.md"]="claude/CLAUDE.md"
+    ["$HOME/.claude/hooks/"]="claude/hooks"
+
+    ["$HOME/Library/LaunchAgents/local.upgrade-claude-code.plist"]="launchd/local.upgrade-claude-code.plist"
 )
 
 # Compare two files to see if they match
@@ -117,15 +131,17 @@ function compare_maybe_dir {
     fi
 
     if [ -d "$LOCAL" ]; then
+        local -A seen
         for local_maybe_dir in "$LOCAL"/*; do
             local final
             final="$(basename "$local_maybe_dir")"
+            seen["$final"]=1
             compare_maybe_dir "$local_maybe_dir" "${GIT}/${final}"
         done
-        # TODO remove dupes, add copy cmd
         for git_maybe_dir in "$GIT"/*; do
             local final
             final="$(basename "$git_maybe_dir")"
+            [ -n "${seen[$final]:-}" ] && continue
             compare_maybe_dir "${LOCAL}/${final}" "$git_maybe_dir"
         done
         return
@@ -149,5 +165,7 @@ for config in "$HOME/.config/fish/conf.d"/*; do
         compare_file "$config" "$gitconfig"
     fi
 done
+
+./claude/settings-check.sh || true
 
 # TODO add "--install" flag

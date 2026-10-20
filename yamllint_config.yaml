@@ -3,7 +3,8 @@ ignore-from-file: .gitignore
 # https://yamllint.readthedocs.io/en/stable/rules.html
 # https://github.com/ContainerSolutions/kubernetes-examples/blob/master/.yamllint
 rules:
-  braces: enable
+  braces:
+    max-spaces-inside: 1
   brackets: enable
   colons: enable
   commas: enable
@@ -21,8 +22,5 @@ rules:
   key-duplicates: enable
   line-length: disable
   truthy: disable
-  # braces:
-    # min-spaces-inside: 1
-    # max-spaces-inside: 1
 
 # vim: ft=yaml
