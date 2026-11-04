@@ -2,15 +2,15 @@
 
 set -euo pipefail
 
-# pre-commit refuses to update any config unless you're currently in a repo
+# prek refuses to update any config unless you're currently in a repo
 TMP_DIR="$(mktemp -d)"
 trap 'rm -rf $TMP_DIR' EXIT
 cd "$TMP_DIR"
 git init
 
-pre-commit gc
+prek cache gc
 for conf in ~/.config/pre-commit/*.yaml; do
     echo "Updating $conf"
-    pre-commit autoupdate --config "$conf" --jobs 5
-    pre-commit install-hooks --config "$conf"
+    prek update --config "$conf"
+    prek prepare-hooks --config "$conf"
 done

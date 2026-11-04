@@ -7,7 +7,7 @@
 default_stages: [pre-commit]
 repos:
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.30.0
+    rev: v8.30.1
     hooks:
       - id: gitleaks
 
@@ -32,7 +32,7 @@ repos:
       - id: check-toml
       - id: check-xml
       - id: check-yaml
-        exclude: '^(chart)|(charts)|(templates)|(tests/data)/'
+        exclude: '^(chart)|(charts)|(templates)|(tests/data)/|(^|/)goss[^/]*\.ya?ml$'
         args: ['--allow-multiple-documents']
 
   - repo: https://github.com/jumanjihouse/pre-commit-hooks
@@ -52,7 +52,7 @@ repos:
       - id: fish_syntax
 
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 3.6.1
+    rev: 3.11.1
     hooks:
       - id: editorconfig-checker
         alias: ec
