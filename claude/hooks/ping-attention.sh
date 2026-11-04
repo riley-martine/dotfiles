@@ -13,7 +13,8 @@
 #
 # Pings are suppressed while you're demonstrably watching this pane (see
 # `watching`), and idle_prompt is suppressed while background work is still
-# running (see `pending_background_work`), so a ping always means your
+# running (see `pending_background_work`) or when Claude hasn't replied since
+# your last input (see `claude_spoke_last`), so a ping always means your
 # attention is somewhere else and something is actually waiting on it.
 set -u
 
@@ -209,11 +210,27 @@ watching() {
   [ -n "$idle" ] && [ "$idle" -lt "$IDLE_SECONDS" ]
 }
 
-# Only idle_prompt is gated on this. A permission prompt or an agent asking for
+# True unless the transcript's last user/assistant entry is a user one.
+#
+# idle_prompt fires 60s after any message, including the entries a local
+# command like /clear, /model or a `!` shell writes, which Claude never answers.
+# A turn Claude finished ends on an assistant entry, followed only by system
+# entries (stop_hook_summary, turn_duration, away_summary).
+claude_spoke_last() {
+  local transcript last
+  transcript=$(hook_field .transcript_path)
+  [ -n "$transcript" ] && [ -r "$transcript" ] || return 0
+  last=$(tail -n 500 "$transcript" |
+    jq -r 'select(.type == "user" or .type == "assistant") | .type' 2>/dev/null |
+    tail -n 1)
+  [ "$last" != user ]
+}
+
+# Only idle_prompt is gated on these. A permission prompt or an agent asking for
 # input wants you regardless of what else is still running.
-if [ "$(hook_field .notification_type)" = idle_prompt ] &&
-   [ "$(pending_background_work)" -gt 0 ]; then
-  exit 0
+if [ "$(hook_field .notification_type)" = idle_prompt ]; then
+  claude_spoke_last || exit 0
+  [ "$(pending_background_work)" -gt 0 ] && exit 0
 fi
 
 if ! watching; then
